@@ -28,6 +28,8 @@ sudo ifconfig slcan0 up
 ```
 
 ## Start canlogserver
+~/can-utils/canlogserver slcan0
+
 ## Start can2mqtt: 
 Minimum parameter: ./can2mqtt_core --Daemon:MqttServer="192.168.0.192" 
 All parameter: ./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true
