@@ -28,6 +28,7 @@ sudo ifconfig slcan0 up
 ```
 
 ## Start canlogserver
+This is only required, if you like to take care of canlogserver on your own. can2mqtt is able to start the canlogserver automatically. Use parameters `--Daemon:CanlogserverPath` and `--Daemon:CanlogserverSocket` to use that option.
 ```
 ~/can-utils/canlogserver slcan0
 ```
@@ -97,3 +98,8 @@ The directory where the canlogserver application is located. Ignore parameter if
 `--Daemon:CanlogserverSocket="slcan0"`
 
 the port name of the socket of the emulated can network adapter. Ignore parameter if you start canlogserver manually. Default: null
+
+## Register to start can2mqtt on startup
+Execute `sudo nano /etc/rc.local` and add this line before the line `exit 0`: `/home/pi/can2mqtt_core/dotnet can2mqtt_core.dll >state your parameters here<`
+
+For example: `/home/pi/can2mqtt_core/dotnet can2mqtt_core.dll --Daemon:MqttServer="127.0.0.1" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanlogserverPath="/home/pi/can-utils" --Daemon:CanlogserverSocket="slcan0"`
