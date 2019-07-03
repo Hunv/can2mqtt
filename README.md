@@ -6,6 +6,7 @@ Note: This whole readme assumes the following environment:
 - You are running Rasbian on a Raspberry Pi
 - You are using the user "Pi"
 - You are using a fresh installation of the OS
+- You are using a USBtin device to connect to the CAN Bus (others might work but are not tested by me)
 
 ## Install can-utils
 ```
@@ -32,69 +33,35 @@ sudo ifconfig slcan0 up
 ```
 
 ## Start canlogserver
-This is only required, if you like to take care of canlogserver on your own. can2mqtt is able to start the canlogserver automatically. Use parameters `--Daemon:CanlogserverPath` and `--Daemon:CanlogserverSocket` to use that option.
+This is only required to test or if you like to take care of canlogserver on your own. You can also configure a daemon to do this automatically (see below).
 ```
 ~/can-utils/canlogserver slcan0
 ```
 
 ## Start can2mqtt: 
+This is only required to test or if you like to take care of can2mqtt on your own. You can also configure a daemon to do this automatically (see below).
+
 Minimum parameter: `./can2mqtt_core --Daemon:MqttServer="192.168.0.192"`
 
-All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true
+All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true`
 
 ### Startup Parameters:
-`--Daemon:Name="Can2MqttSE"`
 
-Define the name of your Daemon. Default: Can2Mqtt
-
-
-`--Daemon:CanServer="192.168.0.192" `
-
-This is the address where your canlogserver is running. Default: 127.0.0.1
-
-
-`--Daemon:CanServerPort=28700 `
-
-This is the port of the canlogserver. Default: 28700
-
-
-`--Daemon:MqttServer="192.168.0.192" `
-
-This is the address of the MQTT Broker.
+| Parameter                     | Description                                                                                                                                                                                                                                                               | Default Value | Required | Example                                   |
+|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|----------|-------------------------------------------|
+| `--Daemon:Name`               | Define the name of your Daemon                                                                                                                                                                                                                                            | Can2Mqtt      | No       | `--Daemon:Name="Can2MqttSE"`              |
+| `--Daemon:CanServer`          | This is the address where your canlogserver is running                                                                                                                                                                                                                    | 127.0.0.1     | No       | `--Daemon:CanServer="192.168.0.192"`      |
+| `--Daemon:CanServerPort`      | This is the port of the canlogserver                                                                                                                                                                                                                                      | 28700         | No       | `--Daemon:CanServerPort=28700`            |
+| `--Daemon:MqttServer`         | This is the address of the MQTT Broker.                                                                                                                                                                                                                                   |               | Yes      | `--Daemon:MqttServer="192.168.0.192"`     |
+| `--Daemon:MqttClientId`       | This is the clientId of the MQTT Client. Choose any name you like                                                                                                                                                                                                         | Can2Mqtt      | No       | `--Daemon:MqttClientId="Can2Mqtt"`        |
+| `--Daemon:MqttTopic`          | This is the MQTT Root Topic of all MQTT message                                                                                                                                                                                                                           | Can2Mqtt      | No       | `--Daemon:MqttTopic="Heating"`            |
+| `--Daemon:MqttTranslator`     | For some CAN Bus Clients are translators to translate the CAN Messages into a readable value and publish them via MQTT including the correct topic. Leave empty to publish every CAN frame without any further handling. Implemented translators right now: StiebelEltron |               | No       | `--Daemon:MqttTranslator="StiebelEltron"` |
+| `--Daemon:CanForwardWrite`    | Should CAN frames of type "Write" be forwarded to MQTT?                                                                                                                                                                                                                   | true          | No       | `--Daemon:CanForwardWrite=true`           |
+| `--Daemon:CanForwardRead`     | Should CAN frames of type "Read" be forwarded to MQTT?                                                                                                                                                                                                                    | false         | No       | `--Daemon:CanForwardRead=false`           |
+| `--Daemon:CanForwardResponse` | Should CAN frames of type "Response" be forwarded to MQTT?                                                                                                                                                                                                                | true          | No       | `--Daemon:CanForwardResponse=true`        |
 
 
-`--Daemon:MqttClientId="Can2Mqtt" `
-
-This is the clientId of the MQTT Client. Choose any name you like. Default: Can2Mqtt
-
-
-`--Daemon:MqttTopic="Heating" `
-
-This is the MQTT Root Topic of all MQTT message. Default: Can2Mqtt
-
-
-`--Daemon:MqttTranslator="StiebelEltron"`
-
-For some CAN Bus Clients are translators to translate the CAN Messages into a readable value and publish them via MQTT including the correct topic. Leave empty to publish every CAN frame without any further handling.
-Implemented translators right now: StiebelEltron
-
-
-`--Daemon:CanForwardWrite=true`
-
-Should CAN frames of type "Write" be forwarded to MQTT? Default: true
-
-
-`--Daemon:CanForwardRead=false`
-
-Should CAN frames of type "Read" be forwarded to MQTT? Default: false
-
-
-`--Daemon:CanForwardResponse=true`
-
-Should CAN frames of type "Response" be forwarded to MQTT? Default: true
-
-
-## Register to start canlogserver and can2mqtt on startup
+## Configure and Register Daemon for can2mqtt and canlogserver
 Execute `sudo nano etc/systemd/system/canlogserver.service` and paste the following into the file. Replace the slcan0 in case your socket has a different name:
 ```
 [Unit]
