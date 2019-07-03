@@ -36,12 +36,6 @@ namespace can2mqtt_core
             _CanForwardRead = config.CanForwardRead;
             _CanForwardResponse = config.CanForwardResponse;
 
-            //Start canlogserver
-            if (!string.IsNullOrEmpty(config.CanlogserverPath))
-            {
-                await StartCanlogserver(config.CanlogserverPath, config.CanlogserverSocket);
-            }
-
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
             _MqttClient = mqttFactory.CreateMqttClient();
@@ -79,23 +73,6 @@ namespace can2mqtt_core
 
             //Start listening on canlogservers port
             await ConnectTcpCanBus(config.CanServer, config.CanServerPort);
-        }
-
-        /// <summary>
-        /// Starting the canlogserver on startup in case it is running on the same host as can2mqtt
-        /// </summary>
-        /// <param name="canlogserverPath"></param>
-        /// <param name="canlogserverSocket"></param>
-        /// <returns></returns>
-        private async Task StartCanlogserver(string canlogserverPath, string canlogserverSocket)
-        {
-            Console.WriteLine("Starting canlogserver: {0}/canlogserver {1}", canlogserverPath, canlogserverSocket);
-
-            Process.Start("screen", string.Format("-dmS can2mqtt", canlogserverPath, canlogserverSocket));
-            await Task.Delay(TimeSpan.FromSeconds(2));
-            Process.Start("screen", string.Format("-S can2mqtt -X exec {0}/canlogserver {1}", canlogserverPath, canlogserverSocket));
-
-            await Task.Delay(TimeSpan.FromSeconds(5));
         }
 
         /// <summary>
