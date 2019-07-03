@@ -56,5 +56,15 @@ namespace can2mqtt_core
         /// Null if the raw data should be forwarded to MQTT. Otherwise the Translator name.
         /// </summary>
         public string MqttTranslator { get; set; }
+
+        /// <summary>
+        /// If given, this will automatically start the Canlogserver before listing to it.
+        /// </summary>
+        public string CanlogserverPath { get; set; }
+
+        /// <summary>
+        /// The socket parameter for the canlogserver (i.e. "slcan0")
+        /// </summary>
+        public string CanlogserverSocket { get; set; }
     }
 }

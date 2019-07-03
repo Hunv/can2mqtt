@@ -3,6 +3,7 @@ using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +35,12 @@ namespace can2mqtt_core
             _CanForwardWrite = config.CanForwardWrite;
             _CanForwardRead = config.CanForwardRead;
             _CanForwardResponse = config.CanForwardResponse;
+
+            //Start canlogserver
+            if (!string.IsNullOrEmpty(config.CanlogserverPath))
+            {
+                await StartCanlogserver(config.CanlogserverPath, config.CanlogserverSocket);
+            }
 
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
@@ -75,6 +82,23 @@ namespace can2mqtt_core
         }
 
         /// <summary>
+        /// Starting the canlogserver on startup in case it is running on the same host as can2mqtt
+        /// </summary>
+        /// <param name="canlogserverPath"></param>
+        /// <param name="canlogserverSocket"></param>
+        /// <returns></returns>
+        private async Task StartCanlogserver(string canlogserverPath, string canlogserverSocket)
+        {
+            Console.WriteLine("Starting canlogserver: {0}/canlogserver {1}", canlogserverPath, canlogserverSocket);
+
+            Process.Start("screen", string.Format("-dmS can2mqtt", canlogserverPath, canlogserverSocket));
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            Process.Start("screen", string.Format("-S can2mqtt -X exec {0}/canlogserver {1}", canlogserverPath, canlogserverSocket));
+
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
+
+        /// <summary>
         /// Listen to the CAN Bus (via TCP) and generate MQTT Message if there is an update
         /// </summary>
         /// <param name="canServer"></param>
@@ -85,10 +109,17 @@ namespace can2mqtt_core
             try
             {
                 //Create TCP Client for connection to canlogserver (=cls)
-                TcpClient clsClient = new TcpClient(canServer, canPort);
-                while (!clsClient.Connected)
+                TcpClient clsClient = null;
+                while (clsClient == null || !clsClient.Connected)
                 {
-                    Console.WriteLine("FAILED TO CONNECT TO CANLOGSERVER. Retry...");
+                    try
+                    {
+                        clsClient = new TcpClient(canServer, canPort);
+                    }
+                    catch (Exception ea)
+                    {
+                        Console.WriteLine("FAILED TO CONNECT TO CANLOGSERVER. {0}. Retry...", ea.Message);
+                    }
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
 

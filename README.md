@@ -35,46 +35,65 @@ sudo ifconfig slcan0 up
 ## Start can2mqtt: 
 Minimum parameter: `./can2mqtt_core --Daemon:MqttServer="192.168.0.192"`
 
-All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true`
+All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true --Daemon:CanlogserverPath="/home/pi/can-utils/" --Daemon:CanlogserverSocket="slcan0"`
 
 ### Startup Parameters:
 `--Daemon:Name="Can2MqttSE"`
 
 Define the name of your Daemon. Default: Can2Mqtt
 
+
 `--Daemon:CanServer="192.168.0.192" `
 
 This is the address where your canlogserver is running. Default: 127.0.0.1
+
 
 `--Daemon:CanServerPort=28700 `
 
 This is the port of the canlogserver. Default: 28700
 
+
 `--Daemon:MqttServer="192.168.0.192" `
 
 This is the address of the MQTT Broker.
+
 
 `--Daemon:MqttClientId="Can2Mqtt" `
 
 This is the clientId of the MQTT Client. Choose any name you like. Default: Can2Mqtt
 
+
 `--Daemon:MqttTopic="Heating" `
 
 This is the MQTT Root Topic of all MQTT message. Default: Can2Mqtt
+
 
 `--Daemon:MqttTranslator="StiebelEltron"`
 
 For some CAN Bus Clients are translators to translate the CAN Messages into a readable value and publish them via MQTT including the correct topic. Leave empty to publish every CAN frame without any further handling.
 Implemented translators right now: StiebelEltron
 
+
 `--Daemon:CanForwardWrite=true`
 
 Should CAN frames of type "Write" be forwarded to MQTT? Default: true
+
 
 `--Daemon:CanForwardRead=false`
 
 Should CAN frames of type "Read" be forwarded to MQTT? Default: false
 
+
 `--Daemon:CanForwardResponse=true`
 
 Should CAN frames of type "Response" be forwarded to MQTT? Default: true
+
+
+`--Daemon:CanlogserverPath="/home/pi/can-utils/"`
+
+The directory where the canlogserver application is located. Ignore parameter if you start canlogserver manually. Default: null
+
+
+`--Daemon:CanlogserverSocket="slcan0"`
+
+the port name of the socket of the emulated can network adapter. Ignore parameter if you start canlogserver manually. Default: null
