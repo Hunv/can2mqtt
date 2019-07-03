@@ -2,6 +2,10 @@
 A Linux or Windows service to forward CAN frames to MQTT messages
 
 # HowTo
+Note: This whole readme assumes the following environment:
+- You are running Rasbian on a Raspberry Pi
+- You are using the user "Pi"
+- You are using a fresh installation of the OS
 
 ## Install can-utils
 ```
@@ -36,7 +40,7 @@ This is only required, if you like to take care of canlogserver on your own. can
 ## Start can2mqtt: 
 Minimum parameter: `./can2mqtt_core --Daemon:MqttServer="192.168.0.192"`
 
-All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true --Daemon:CanlogserverPath="/home/pi/can-utils/" --Daemon:CanlogserverSocket="slcan0"`
+All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true
 
 ### Startup Parameters:
 `--Daemon:Name="Can2MqttSE"`
@@ -90,16 +94,50 @@ Should CAN frames of type "Read" be forwarded to MQTT? Default: false
 Should CAN frames of type "Response" be forwarded to MQTT? Default: true
 
 
-`--Daemon:CanlogserverPath="/home/pi/can-utils/"`
+## Register to start canlogserver and can2mqtt on startup
+Execute `sudo nano etc/systemd/system/canlogserver.service` and paste the following into the file. Replace the slcan0 in case your socket has a different name:
+```
+[Unit]
+Description=canlogserver
+After=network.target
 
-The directory where the canlogserver application is located. Ignore parameter if you start canlogserver manually. Default: null
+[Service]
+ExecStart=/home/pi/can-utils/canlogserver slcan0
+WorkingDirectory=/home/pi/can-utils/canlogserver
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
 
+[Install]
+WantedBy=multi-user.target
+```
+Run `sudo systemctl start canlogserver.service` to test if the service starts (it should). To see if it runs, execute `sudo systemctl status canlogserver.service`. You should see something similar like this if everything went well in the last line: `Jul 03 19:09:16 raspi-test systemd[1]: Started canlogserver.`
 
-`--Daemon:CanlogserverSocket="slcan0"`
+Now we repeat this for the can2mqtt daemon. Execute `sudo nano etc/systemd/system/can2mqtt.service` and paste the following into the file. Replace the placeholder with your parameters:
+```
+[Unit]
+Description=can2mqtt
+After=network.target
 
-the port name of the socket of the emulated can network adapter. Ignore parameter if you start canlogserver manually. Default: null
+[Service]
+ExecStart=/usr/local/bin/dotnet /home/pi/can2mqtt_core/can2mqtt_core.dll >>>STATE YOUR PARAMETERS HERE<<<
+WorkingDirectory=/home/pi/can2mqtt_core/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
 
-## Register to start can2mqtt on startup
-Execute `sudo nano /etc/rc.local` and add this line before the line `exit 0`: `/home/pi/can2mqtt_core/dotnet can2mqtt_core.dll >state your parameters here<`
+[Install]
+WantedBy=multi-user.target
+```
+An example for the ExecStart line is:
+```ExecStart=/usr/local/bin/dotnet /home/pi/can2mqtt_core/can2mqtt_core.dll --Daemon:MqttServer="127.0.0.1" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanlogserverPath="/home/pi/can-utils" --Daemon:CanlogserverSocket="slcan0"```
 
-For example: `/home/pi/can2mqtt_core/dotnet can2mqtt_core.dll --Daemon:MqttServer="127.0.0.1" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanlogserverPath="/home/pi/can-utils" --Daemon:CanlogserverSocket="slcan0"`
+To test if it works, run the following command: `sudo systemctl start can2mqtt.service`. To test if the service is running, execute `sudo systemctl status can2mqtt.service`. You will see the last lines of output. If you do not see any errors after about 10 seconds, everything is fine.
+
+Finally if everything is fine and you want to autostart the canlogserver and can2mqtt application, execute this: 
+```
+sudo systemctl enable canlogserver.service
+sudo systemctl enable can2mqtt.service
+```
