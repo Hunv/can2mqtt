@@ -1,0 +1,6 @@
+Known working CAN Ids are:
+180 (Boiler / Kessel)
+301 (Controller / Bedienmodul)
+302 (Controller / Bedienmodul)
+6A1 (???) 180, 301 and 302 are reacting when sending with this ID but this ID is never sending or answering on any query
+6A2 (???) 180, 301 and 302 are reacting when sending with this ID but this ID is never sending or answering on any query

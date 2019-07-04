@@ -1,6 +1,4 @@
 can2mqtt_core/.vs/
 can2mqtt_core/can2mqtt_core/bin/
 can2mqtt_core/can2mqtt_core/obj/
-infos/can_progs/.DS_Store
-infos/can_progs/
-infos/
+infos/private/

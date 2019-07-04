@@ -1,0 +1,55 @@
+Example Telegram:
+180#D222FA000C00EE
+
+180 = Sender Id
+    D = Receiver Id Index (see below. Here: 680)
+     2 = Response (0=write, 1=read)
+      22 = Receiver Id Part 2: 22
+         => Receiver ID = 680 + 22 = 6A2
+        FA = Elster-Table redirect
+          000C = Elster-Index the value is related to
+              00EE = Value
+
+Byte 1, 1st character, Receiver Id Index:
+0 (000) = Direct / Direkt
+1 
+2 
+3 (180) = Boiler / Kessel
+4 
+5 ??? Atez
+6 (300) = Controler / Bedienmodule
+7 
+8 ??? Room Controler
+9 (480) = Manager
+A (500) = Heating module / Heizmodul
+B ??? Bus connection
+C (600) = Mixer module / Mischermodule
+D (680) = PC
+E ??? Foreign Device
+F ??? DCF Module
+
+Byte 1, 2nd character, Frame Type:
+0 - write
+1 - read
+2 - response
+3 - ack
+4 - write ack
+5 - write respond
+6 - system
+7 - system respond
+
+
+
+Examle query:
+Query: ./cansend slcan0 6A1#3100FA01260000
+cansend return frame: (1561814273.389860) slcan0 180#D03CFA01260E00\n
+
+Some useful parameters:
+Abruf der Aussentemperatur (000c)
+Abruf der Vorlauftemperatur (000f) 
+Abruf der Rücklauftemperatur (0016):
+Abruf der erzeugten Wärme Warmwasser in MWh (092d):
+Abruf der erzeugten Wärme heizung in MWh (0931):
+Abruf der heute erzeugten Wärme Warmwasser in MWh (092b):
+Abruf der heute erzeugten Wärme Heizung in MWh (092f):
+Abruf der aktuellen Heizkurve (010e):
