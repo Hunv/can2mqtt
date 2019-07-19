@@ -1,37 +1,39 @@
 This are informations from the manual about the units of the values. This is in German because the scan and the manual is also Germansorry.
 Some values (i.e. "Zuluft Soll" seems to be incorrect. The unit does not fit to the description)
 
+							Einheit	Minimumwert	Maximumwert	Standardwert	ElsterIndex	Beschreibung
+
 # Info
 ## Raumtemperatur
-Raumtemperatur HK1:			°C		Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Temperatur angezeigt. Falls kein Bedienteil angeschlossen istwird die Soll-Temperatur angezeigt
-Raumsolltemp. HK1:			°C
-Raumfeuchte HK1:			%		Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Raumfeuchte angezeigt. Falls kein Bedienteil angeschlossen istwird 0% angezeigt
-Raumtemperatur HK2:			°C		Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Temperatur angezeigt. Falls kein Bedienteil angeschlossen istwird die Soll-Temperatur angezeigt
+Raumtemperatur HK1:			°C												0011?		Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Temperatur angezeigt. Falls kein Bedienteil angeschlossen istwird die Soll-Temperatur angezeigt
+Raumsolltemp. HK1:			°C												0005?/0006?/0007?
+Raumfeuchte HK1:			%															Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Raumfeuchte angezeigt. Falls kein Bedienteil angeschlossen istwird 0% angezeigt
+Raumtemperatur HK2:			°C															Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Temperatur angezeigt. Falls kein Bedienteil angeschlossen istwird die Soll-Temperatur angezeigt
 Raumsolltemp. HK2:			°C
-Raumfeuchte HK2:			%		Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Raumfeuchte angezeigt. Falls kein Bedienteil angeschlossen istwird 0% angezeigt
+Raumfeuchte HK2:			%															Falls exteres Bedienteil angeschlossen und dem HK zugeordnetwird hier die Raumfeuchte angezeigt. Falls kein Bedienteil angeschlossen istwird 0% angezeigt
 
 ## Heizen
-Aussentemperatur:			°C
-Istwert HK1:				°C		Heizkreistemperaturwelche errechnet wird aus Vor- und Rücklauftemperatur. Dieser Wert ist mit dem Parameter "Anteil Vorlauf" gewichtet. Während der Warmwasserladung wird mit diesem Parameter die Temperatur angezeigtmit welcher der Warmwasserspeicher geladen wird.
-Sollwert HK1:				°C		Temperaturvorgabe für den Heizkreis
+Aussentemperatur:			°C												000c
+Istwert HK1:				°C															Heizkreistemperatur welche errechnet wird aus Vor- und Rücklauftemperatur. Dieser Wert ist mit dem Parameter "Anteil Vorlauf" gewichtet. Während der Warmwasserladung wird mit diesem Parameter die Temperatur angezeigtmit welcher der Warmwasserspeicher geladen wird.
+Sollwert HK1:				°C															Temperaturvorgabe für den Heizkreis
 Istwert HK2:				°C
 Sollwert HK2:				°C
-Vorlauftemp.:				°C		Temperatur zwischen Heizung und Verbraucher
-Rücklauftemp.:				°C		Temperatur zwischen Verbraucher und Heizung
+Vorlauftemp.:				°C												000f		Temperatur zwischen Heizung und Verbraucher
+Rücklauftemp.:				°C												0016		Temperatur zwischen Verbraucher und Heizung
 Druck Heizkreis:			bar
-Volumenstrom:				l/min
+Volumenstrom:				l/min											01da
 
 ## Warmwasser
-WW-Temperatur:				°C		Wassertemperatur im Speicherbehälter
-WW-Solltemperatur:			°C
-DOM-Temperatur:				°C
+WW-Temperatur:				°C												000e		Wassertemperatur im Speicherbehälter
+WW-Solltemperatur:			°C												0003
+DOM-Temperatur:				°C												0019?
 Mischwassermenge:			l
 
 ## Lüften
-Zuluft Ist					Hz 		Drehzahl des Zuluftlüfters
-Zuluft Soll					m³/h 	Prozent der maximalen Steuerspannung des Zuluftlüfters
-Abluft Ist					Hz		Drehzahl des Abluftlüfters
-Abluft Soll					m³/h	Prozent der maximalen Steuerspannung des Abluftlüfters
+Zuluft Ist					Hz 												0598		Drehzahl des Zuluftlüfters
+Zuluft Soll					m³/h 											0597		Prozent der maximalen Steuerspannung des Zuluftlüfters
+Abluft Ist					Hz												059a		Drehzahl des Abluftlüfters
+Abluft Soll					m³/h											0599		Prozent der maximalen Steuerspannung des Abluftlüfters
 Abluftfeuchte				%
 Ablufttemperatur			°C
 Ablufttaupunkt				°C
@@ -41,76 +43,91 @@ Taupunkttemp. HK1			°C
 Taupunkttemp. HK2			°C
 
 ## Solar
-Kolletortemp.				°C		Temperatur des Solarkollektors
+Kolletortemp.				°C												001b?		Temperatur des Solarkollektors
 
 ## Wärmeerzeuger
 Heizstufe					N/A
 
 ## Wärmepumpe
-Heissgastemp.				°C		Temperatur des gasförmigen Kältemittels am Verflüssigereingang
-Hochdruck					bar
-Niederdruck					bar
-Verdampfertemp.				°C		Im Verdampfer wird bei niedrigem Druck das Kältemittel verdampft. Hierbei wird dem Luftstrom Wärme entzogen.
-Verflüssigertemp.			°C		Im Verflüssiger wird bei hohem Druck das Kältemittel verflüssigt. Dadurch wird Wärme freigesetzt.
+Heissgastemp.				°C												0265		Temperatur des gasförmigen Kältemittels am Verflüssigereingang
+Hochdruck					bar												07a6
+Niederdruck					bar												07a7
+Verdampfertemp.				°C												0014		Im Verdampfer wird bei niedrigem Druck das Kältemittel verdampft. Hierbei wird dem Luftstrom Wärme entzogen.
+Verflüssigertemp.			°C												059d		Im Verflüssiger wird bei hohem Druck das Kältemittel verflüssigt. Dadurch wird Wärme freigesetzt.
 Ölsumpftemperatur			°C
-Fortluft Ist				Hz		aktuelle Drehzahl des Fortluftlüfters
-Fortluft Soll				N/A	?? m³/h ?? Sollvolumenstrom des Wärmepumpenlüfters
+Fortluft Ist				Hz												059c		aktuelle Drehzahl des Fortluftlüfters
+Fortluft Soll				m³/h 											059b		Sollvolumenstrom des Wärmepumpenlüfters
 Diff.-Druck Verdampf		Pa
 Verdichterstarts			N/A
 
 ## Wärmemenge
-WM Heizen Tag				kWh		An diesem Tag abgegebene Wärmemenge
-WM Heizen Summe				MWh		Die seit Inbetriebnahme abgegebene Wärmemenge
-WM WW Tag					kWh		An diesem Tag abgegebene Wärmemenge an den Wasserspeicher
-WM WW Summe					MWh		Die seit Inbetriebnahme agegebene Wärmemenge an den Wasserspeicher
-WM NE Heizen Summe			MWh		Durch die elektrische Not-/Zusatzheizung abgegebene Wärmemenge seit Inbetriebnahme
-WM NE WW Summe				MWh		Durch die elektrische Not-/Zusatzheizung abgegebene Wärmemenge an den Wasserspeicher seit Inbetriebnahme
-WM WRG Tag					kWh		An diesem Tag zurückgewonnene Wärmemenge aus der Lüftungsanlage
-WM WRG Summe				MWh		Seit Inbetriebnahme zurückgewonnene Wärmemenge aus der Lüftungsanlage
-WM Solar Hz Tag				kWh		An diesem Tag von der Solaranlage an den Heizkreis übergebene Wärmemenge
-WM Solar Hz Summe			MWh		Seit Inbetriebnahme von der Solaranlage an den Wasserspeicher übergebene Wärmemenge
-WM Solar WW Tag				kWh		An diesem Tag von der Solaranlage an den Heizkreis übergebene Wärmemenge
-WM Solar WW Summe			MWh		Seit Inbetriebnahme von der Solaranlage an den Wasserspeicher übergebene Wärmemenge
-WM Kühlen Summe				MWh		Aus den Räumen aufgenommene Wärmemenge des Verdampfers
+WM Heizen Tag				Wh											092e			(nicht im Handbuch)
+WM Heizen Tag				kWh											092f			An diesem Tag abgegebene Wärmemenge
+WM Heizen Summe				kWh											0930			(nicht im Handbuch)
+WM Heizen Summe				MWh											0931			Die seit Inbetriebnahme abgegebene Wärmemenge
+WM WW Tag					Wh											092a			(nicht im Handbuch)
+WM WW Tag					kWh											092b			An diesem Tag abgegebene Wärmemenge an den Wasserspeicher
+WM WW Summe					kWh											092c			(nicht im Handbuch)
+WM WW Summe					MWh											092d			Die seit Inbetriebnahme agegebene Wärmemenge an den Wasserspeicher
+WM NE Heizen Summe			kWh											0928			Durch die elektrische Not-/Zusatzheizung abgegebene Wärmemenge seit Inbetriebnahme
+WM NE Heizen Summe			MWh											0929			Durch die elektrische Not-/Zusatzheizung abgegebene Wärmemenge seit Inbetriebnahme
+WM NE WW Summe				kWh											0924			Durch die elektrische Not-/Zusatzheizung abgegebene Wärmemenge an den Wasserspeicher seit Inbetriebnahme
+WM NE WW Summe				MWh											0925			Durch die elektrische Not-/Zusatzheizung abgegebene Wärmemenge an den Wasserspeicher seit Inbetriebnahme
+WM WRG Tag					Wh											03af			(nicht im Handbuch)
+WM WRG Tag					kWh											03b0			An diesem Tag zurückgewonnene Wärmemenge aus der Lüftungsanlage
+WM WRG Summe				kWh											03b1			(nicht im Handbuch)
+WM WRG Summe				MWh											03b2			Seit Inbetriebnahme zurückgewonnene Wärmemenge aus der Lüftungsanlage
+WM Solar Hz Tag				kWh															An diesem Tag von der Solaranlage an den Heizkreis übergebene Wärmemenge
+WM Solar Hz Summe			MWh															Seit Inbetriebnahme von der Solaranlage an den Wasserspeicher übergebene Wärmemenge
+WM Solar WW Tag				kWh															An diesem Tag von der Solaranlage an den Heizkreis übergebene Wärmemenge
+WM Solar WW Summe			MWh															Seit Inbetriebnahme von der Solaranlage an den Wasserspeicher übergebene Wärmemenge
+WM Kühlen Summe				MWh															Aus den Räumen aufgenommene Wärmemenge des Verdampfers
 
 ## Laufzeiten
-Verdichter Heizen			h
-Verdichter Kühlen			h
-Verdichter WW				h
-Elektr. Ne Heizen			h
-Elektr. Ne WW				h
+Verdichter Heizen			h											05a5
+Verdichter Kühlen			h											05a6
+Verdichter WW				h											05a7
+Elektr. Ne Heizen			h											05a9
+Elektr. Ne WW				h											05a8
 
 ## Leistungsaufnahme
-E Heizung Tag				kWh		Für diesen Tag zugeführte Energie an den Verdichter zur Versorgung des Heizkreises
-E Heizung Summe				MWh		Seit Inbetriebnahme zugeführte Energie an den Verdichter zur Versorgung des Heizkreises
-E WW Tag					kWh		Für diesen Tag zugeführte Energie an den Verdichter zur Versorgung des Wasserspeichers
-E WW Summe					MWh		Seit Inbetriebnahme zugeführte Energie an den Verdichter zur Versorgung des Wasserspeichers
+E Heizung Tag				Wh											091e			(nicht im Handbuch)
+E Heizung Tag				kWh											091f			Für diesen Tag zugeführte Energie an den Verdichter zur Versorgung des Heizkreises
+E Heizung Summe				kWh											0920			(nicht im Handbuch)
+E Heizung Summe				MWh											0921			Seit Inbetriebnahme zugeführte Energie an den Verdichter zur Versorgung des Heizkreises
+E WW Tag					Wh											091a			(nicht im Handbuch)
+E WW Tag					kWh											091b			Für diesen Tag zugeführte Energie an den Verdichter zur Versorgung des Wasserspeichers
+E WW Summe					kWh											091c			(nicht im Handbuch)
+E WW Summe					MWh											091d			Seit Inbetriebnahme zugeführte Energie an den Verdichter zur Versorgung des Wasserspeichers
 
 
-							Einheit Minimumwert	Maximumwert	Standardwert
+							Einheit Minimumwert	Maximumwert	Standardwert	ElsterIndex	Beschreibung
 
 # Einstellungen
 ## Heizen
 ### Raumtemperaturen HK1
-RT-Tag HK1					°C 		10 			30 			21
-RT-Nacht HK1				°C 		10 			30			21
+RT-Tag HK1					°C 		10 			30 			21			0005
+RT-Nacht HK1				°C 		10 			30			21			0008
 RT-Bereitschaft HK1			°C 		10 			30 			10
-Heizk.soll Hand HK1 		°C 		10 			65 			35
-Raumtemperatur HK1			°C 		read only
+Heizk.soll Hand HK1 		°C 		10 			65 			35			010e
+Raumtemperatur HK1			°C 		read only							0011
+
 ### Raumtemperaturen HK2
 RT-Tag HK2					°C 		10 			30 			21
 RT-Nacht HK2				°C 		10 			30 			21
 RT-Bereitschaft HK2			°C 		10 			30 			10
 Heizk.soll Hand HK2 		°C 		10 			65 			35
 Raumtemperatur HK2			°C		read only
+
 ## Heizkurve HK1
 Steigung HK1				N/A 	0 			5 			0,3
-Fußpunkt HK1				°C 		0 			20 			3
-Raumeinfluss HK1			N/A 	0			100 		0
-Anteil Vorlauf HK1			N/A 	0			100 		30
+Fußpunkt HK1				°C 		0 			20 			3				059f
+Raumeinfluss HK1			N/A 	0			100 		0				010f
+Anteil Vorlauf HK1			N/A 	0			100 		30				059e
 Sollwert Max HK1			°C 		10 			65 			55
-Sollwert Min HK1			°C 		0 			40 			10
+Sollwert Min HK1			°C 		0 			40 			10				012b
 Heizkurve HK1				N/A		read only
+
 ## Heizkurve HK2
 Steigung HK2				N/A 	0			5			0,3
 Fußpunkt HK2				°C 		0 			20 			3
@@ -119,6 +136,7 @@ Anteil Vorlauf HK2			N/A 	0			100 		30
 Sollwert Max HK2			°C 		10 			65 			55
 Sollwert Min HK2			°C 		0 			40 			10
 Heizkurve HK2				N/A		read only
+
 ## Grundeinstellung
 Prop.-Anteil				%/K 	0			10			2
 Integralanteil-Inv			Kmin 	0			500			500
@@ -129,7 +147,7 @@ Hyst. Sommerbetrieb			K 		1			7			4
 Dämpfung Außentemp.			h 		0			24			1
 Bivalenzpunkt				°C 		-20			10			-10
 Zeitsperre NE				min 	0			60			20
-Korrektur Außenfüh.			°C 		-20			30			0
+Korrektur Außenfüh.			°C 		-20			30			0				05a4
 Unterdr. T.Messung			s 		0			120			60
 Auslegungstemp.				°C		-25			5			-20
 Leistung Ausl. Heiz.		% 		40			100			100
@@ -137,7 +155,7 @@ Leistung Ausl. Heiz.		% 		40			100			100
 # Warmwasser
 ## WW-Temperaturen	
 WW-Soll-Tag					°C		10			65			45
-WW-Soll-Nacht				°C		10			65			45
+WW-Soll-Nacht				°C		10			65			45				05c0???
 WW-Soll-Bereitschaft		°C		10			65			10
 WW-Soll-Handbetrieb			°C		10			65			45
 WW-Temperatur				°C		read only
@@ -154,9 +172,9 @@ Hysterese					K		2			10			2
 MWM-Hysterese				N/A		50			288			50
 Zeitsperre NE				min		0			360			90
 Temp. Freigabe Ne			°C 		-20 		10			-10
-Antilegionellen				d		1			30			30
+Antilegionellen				d		1			30			30			0587
 Max Dauer WW-Erzeug			h		6			12			12
-WW-Temp.Legionellen			°C		10			65			30
+WW-Temp.Legionellen			°C		10			65			30			0588
 Antilegionellenzeit			N/A 	00:00		23:45		02:00
 NE Stufe WW					N/A		0			3			3
 WW-Pufferbetrieb			Ein/Aus							Aus
@@ -169,48 +187,48 @@ Integralsensor				Ein/Aus/Regelung				Aus
 
 # Lüften
 ## Lüftungsstufen
-Stufe-Tag					N/A		0			3			2
-Stufe-Nacht					N/A		0			3			1
-Stufe-Bereitschaft			N/A		0			3			0
-Stufe-Party					N/A		0			3			3
+Stufe-Tag					N/A		0			3			2			056d
+Stufe-Nacht					N/A		0			3			1			056f
+Stufe-Bereitschaft			N/A		0			3			0			0570
+Stufe-Party					N/A		0			3			3			0571
 Stufe-Hand					N/A		0			3			2
 
 ##Lüftungszeiten
-Lüftungszeit Auss. Stufe 0	min		0			1000		60
-Lüftungszeit Auss. Stufe 1	min		0			1000		60
-Lüftungszeit Auss. Stufe 2	min		0			1000		60
-Lüftungszeit Auss. Stufe 3	min		0			1000		60
+Lüftungszeit Auss. Stufe 0	min		0			1000		60			0572
+Lüftungszeit Auss. Stufe 1	min		0			1000		60			0573
+Lüftungszeit Auss. Stufe 2	min		0			1000		60			0574
+Lüftungszeit Auss. Stufe 3	min		0			1000		60			0575
 
 ##Luftvolumenstrom
-Lürfterstufe Zuluft 1		m³/h	10			300			140
-Lürfterstufe Zuluft 2		m³/h	80			300			170
-Lürfterstufe Zuluft 3		m³/h	80			300			220
-Lürfterstufe Abluft 1		m³/h	10			300			140
-Lürfterstufe Abluft 2		m³/h	80			300			170
-Lürfterstufe Abluft 3		m³/h	80			300			220
+Lürfterstufe Zuluft 1		m³/h	10			300			140			0577
+Lürfterstufe Zuluft 2		m³/h	80			300			170			0578
+Lürfterstufe Zuluft 3		m³/h	80			300			220			0579
+Lürfterstufe Abluft 1		m³/h	10			300			140			057a
+Lürfterstufe Abluft 2		m³/h	80			300			170			057b
+Lürfterstufe Abluft 3		m³/h	80			300			220			057c
 
 ##Passivkühlung
-Passivkühlung				Aus/Ablüften/Zulüften/Bypass/Sommerkassette		Aus
+Passivkühlung				Aus/Ablüften/Zulüften/Bypass/Sommerkassette std: Aus
 Passivkühlung Fortl.		Aus/Ein							Aus
 Luftstop Sommer WWB			Aus/Ein							Aus
 
 ##Feuchteschutz
-Feuchteschutz				Aus/Ein							Aus
+Feuchteschutz				Aus/Ein							Aus			09d1???
 Feuchte Schwellwert			%		30			70			55
-Feuchte Hysterese			%		2			10			5
+Feuchte Hysterese			%		2			10			5			008e
 Feuchte Maskierzeit			min		1			10			5
-Feuchtesoll	min				%		30			60			50
+Feuchtesoll	min				%		30			60			50			09d2
 Leistungsreduktion			%		0			50			0
-Feuchtesoll max				%		60			90			60
+Feuchtesoll max				%		60			90			60			09d3
 Leistungserhöhung			%		0			100			0
 
 ##Ofen/Kamin
-Ofen/Kamin					Aus/Schliesser Aus/Öffner Aus/Schliesser Überwachung/Öffner Überwachung		Aus
+Ofen/Kamin					Aus/Schliesser Aus/Öffner Aus/Schliesser Überwachung/Öffner Überwachung		Aus		057d???
 
 ##Luft / Luft WT
-Max Abtaudauer				min		60			250			60
-Abtaubeginnschwelle					0			50			20
-Drehzahl Filter						0			100			20
+Max Abtaudauer				min		60			250			60			057e
+Abtaubeginnschwelle					0			50			20			057f
+Drehzahl Filter						0			100			20			0580
 
 ##Service
 Laufzeit Filter				d		0			1024		0
@@ -218,9 +236,9 @@ Reset Filter				Aus/Ein							Aus
 
 #Kühlen
 ##Raumtemperaturen HK1
-RT-Tag HK1					°C		10			30			25
-RT-Nacht HK1				°C		10			30			25
-RT-Bereitschaft HK1			°C		10			30			30
+RT-Tag HK1					°C		10			30			25			056a
+RT-Nacht HK1				°C		10			30			25			
+RT-Bereitschaft HK1			°C		10			30			30			056b
 Raumtemperatur HK1			°C		read-only
 ##Raumtemperaturen HK2
 RT-Tag HK2					°C		10			30			25
@@ -240,7 +258,7 @@ Hyst.-Raumtemp HK2			K		0,5			3			0,5
 ##Grundeinstellung
 Leistung Kühlen				%		30			50			30
 Prop. Band Kühlen			%		0,1			100			10
-Hyst.-Vorlauftemp			K		0,5			5			1,5
+Hyst.-Vorlauftemp			K		0,5			5			1,5			0584
 
 #Solar
 Freigabe Solar				Aus/Ein							Aus
@@ -251,20 +269,20 @@ Hysterese Solar				K		0,6			10			5
 Kollektorgrenztemp.			°C		50			80			70
 Kollektorschutztemp.		°C		100			150			120
 Kollektorsperrtemp.			°C		130			200			180
-Kollektorschutz				Aus/Ein							Aus
+Kollektorschutz				Aus/Ein							Aus				02f6
 Vorrang Solar				Solar/Kühlen/Kühlzeit			Solar
 ###Kühlzeit
 Start						N/A		00:00		23:59
 Ende						N/A		00:00		23:59
 
 #Trockenheizprogramm
-Start						Aus/Ein							Aus
-Sockeltemperatur			K		20			40			25
-Max. Temperatur				K		25			55			40
-Dauer Sockel				d		0			30			3
-Dauer Max-Temp.				d		0			30			3
-Steigung
-					K/d		1			10			1
+Start						Aus/Ein							Aus				011a
+Sockeltemperatur			K		20			40			25				01bb
+Max. Temperatur				K		25			55			40				01bd
+Dauer Sockel				d		0			30			3				01bc
+Dauer Max-Temp.				d		0			30			3				01be
+Steigung					K/d		1			10			1				01ba
+
 #Inbetriebnahme
 ##Bedienteil
 Bedienteilsoftware			N/A
@@ -275,7 +293,7 @@ Touch Beschleunigung		N/A
 Sprache						Deutsch/English/Francais/Nederlands/Italiano/Svenska/Polski/Cestina/Magyar/Espanyol/Suomi/Dansk		Deutsch
 Terminaladresse				N/A		1			4			4
 Rt.Erfassung HK				Keine/HK1/HK2					Keine
-Kor. Raumtemp.				Kor. Raumtemp./Kor. Raumtemp. HK1/Kor. Raumtemp. HK2 °C	min:-5	5	0
+Kor. Raumtemp.				Kor. Raumtemp./Kor. Raumtemp. HK1/Kor. Raumtemp. HK2 °C	min:-5	5	0	0109
 Korrektur Raumfeuchte		%		-5			5			0
 ##Regler
 Softwarestand				N/A		read-only
@@ -286,27 +304,27 @@ Gerätetyp
 				
 #Zeit / Datum
 ## Zeit/Datum
-Tag							N/A		1			31			1
-Monat						N/A		1			12			1
-Jahr						N/A		0			99			0
-Stunde						N/A		0			23			0
-Minute						N/A		0			59			0
+Tag							N/A		1			31			1				0122
+Monat						N/A		1			12			1				0123
+Jahr						N/A		0			99			0				0124
+Stunde						N/A		0			23			0				0125
+Minute						N/A		0			59			0				0126
 ##Sommerzeit Manuell
 ###Tag Beginn
-Tag							N/A		1			31			21
-Monat						N/A		1			12			3
+Tag							N/A		1			31			21				fddf
+Monat						N/A		1			12			3				fde0
 ###Tag Ende
-Tag							N/A		1			31			25
-Monat						N/A		1			12			10
+Tag							N/A		1			31			25				fde1
+Monat						N/A		1			12			10				fde2???
 ##Sommerzeit automatik
-Sommerzeit automatik		Aus/Ein							Ein
+Sommerzeit automatik		Aus/Ein							Ein				0944
 
 #Fachmann
 ##Verdampfer
-Temperatur Abtauende		°C		0			30			30
-Max. Abtaudauer				min		2			60			10
-Einfrierschutz Ne			°C		10			30			15
-Abtau Abbr.					°C		0			20			10
+Temperatur Abtauende		°C		0			30			30				05b3
+Max. Abtaudauer				min		2			60			10				03a9
+Einfrierschutz Ne			°C		10			30			15				05b4
+Abtau Abbr.					°C		0			20			10				
 
 ##Kälteaggregat
 Verdichter Taktung			min		0			20			20
@@ -322,16 +340,16 @@ Mischer-P Typ				N/A		0			2			0
 Solar-R Typ					N/A		0			2			0
 
 ##Pumpenzyklen
-Minimale Zyklen				1/d		1			24			1
-Maximale Zyklen				1/d		25			288			100
-At. min Zyklen				°C		0			25			20
-At. max Zyklen				°C		0			20			0
+Minimale Zyklen				1/d		1			24			1				05b9
+Maximale Zyklen				1/d		25			288			100				05b8
+At. min Zyklen				°C		0			25			20				05bb
+At. max Zyklen				°C		0			20			0				05ba
 
 ##Notbetrieb
 Notbetrieb Auto				Aus/Ein							Aus
 
 ##EVU Sperre
-EVU-Sperre					N/A		0			5			5
+EVU-Sperre					N/A		0			5			5			01d3
 
 ##Prozesswerte
 Lüfter (PRZ)				%		read-only

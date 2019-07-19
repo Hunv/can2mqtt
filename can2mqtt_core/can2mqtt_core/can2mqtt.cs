@@ -18,6 +18,7 @@ namespace can2mqtt_core
         bool _CanForwardWrite = true;
         bool _CanForwardRead = false;
         bool _CanForwardResponse = true;
+        bool _NoUnits = false;
 
         public Can2Mqtt()
         {
@@ -35,6 +36,7 @@ namespace can2mqtt_core
             _CanForwardWrite = config.CanForwardWrite;
             _CanForwardRead = config.CanForwardRead;
             _CanForwardResponse = config.CanForwardResponse;
+            _NoUnits = config.NoUnits;
 
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
@@ -52,7 +54,7 @@ namespace can2mqtt_core
             //Handle reconnect on loosing connection to MQTT Server
             _MqttClient.UseDisconnectedHandler(async e =>
             {
-                Console.WriteLine("DISCONNECTED FROM MQTT BROKER");
+                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0}", config.MqttServer);
                 while (!_MqttClient.IsConnected)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(5));
@@ -60,16 +62,19 @@ namespace can2mqtt_core
                     try
                     {
                         await _MqttClient.ConnectAsync(mqttClientOptions);
+                        Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
                     }
                     catch
                     {
-                        Console.WriteLine("RECONNECTING TO MQTT BROKER FAILED");
+                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED", config.MqttServer);
                     }
                 }
             });
 
             //Connect the MQTT Client to the MQTT Broker
             await _MqttClient.ConnectAsync(mqttClientOptions);
+            if (_MqttClient.IsConnected)
+                Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
 
             //Start listening on canlogservers port
             await ConnectTcpCanBus(config.CanServer, config.CanServerPort);
@@ -95,11 +100,11 @@ namespace can2mqtt_core
                     }
                     catch (Exception ea)
                     {
-                        Console.WriteLine("FAILED TO CONNECT TO CANLOGSERVER. {0}. Retry...", ea.Message);
+                        Console.WriteLine("FAILED TO CONNECT TO CANLOGSERVER {1}. {0}. Retry...", ea.Message, canServer);
                     }
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
-
+                
                 Console.WriteLine("CONNECTED TO CANLOGSERVER {0} ON PORT {1}", canServer, canPort);
 
                 //Create TCP Stream to read the CAN Bus Data
@@ -196,7 +201,7 @@ namespace can2mqtt_core
                 {
                     case "StiebelEltron":
                         var translator = new Translator.StiebelEltron.StiebelEltron();
-                        canMsg = translator.Translate(canMsg);
+                        canMsg = translator.Translate(canMsg, _NoUnits);
                         break;
                 }
             }            

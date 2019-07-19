@@ -36,6 +36,10 @@ namespace can2mqtt_core
         /// </summary>
         public string MqttTopic { get; set; } = "Can2Mqtt";
 
+        /// <summary>
+        /// In case MQTT should only broadcast numeric values without the units, set this to true
+        /// </summary>
+        public bool NoUnits { get; set; } = false;
 
         /// <summary>
         /// Should the application forward CAN write message?

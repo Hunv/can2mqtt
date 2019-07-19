@@ -17,7 +17,7 @@ namespace can2mqtt_core.Translator.StiebelEltron
     /// </summary>
     public class StiebelEltron
     {
-        public CanFrame Translate(CanFrame rawData)
+        public CanFrame Translate(CanFrame rawData, bool noUnit)
         {
             //Check if format is correct
             if (string.IsNullOrEmpty(rawData.PayloadCanData) || rawData.PayloadCanData.Length != 14)
@@ -62,7 +62,11 @@ namespace can2mqtt_core.Translator.StiebelEltron
                 return rawData;
 
             rawData.MqttTopicExtention = indexData.MqttTopic;
-            rawData.MqttValue = indexData.Converter.ConvertValue(payloadData) + indexData.Unit;
+
+            if (!noUnit)
+                rawData.MqttValue = indexData.Converter.ConvertValue(payloadData) + indexData.Unit;
+            else
+                rawData.MqttValue = indexData.Converter.ConvertValue(payloadData);
 
             return rawData;
         }
