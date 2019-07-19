@@ -50,18 +50,22 @@ namespace can2mqtt_core.Translator.StiebelEltron
             new ElsterIndexItem{Index = 0x03B0, Name = "Wärmerückgewinnung Heizung",    Unit = "kWh",   MqttTopic = "/heating/recoverydaykwh",          Converter = new ConvertDouble()},
             new ElsterIndexItem{Index = 0x03B1, Name = "Wärmerückgewinnung Heizung Gesamt",Unit = "kWh",MqttTopic = "/heating/heatrecoverysumkwh",      Converter = new ConvertDouble()},
             new ElsterIndexItem{Index = 0x03B6, Name = "Wärmerückgewinnung Heizung Gesamt",Unit = "MWh",MqttTopic = "/heating/heatrecoverysummwh",      Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x03AF, Name = "Stromverbrauch Heizung/Tag",    Unit = "Wh",    MqttTopic = "/heating/power/usagedaywh",        Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x03B0, Name = "Stromverbrauch Heizung/Tag",    Unit = "kWh",   MqttTopic = "/heating/power/usagedaykwh",       Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x03B1, Name = "Stromverbrauch Heizung Gesamt", Unit = "kWh",   MqttTopic = "/heating/power/usagesumkwh",       Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x03B6, Name = "Stromverbrauch Heizung Gesamt", Unit = "MWh",   MqttTopic = "/heating/power/usagesummwh",       Converter = new ConvertDouble()},
+            new ElsterIndexItem{Index = 0x091E, Name = "Stromverbrauch Heizung/Tag",    Unit = "Wh",    MqttTopic = "/heating/power/usagedaywh",        Converter = new ConvertDouble()},
+            new ElsterIndexItem{Index = 0x091F, Name = "Stromverbrauch Heizung/Tag",    Unit = "kWh",   MqttTopic = "/heating/power/usagedaykwh",       Converter = new ConvertDouble()},
+            new ElsterIndexItem{Index = 0x0920, Name = "Stromverbrauch Heizung Gesamt", Unit = "kWh",   MqttTopic = "/heating/power/usagesumkwh",       Converter = new ConvertDouble()},
+            new ElsterIndexItem{Index = 0x0921, Name = "Stromverbrauch Heizung Gesamt", Unit = "MWh",   MqttTopic = "/heating/power/usagesummwh",       Converter = new ConvertDouble()},
 
             new ElsterIndexItem{Index = 0x02CE, Name = "Stromverbrauch Speicher",       Unit = "",      MqttTopic = "/boiler/power/usage",              Converter = new ConvertLittleEndian()},
             new ElsterIndexItem{Index = 0x091A, Name = "Stromverbrauch Warmwasser/Tag", Unit = "Wh",    MqttTopic = "/boiler/power/usagewarmwaterdaywh",Converter = new ConvertDouble()},
             new ElsterIndexItem{Index = 0x091B, Name = "Stromverbrauch Warmwasser/Tag", Unit = "kWh",   MqttTopic = "/boiler/power/usagewarmwaterdaykwh",Converter = new ConvertDouble()},
             new ElsterIndexItem{Index = 0x091C, Name = "Stromverbrauch Warmwasser Gesamt",Unit = "kWh", MqttTopic = "/boiler/power/usagewarmwatersumkwh",Converter = new ConvertDouble()},
             new ElsterIndexItem{Index = 0x091D, Name = "Stromverbrauch Warmwasser Gesamt",Unit = "Mwh", MqttTopic = "/boiler/power/usagewarmwatersummwh",Converter = new ConvertDouble()},
-            
-            
+
+            new ElsterIndexItem{Index = 0x059F, Name = "HK1 Fußpunkt",                  Unit = "°C",    MqttTopic = "/heating/hk1/base",                Converter = new ConvertDec()},
+            new ElsterIndexItem{Index = 0x010f, Name = "HK1 Raumeinfluss",              Unit = "",      MqttTopic = "/heating/hk1/roominfluence",       Converter = new ConvertDefault()},
+            new ElsterIndexItem{Index = 0x059E, Name = "HK1 Anteil Vorlauf",            Unit = "",      MqttTopic = "/heating/hk1/flowpercent",         Converter = new ConvertDefault()},
+            //new ElsterIndexItem{Index = , Name = "HK1 Maximum (Soll)",            Unit = "°C",    MqttTopic = "/heating/hk1/maximum/desired",     Converter = new ConvertDefault()},
+            new ElsterIndexItem{Index = 0x012B, Name = "HK1 Minimum (Soll)",            Unit = "°C",    MqttTopic = "/heating/hk1/minimum/desired",     Converter = new ConvertDefault()},
 
         };
 
