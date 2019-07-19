@@ -76,23 +76,24 @@ namespace can2mqtt_core.Translator.StiebelEltron
         {
             if (hexData != "0000")
                 //C++ handling: sprintf(Val, "%d", (signed char)Value);
-                throw new NotImplementedException("ConvertByte for Data " + hexData + " not implemented. Please report example values via Github!");
+                return Convert.ToSByte(hexData).ToString();
+                //throw new NotImplementedException("ConvertByte for Data " + hexData + " not implemented. Please report example values via Github!");
             else
-                return "0";
-            throw new NotImplementedException("ConvertByte for Data " + hexData + " not implemented.");
+                return "0";            
         }
     }
 
     /// <summary>
     /// Converts values (et_double_val)
+    /// This value is always just an int but in several unit steps (i.e. Wh, kWh). The unit has to be maintained by the frontend/middleware.
     /// </summary>
     public class ConvertDouble : IValueConverter
     {
         public string ConvertValue(string hexData)
         {
             if (hexData != "0000")
-                //C++: sprintf(Val, "%.3f", Value);
-                throw new NotImplementedException("ConvertDouble for Data " + hexData + " not implemented. Please report example values via Github!");
+                return Convert.ToInt32(hexData, 16).ToString();
+                //throw new NotImplementedException("ConvertDouble for Data " + hexData + " not implemented. Please report example values via Github!");
             else
                 return "0";
         }
@@ -100,14 +101,15 @@ namespace can2mqtt_core.Translator.StiebelEltron
 
     /// <summary>
     /// Converts values (et_triple_val)
+    /// This value is always just an int but in several unit steps (i.e. Wh, kWh, MWh). The unit has to be maintained by the frontend/middleware.
     /// </summary>
     public class ConvertTriple : IValueConverter
     {
         public string ConvertValue(string hexData)
         {
             if (hexData != "0000")
-                //C++: sprintf(Val, "%.6f", Value);
-                throw new NotImplementedException("ConvertTriple for Data " + hexData + " not implemented. Please report example values via Github!");
+                return Convert.ToInt32(hexData, 16).ToString();
+                //throw new NotImplementedException("ConvertTriple for Data " + hexData + " not implemented. Please report example values via Github!");
             else
                 return "0";
         }
