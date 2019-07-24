@@ -13,6 +13,7 @@ namespace can2mqtt_core
     public class Can2Mqtt
     {
         IMqttClient _MqttClient = null;
+        IMqttClientOptions _MqttClientOptions = null;
         string _MqttTopic = "";
         string _CanTranslator = null;
         bool _CanForwardWrite = true;
@@ -43,7 +44,7 @@ namespace can2mqtt_core
             _MqttClient = mqttFactory.CreateMqttClient();
 
             // Create TCP based options using the builder.
-            var mqttClientOptions = new MqttClientOptionsBuilder()
+            _MqttClientOptions = new MqttClientOptionsBuilder()
                 .WithClientId(config.MqttClientId)
                 .WithTcpServer(config.MqttServer)
                 //.WithCredentials("bud", "%spencer%")
@@ -61,7 +62,7 @@ namespace can2mqtt_core
 
                     try
                     {
-                        await _MqttClient.ConnectAsync(mqttClientOptions);
+                        await _MqttClient.ConnectAsync(_MqttClientOptions);
                         Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
                     }
                     catch
@@ -72,7 +73,7 @@ namespace can2mqtt_core
             });
 
             //Connect the MQTT Client to the MQTT Broker
-            await _MqttClient.ConnectAsync(mqttClientOptions);
+            await _MqttClient.ConnectAsync(_MqttClientOptions);
             if (_MqttClient.IsConnected)
                 Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
 
@@ -189,39 +190,66 @@ namespace can2mqtt_core
         /// <returns></returns>
         public async Task SendMQTT(CanFrame canMsg)
         {
-            //Check if there is payload
-            if (canMsg.RawFrame.Trim().Length == 0)
-                return;
-
-            //Use Translator (if selected)
-            if (!string.IsNullOrEmpty(_CanTranslator))
+            try
             {
-                //choose the translator to use and translate the message if translator exists
-                switch(_CanTranslator)
+                //Check if there is payload
+                if (canMsg.RawFrame.Trim().Length == 0)
+                    return;
+
+                //Use Translator (if selected)
+                if (!string.IsNullOrEmpty(_CanTranslator))
                 {
-                    case "StiebelEltron":
-                        var translator = new Translator.StiebelEltron.StiebelEltron();
-                        canMsg = translator.Translate(canMsg, _NoUnits);
-                        break;
+                    //choose the translator to use and translate the message if translator exists
+                    switch (_CanTranslator)
+                    {
+                        case "StiebelEltron":
+                            var translator = new Translator.StiebelEltron.StiebelEltron();
+                            canMsg = translator.Translate(canMsg, _NoUnits);
+                            break;
+                    }
                 }
-            }            
 
-            //Logoutput with or without tranlated MQTT message
-            if (string.IsNullOrEmpty(canMsg.MqttValue))
-                Console.WriteLine("Sending MQTT Message: {0} and Topic {1}", canMsg.PayloadFull.Trim(), _MqttTopic);
-            else
-                Console.WriteLine("Sending MQTT Message: {0} and Topic {1}{2}", canMsg.MqttValue, _MqttTopic, canMsg.MqttTopicExtention);
+                //Verify connection to MQTT Broker is established
+                while (!_MqttClient.IsConnected)
+                {
+                    Console.WriteLine("UNHANDLED DISCONNECT FROM MQTT BROKER");
+                    while (!_MqttClient.IsConnected)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5));
 
-            //Create MQTT Message
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic(_MqttTopic + canMsg.MqttTopicExtention)
-                .WithPayload(string.IsNullOrEmpty(canMsg.MqttValue) ? canMsg.PayloadFull : canMsg.MqttValue)
-                .WithExactlyOnceQoS()
-                .WithRetainFlag()
-                .Build();
+                        try
+                        {
+                            await _MqttClient.ConnectAsync(_MqttClientOptions);
+                            Console.WriteLine("CONNECTED TO MQTT BROKER");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("RECONNECTING TO MQTT BROKER FAILED. Retrying...");
+                        }
+                    }
+                }
 
-            //Publish MQTT Message
-            await _MqttClient.PublishAsync(message);
+                //Logoutput with or without tranlated MQTT message
+                if (string.IsNullOrEmpty(canMsg.MqttValue))
+                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}", canMsg.PayloadFull.Trim(), _MqttTopic);
+                else
+                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}{2}", canMsg.MqttValue, _MqttTopic, canMsg.MqttTopicExtention);
+
+                //Create MQTT Message
+                var message = new MqttApplicationMessageBuilder()
+                    .WithTopic(_MqttTopic + canMsg.MqttTopicExtention)
+                    .WithPayload(string.IsNullOrEmpty(canMsg.MqttValue) ? canMsg.PayloadFull : canMsg.MqttValue)
+                    .WithExactlyOnceQoS()
+                    .WithRetainFlag()
+                    .Build();
+
+                //Publish MQTT Message
+                await _MqttClient.PublishAsync(message);
+            }
+            catch (Exception ea)
+            {
+                Console.WriteLine("ERROR while sending MQTT message. {0}", ea.ToString());
+            }
         }
 
     }
