@@ -1,0 +1,15 @@
+Enthält die Aufschlüsselung von Betriebszustand zu den Icons im Display
+Gezählt wird von hinten nach vorne. Beispiel der Bits:
+0000010100000111
+
+1. Bit: Sanduhr (1. von Links) oder Doppel-Filter-Symbol (5. von Links)
+2. Bit: Trapezsymbol (2. von Links)
+3. Bit: Heizungssymbol (3. von Links)
+4. Bit: 
+5. Bit: Wasserhahnsymbol (3. von Links)
+6. Bit: 
+7. Bit: 
+8. Bit: Kein Strom für Kompressor (Sperrzeit) (5. von Links)
+9. Bit: Sanduhr (1. von Links) oder Doppel-Filter-Symbol (5. von Links)
+10.Bit:
+11.Bit: "Play"-Symbol (7. von Links)
