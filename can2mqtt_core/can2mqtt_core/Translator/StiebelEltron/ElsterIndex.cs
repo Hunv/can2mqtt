@@ -13,6 +13,7 @@ namespace can2mqtt_core.Translator.StiebelEltron
             new ElsterIndexItem{Index = 0x000C, Name = "Außentemperaturfühler",         Unit = "°C",    MqttTopic = "/outdoor/temperature/measured",    Converter = new ConvertDec()},
             new ElsterIndexItem{Index = 0x000E, Name = "Speichertemperatur",            Unit = "°C",    MqttTopic = "/boiler/temperature/measured",     Converter = new ConvertDec()},
             new ElsterIndexItem{Index = 0x000F, Name = "Vorlauftemperatur",             Unit = "°C",    MqttTopic = "/flow/temperature/measured",       Converter = new ConvertDec()},
+            new ElsterIndexItem{Index = 0x000F, Name = "Raumtemperatur HK1",            Unit = "°C",    MqttTopic = "/indoor/temperature/measured",     Converter = new ConvertDec()},
             new ElsterIndexItem{Index = 0x0014, Name = "Verdampfertemperatur",          Unit = "°C",    MqttTopic = "/evaporator/temperature/measured", Converter = new ConvertDec()},
             new ElsterIndexItem{Index = 0x0016, Name = "Rücklauftemperatur",            Unit = "°C",    MqttTopic = "/returnflow/temperature/measured", Converter = new ConvertDec()},
 
