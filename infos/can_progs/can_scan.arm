@@ -1,0 +1,21 @@
+rm can_scan
+
+${CROSS_COMPILE}g++ -Wall $1 $2 -D__LINUX__ -D__CONSOLE__ -D__CAN__ -D__ARM__ -D__SCAN__ -D__64__ -lpthread \
+  KIpSocket.cpp \
+  KThread.cpp \
+  KCriticalSection.cpp \
+  KCanDriver.cpp \
+  KComm.cpp \
+  KSocketCanDriver.cpp \
+  KCanServer.cpp \
+  KStream.cpp \
+  NUtils.cpp \
+  NCanUtils.cpp \
+  KElsterTable.cpp \
+  KCanElster.cpp \
+  KScanTable.cpp \
+  KCanCommDriver.cpp \
+  KSniffedFrame.cpp \
+  KCanTcpDriver.cpp \
+  KTcpClient.cpp \
+  -o can_scan
