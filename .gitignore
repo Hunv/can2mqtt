@@ -2,3 +2,5 @@ can2mqtt_core/.vs/
 can2mqtt_core/can2mqtt_core/bin/
 can2mqtt_core/can2mqtt_core/obj/
 infos/private/
+can2mqtt_core/can2mqtt_tool/bin/
+can2mqtt_core/can2mqtt_tool/obj/

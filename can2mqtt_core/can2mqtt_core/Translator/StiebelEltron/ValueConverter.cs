@@ -38,6 +38,23 @@ namespace can2mqtt_core.Translator.StiebelEltron
     }
 
     /// <summary>
+    /// Converts Little Endian values (et_little_endian) with one digit after comma
+    /// </summary>
+    public class ConvertLittleEndianDec : IValueConverter
+    {
+        public string ConvertValue(string hexData)
+        {
+            decimal result = 0;
+            for (int i = 0; i < hexData.Length; i += 2)
+            {
+                var digit = Convert.ToInt32(hexData.Substring(i, 2), 16) * Math.Pow(16, i);
+                result += Convert.ToInt32(digit);
+            }
+            result /= 10;
+            return result.ToString();
+        }
+    }
+    /// <summary>
     /// Converts values (et_zeit)
     /// </summary>
     public class ConvertZeit : IValueConverter
@@ -74,9 +91,13 @@ namespace can2mqtt_core.Translator.StiebelEltron
     {
         public string ConvertValue(string hexData)
         {
+            if (!hexData.StartsWith("00")) //A byte cannot be larger than 255
+            {
+                return "255";
+            }
             if (hexData != "0000")
                 //C++ handling: sprintf(Val, "%d", (signed char)Value);
-                return Convert.ToSByte(hexData).ToString();
+                return Convert.ToByte(int.Parse(hexData, System.Globalization.NumberStyles.HexNumber)).ToString();
                 //throw new NotImplementedException("ConvertByte for Data " + hexData + " not implemented. Please report example values via Github!");
             else
                 return "0";            
@@ -268,6 +289,19 @@ namespace can2mqtt_core.Translator.StiebelEltron
                 case "0100": return "Ein";
                 default: return "???";
             }
+        }
+    }
+
+
+
+    /// <summary>
+    /// Converts a Hex Value to a Binary value (i.e. for operating status)
+    /// </summary>
+    public class ConvertBinary : IValueConverter
+    {
+        public string ConvertValue(string hexData)
+        {
+            return Convert.ToString(Convert.ToInt64(hexData, 16), 2);
         }
     }
 }

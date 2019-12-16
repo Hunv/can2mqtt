@@ -72,7 +72,7 @@ namespace can2mqtt_core
 
                 receiverId += Convert.ToInt16(mod.Substring(0, 1),16) * 16 + Convert.ToInt16(mod.Substring(1, 1),16);
 
-                return receiverId.ToString();                
+                return receiverId.ToString("X3");                
             }
         }
 
@@ -83,6 +83,20 @@ namespace can2mqtt_core
         /// </summary>
         public string PayloadCanData { get { return PayloadFull.Substring(PayloadFull.IndexOf('#') +1); } }
 
+        /// <summary>
+        /// Gets the IndexTable Index. Usually this is FA but FD was also discovered in the past
+        /// </summary>
+        public string IndexTableIndex { get { return PayloadFull.Substring(8,2); } }
+
+        /// <summary>
+        /// The Index the value belongs to
+        /// </summary>
+        public string ValueIndex { get { return PayloadFull.Substring(10, 4); } }
+
+        /// <summary>
+        /// The Value that is transmitted by this CAN frame
+        /// </summary>
+        public string Value { get { return PayloadFull.Substring(14, 4); } }
 
         /// <summary>
         /// In case a translator was used, the topic may become more specified
