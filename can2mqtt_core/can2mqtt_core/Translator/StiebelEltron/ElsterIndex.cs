@@ -41,7 +41,7 @@ namespace can2mqtt_core.Translator.StiebelEltron
             new ElsterIndexItem{Index = 0x0126, Name = "Minute",                        Unit = "",      MqttTopic = "/time/minute",                     Converter = new ConvertLittleEndian()},
             new ElsterIndexItem{Index = 0x0127, Name = "Sekunde",                       Unit = "",      MqttTopic = "/time/second",                     Converter = new ConvertLittleEndian()},
           
-            new ElsterIndexItem{Index = 0x0176, Name = "Betriebsstatus",                Unit = "",      MqttTopic = "/status/operationstatus",          Converter = new ConvertDefault()},
+            new ElsterIndexItem{Index = 0x0176, Name = "Betriebsstatus",                Unit = "",      MqttTopic = "/status/operationstatus",          Converter = new ConvertBinary()},
             new ElsterIndexItem{Index = 0x019A, Name = "Versionsnummer",                Unit = "",      MqttTopic = "/status/softwareversion",          Converter = new ConvertDefault()},
 
             new ElsterIndexItem{Index = 0x01DA, Name = "Volumenstrom",                  Unit = "l/sec", MqttTopic = "/ac/volumeflow",                   Converter = new ConvertLittleEndianDec()},

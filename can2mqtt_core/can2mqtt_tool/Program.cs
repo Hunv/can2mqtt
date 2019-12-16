@@ -1,5 +1,6 @@
 ﻿using can2mqtt_core;
 using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ namespace can2mqtt_tool
     {
         public static string _Translator = null;
         public static bool _OnlyUnkown = false;
+        public static string _LogPath = null;
 
         public static async Task Main(string[] args)
         {
@@ -24,16 +26,19 @@ namespace can2mqtt_tool
 
             for (var i = 0; i < args.Length; i++)
             {
-                if (args[i].ToLower() == "--CanServer" || args[i].ToLower() == "-cs")
+                if (args[i].ToLower() == "--canserver" || args[i].ToLower() == "-cs")
                     serverAddress = args[i + 1];
-                else if (args[i].ToLower() == "--CanServerPort" || args[i].ToLower() == "-cp")
+                else if (args[i].ToLower() == "--canserverport" || args[i].ToLower() == "-cp")
                     serverPort = Convert.ToInt32(args[i + 1]);
-                else if (args[i].ToLower() == "--Translator" || args[i].ToLower() == "-t")
+                else if (args[i].ToLower() == "--translator" || args[i].ToLower() == "-t")
                     _Translator = args[i + 1];
-                else if (args[i].ToLower() == "--OnlyUnknown" || args[i].ToLower() == "-u")
+                else if (args[i].ToLower() == "--onlyunknown" || args[i].ToLower() == "-u")
                     _OnlyUnkown = true;
-                else if (args[i].ToLower() == "--Calculate" || args[i].ToLower() == "-c")
+                else if (args[i].ToLower() == "--calculate" || args[i].ToLower() == "-c")
                     calculate = args[i + 1];
+                else if (args[i].ToLower() == "--logpath" || args[i].ToLower() == "-l")
+                    _LogPath = args[i + 1];
+
 
             }
 
@@ -123,13 +128,14 @@ namespace can2mqtt_tool
                     }
                     catch (Exception ea)
                     {
-                        Console.WriteLine("FAILED TO CONNECT TO CANLOGSERVER {1}. {0}. Retry...", ea.Message, canServer);
+                        await Log(string.Format("FAILED TO CONNECT TO CANLOGSERVER {1}. {0}. Retry...", ea.Message, canServer));
                     }
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
 
-                Console.WriteLine("CONNECTED TO CANLOGSERVER {0} ON PORT {1}", canServer, canPort);
+                await Log(string.Format("CONNECTED TO CANLOGSERVER {0} ON PORT {1}", canServer, canPort));
 
+                await Log(string.Format("DATE      TIME     SND REC MODE ID INDX VALU => DATA   MQTT TOPIC"), true);
                 //Create TCP Stream to read the CAN Bus Data
                 NetworkStream stream = clsClient.GetStream();
                 byte[] data = new Byte[46];
@@ -207,10 +213,18 @@ namespace can2mqtt_tool
                                     break;
                             }
 
-                            //Console.WriteLine("{0}", canFrame.RawFrame);
-                            Console.WriteLine("{0} {1} {2} {3} {4} {5} => {6}\t{7}",
-                                canFrame.PayloadSenderCanId, canFrame.PayloadReceiverCanId, frameTypeString,
-                                canFrame.IndexTableIndex, canFrame.ValueIndex, canFrame.Value, canFrame.MqttValue, canFrame.MqttTopicExtention);
+                            if (canFrame.CanFrameType == "1")
+                            {
+                                await Log(string.Format("{0} {1} {2} {3} {4} {5}    \t{7}",
+                                    canFrame.PayloadSenderCanId, canFrame.PayloadReceiverCanId, frameTypeString,
+                                    canFrame.IndexTableIndex, canFrame.ValueIndex, canFrame.Value, canFrame.MqttValue, canFrame.MqttTopicExtention));
+                            }
+                            else
+                            {
+                                await Log(string.Format("{0} {1} {2} {3} {4} {5} => {6}\t{7}",
+                                    canFrame.PayloadSenderCanId, canFrame.PayloadReceiverCanId, frameTypeString,
+                                    canFrame.IndexTableIndex, canFrame.ValueIndex, canFrame.Value, canFrame.MqttValue, canFrame.MqttTopicExtention));
+                            }
                         }
                     }
                     //Reset byte counter
@@ -222,11 +236,11 @@ namespace can2mqtt_tool
                 //Close the TCP Stream
                 clsClient.Close();
 
-                Console.WriteLine("Disconnected from canServer {0} Port {1}", canServer, canPort);
+                await Log(string.Format("Disconnected from canServer {0} Port {1}", canServer, canPort));
             }
             catch (Exception ea)
             {
-                Console.WriteLine("Error while reading CanBus Server. {0}", ea);
+                await Log(string.Format("Error while reading CanBus Server. {0}", ea));
             }
             finally
             {
@@ -248,6 +262,19 @@ namespace can2mqtt_tool
             Console.WriteLine("--IndexFilter    Only show values, that are using the given Elster Index(es). Valid values: comma separated Elster Indexes");
             Console.WriteLine("--LogPath        If given, the output will be logged. Valid value: Path the a log file");
             Console.WriteLine("--Calculate      Calculates a raw value to all available value converters of a Translator");
+        }
+
+        private static async Task Log(string text, bool dontLogToFile = false)
+        {
+            var logText = string.Format("{0} {1}", (dontLogToFile ? "" : DateTime.Now.ToString("yyyy-MM-hh dd-mm-ss")), text);
+            Console.WriteLine(logText);
+
+            if (_LogPath != null && !dontLogToFile)
+            {
+                StreamWriter sW = new StreamWriter(_LogPath, true, System.Text.Encoding.Default);
+                await sW.WriteLineAsync(logText);
+                sW.Close();
+            }
         }
     }
 }
