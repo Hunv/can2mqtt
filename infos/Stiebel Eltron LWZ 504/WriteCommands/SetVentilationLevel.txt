@@ -1,0 +1,8 @@
+Lüftungsstufe außerplanmäßig setzen:
+1. Stufe auswählen (hier: 0)
+2. Zeit auswählen (hier für Stufe 0 außerplanmäßig 5 Minuten)
+/home/pi/can-utils/cansend slcan0 6A2#3000FA05DD0000
+/home/pi/can-utils/cansend slcan0 6A2#3000FA05710005
+
+Lüftungsstufe allgemein setzen:
+/home/pi/can-utils/cansend slcan0 6A2#3000FA056C0002

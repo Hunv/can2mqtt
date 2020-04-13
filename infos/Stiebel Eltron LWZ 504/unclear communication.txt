@@ -1,0 +1,10 @@
+When switching AC to 0
+  slcan0  RX - E  403   [7]  86 03 FD 09 00 00 00
+  slcan0  RX - E  6A0   [7]  D6 20 FD 09 00 00 00
+
+
+
+
+6A0 180 read FA 019A 0000 =>
+180 6A0 answ FA 019A 02F7 =>
+

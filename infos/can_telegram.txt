@@ -3,7 +3,7 @@ Example Telegram:
 
 180 = Sender Id
     D = Receiver Id Index (see below. Here: 680)
-     2 = Response (0=write, 1=read)
+     2 = Response (0=write, 1=read, 2=response)
       22 = Receiver Id Part 2: 22
          => Receiver ID = 680 + 22 = 6A2
         FA = Elster-Table redirect

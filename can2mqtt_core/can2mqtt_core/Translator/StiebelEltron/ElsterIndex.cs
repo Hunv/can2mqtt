@@ -7,24 +7,25 @@ namespace can2mqtt_core.Translator.StiebelEltron
     public static class ElsterIndex
     {
         public static ElsterIndexItem[] ElsterTable = new ElsterIndexItem[] {
-            new ElsterIndexItem{Index = 0x0001, Name = "Fehlermeldung",                 Unit = "",      MqttTopic = "/error/status",                    Converter = new ConvertDefault()},
+            new ElsterIndexItem{Index = 0x0001, Name = "Fehlermeldung",                 Unit = "",      MqttTopic = "/error/status",                    Converter = new ConvertDefault(),       Description = "Is there any Error at the Device?"},
 
-            new ElsterIndexItem{Index = 0x0003, Name = "Speichertemperatur (Soll)",     Unit = "°C",    MqttTopic = "/boiler/temperature/desired",      Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x000C, Name = "Außentemperaturfühler",         Unit = "°C",    MqttTopic = "/outdoor/temperature/measured",    Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x000E, Name = "Speichertemperatur",            Unit = "°C",    MqttTopic = "/boiler/temperature/measured",     Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x000F, Name = "Vorlauftemperatur",             Unit = "°C",    MqttTopic = "/flow/temperature/measured",       Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x0011, Name = "Raumtemperatur HK1",            Unit = "°C",    MqttTopic = "/indoor/temperature/measured",     Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x0014, Name = "Verdampfertemperatur",          Unit = "°C",    MqttTopic = "/evaporator/temperature/measured", Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x0016, Name = "Rücklauftemperatur",            Unit = "°C",    MqttTopic = "/returnflow/temperature/measured", Converter = new ConvertDec()},
+            new ElsterIndexItem{Index = 0x0003, Name = "Speichertemperatur (Soll)",     Unit = "°C",    MqttTopic = "/boiler/temperature/desired",      Converter = new ConvertDec(),           Description = "The desired temperature for the storage of the boiler"},
+            new ElsterIndexItem{Index = 0x000C, Name = "Außentemperaturfühler",         Unit = "°C",    MqttTopic = "/outdoor/temperature/measured",    Converter = new ConvertDec(),           Description = "The measured temperature by the outside sensor"},
+            new ElsterIndexItem{Index = 0x000E, Name = "Speichertemperatur",            Unit = "°C",    MqttTopic = "/boiler/temperature/measured",     Converter = new ConvertDec(),           Description = "The measured temperature in the storage of the boiler"},
+            new ElsterIndexItem{Index = 0x000F, Name = "Vorlauftemperatur",             Unit = "°C",    MqttTopic = "/flow/temperature/measured",       Converter = new ConvertDec(),           Description = "The measured temperature of the flow"},
+            new ElsterIndexItem{Index = 0x0011, Name = "Raumtemperatur HK1",            Unit = "°C",    MqttTopic = "/indoor/temperature/measured",     Converter = new ConvertDec(),           Description = "The measured temperature by the indoor sensor or the assumed temperature by the device (default: 25°C)"},
+            new ElsterIndexItem{Index = 0x0014, Name = "Verdampfertemperatur",          Unit = "°C",    MqttTopic = "/evaporator/temperature/measured", Converter = new ConvertDec(),           Description = "The measured temperature of the evaporator"},
+            new ElsterIndexItem{Index = 0x0016, Name = "Rücklauftemperatur",            Unit = "°C",    MqttTopic = "/returnflow/temperature/measured", Converter = new ConvertDec(),           Description = "The measured temperature of the return flow"},
+            new ElsterIndexItem{Index = 0x0075, Name = "Luftfeuchte HK1",               Unit = "%",     MqttTopic = "/indor/humidity/measured",         Converter = new ConvertDec(),           Description = "The measured humidity by the indoor sensor"},
 
-            new ElsterIndexItem{Index = 0x0112, Name = "Programmschalter",              Unit = "",      MqttTopic = "/status/operationswitch",          Converter = new ConvertBetriebsart()},
+            new ElsterIndexItem{Index = 0x0112, Name = "Programmschalter",              Unit = "",      MqttTopic = "/status/operationswitch",          Converter = new ConvertBetriebsart(),   Description = "The operationmode of the device"},
 
-            new ElsterIndexItem{Index = 0x011A, Name = "Estrichprogramm aktiv",         Unit = "",      MqttTopic = "/heating/concrete/enabled",        Converter = new ConvertBool()},
-            new ElsterIndexItem{Index = 0x01BA, Name = "Estrichprogramm Zunahme/Tag",   Unit = "K/Tag", MqttTopic = "/heating/concrete/increaseperday", Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x01BB, Name = "Estrichprogramm Sockeltemperatur",Unit = "K",   MqttTopic = "/heating/concrete/basetemperature",Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x01BC, Name = "Estrichprogramm dauer Fußpunkt",Unit = "Tage",  MqttTopic = "/heating/concrete/basetemperaturehold",Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x01BD, Name = "Estrichprogramm Maximum",       Unit = "K",     MqttTopic = "/heating/concrete/maxtemperature", Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x01BE, Name = "Estrichprogramm Maximum halten",Unit = "Tage",  MqttTopic = "/heating/concrete/maxtemperaturehold",Converter = new ConvertDec()},
+            new ElsterIndexItem{Index = 0x011A, Name = "Estrichprogramm aktiv",         Unit = "",      MqttTopic = "/heating/concrete/enabled",        Converter = new ConvertBool(),          Description = "Is the concrete heating mode enabled?"},
+            new ElsterIndexItem{Index = 0x01BA, Name = "Estrichprogramm Zunahme/Tag",   Unit = "K/Tag", MqttTopic = "/heating/concrete/increaseperday", Converter = new ConvertDec(),           Description = "How many Kelvin per day should the concrete be heated more"},
+            new ElsterIndexItem{Index = 0x01BB, Name = "Estrichprogramm Sockeltemperatur",Unit = "K",   MqttTopic = "/heating/concrete/basetemperature",Converter = new ConvertDec(),           Description = ""},
+            new ElsterIndexItem{Index = 0x01BC, Name = "Estrichprogramm dauer Fußpunkt",Unit = "Tage",  MqttTopic = "/heating/concrete/basetemperaturehold",Converter = new ConvertDec(),       Description = ""},
+            new ElsterIndexItem{Index = 0x01BD, Name = "Estrichprogramm Maximum",       Unit = "K",     MqttTopic = "/heating/concrete/maxtemperature", Converter = new ConvertDec(),           Description = "The maxium temperature, that should be reached by the concrete heating program"},
+            new ElsterIndexItem{Index = 0x01BE, Name = "Estrichprogramm Maximum halten",Unit = "Tage",  MqttTopic = "/heating/concrete/maxtemperaturehold",Converter = new ConvertDec(),        Description = ""},
             
             new ElsterIndexItem{Index = 0x011B, Name = "Ferienbeginn Tag",              Unit = "",      MqttTopic = "/time/holiday/startday",           Converter = new ConvertLittleEndian()},
             new ElsterIndexItem{Index = 0x011C, Name = "Ferienbeginn Monat",            Unit = "",      MqttTopic = "/time/holiday/startmonth",         Converter = new ConvertLittleEndian()},
@@ -43,9 +44,19 @@ namespace can2mqtt_core.Translator.StiebelEltron
           
             new ElsterIndexItem{Index = 0x0176, Name = "Betriebsstatus",                Unit = "",      MqttTopic = "/status/operationstatus",          Converter = new ConvertBinary()},
             new ElsterIndexItem{Index = 0x019A, Name = "Versionsnummer",                Unit = "",      MqttTopic = "/status/softwareversion",          Converter = new ConvertDefault()},
+            new ElsterIndexItem{Index = 0x001A, Name = "Kundenkennung",                 Unit = "",      MqttTopic = "/status/customerid",               Converter = new ConvertDefault()},
 
-            new ElsterIndexItem{Index = 0x01DA, Name = "Volumenstrom",                  Unit = "l/sec", MqttTopic = "/ac/volumeflow",                   Converter = new ConvertLittleEndianDec()},
+            new ElsterIndexItem{Index = 0x01DA, Name = "Volumenstrom",                  Unit = "l/Min", MqttTopic = "/ac/volumeflow",                   Converter = new ConvertLittleEndianDec()},
             new ElsterIndexItem{Index = 0x033B, Name = "Lüftung Sommermodus",           Unit = "",      MqttTopic = "/ac/summeroperation",              Converter = new ConvertLittleEndian()},
+            new ElsterIndexItem{Index = 0x05DD, Name = "Lüftung Stufe",                 Unit = "",      MqttTopic = "/ac/coolingstatus",                Converter = new ConvertDefault(),           Description = "The ventilation level of the device"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x0571, Name = "Lüftung Außerplanm. Stufe 0",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel0",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 0 will run, when changed to"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x0572, Name = "Lüftung Außerplanm. Stufe 1",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel1",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 1 will run, when changed to"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x0573, Name = "Lüftung Außerplanm. Stufe 2",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel2",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 2 will run, when changed to"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x0574, Name = "Lüftung Außerplanm. Stufe 3",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel3",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 3 will run, when changed to"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x056C, Name = "Lüftungsstufe Tag",             Unit = "",      MqttTopic = "/ac/daylevel",                     Converter = new ConvertDefault(),           Description = "The level of the ventilation at daytime"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x056D, Name = "Lüftungsstufe Nacht",           Unit = "",      MqttTopic = "/ac/nightlevel",                   Converter = new ConvertDefault(),           Description = "The level of the ventilation at nighttime"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x056E, Name = "Lüftungsstufe Abwesend",        Unit = "",      MqttTopic = "/ac/awaylevel",                    Converter = new ConvertDefault(),           Description = "The level of the ventilation at awaitime"}, //Differs from the original Index source
+            new ElsterIndexItem{Index = 0x056F, Name = "Lüftungsstufe Party",           Unit = "",      MqttTopic = "/ac/partylevel",                   Converter = new ConvertDefault(),           Description = "The level of the ventilation at partytime"}, //Differs from the original Index source
 
             new ElsterIndexItem{Index = 0x02CC, Name = "Stromverbrauch Heizung",        Unit = "",      MqttTopic = "/heating/power/usage",             Converter = new ConvertLittleEndian()},
             new ElsterIndexItem{Index = 0x03AF, Name = "Wärmerückgewinnung Heizung",    Unit = "Wh",    MqttTopic = "/heating/recoverydaywh",           Converter = new ConvertDouble()},
@@ -61,10 +72,10 @@ namespace can2mqtt_core.Translator.StiebelEltron
             new ElsterIndexItem{Index = 0x091A, Name = "Stromverbrauch Warmwasser/Tag", Unit = "Wh",    MqttTopic = "/boiler/power/usagewarmwaterdaywh",Converter = new ConvertDouble()},
             new ElsterIndexItem{Index = 0x091B, Name = "Stromverbrauch Warmwasser/Tag", Unit = "kWh",   MqttTopic = "/boiler/power/usagewarmwaterdaykwh",Converter = new ConvertDouble()},
             new ElsterIndexItem{Index = 0x091C, Name = "Stromverbrauch Warmwasser Gesamt",Unit = "kWh", MqttTopic = "/boiler/power/usagewarmwatersumkwh",Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x091D, Name = "Stromverbrauch Warmwasser Gesamt",Unit = "Mwh", MqttTopic = "/boiler/power/usagewarmwatersummwh",Converter = new ConvertDouble()},
+            new ElsterIndexItem{Index = 0x091D, Name = "Stromverbrauch Warmwasser Gesamt",Unit = "MWh", MqttTopic = "/boiler/power/usagewarmwatersummwh",Converter = new ConvertDouble()},
 
             new ElsterIndexItem{Index = 0x059F, Name = "HK1 Fußpunkt",                  Unit = "°C",    MqttTopic = "/heating/hk1/base",                Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x010f, Name = "HK1 Raumeinfluss",              Unit = "",      MqttTopic = "/heating/hk1/roominfluence",       Converter = new ConvertDefault()},
+            new ElsterIndexItem{Index = 0x010F, Name = "HK1 Raumeinfluss",              Unit = "",      MqttTopic = "/heating/hk1/roominfluence",       Converter = new ConvertDefault()},
             new ElsterIndexItem{Index = 0x059E, Name = "HK1 Anteil Vorlauf",            Unit = "",      MqttTopic = "/heating/hk1/flowpercent",         Converter = new ConvertDefault()},
             //new ElsterIndexItem{Index = , Name = "HK1 Maximum (Soll)",            Unit = "°C",    MqttTopic = "/heating/hk1/maximum/desired",     Converter = new ConvertDefault()},
             new ElsterIndexItem{Index = 0x012B, Name = "HK1 Minimum (Soll)",            Unit = "°C",    MqttTopic = "/heating/hk1/minimum/desired",     Converter = new ConvertDefault()},
@@ -3748,5 +3759,6 @@ namespace can2mqtt_core.Translator.StiebelEltron
         public IValueConverter Converter { get; set; }
         public string MqttTopic { get; set; }
         public string Unit { get; set; }
+        public string Description { get; set; }
     }
 }

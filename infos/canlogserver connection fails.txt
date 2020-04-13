@@ -1,0 +1,5 @@
+canlogserver
+Jul 21 20:25:06 raspi-test canlogserver[543]: writeaccsock: Connection reset by
+
+can2mqtt
+Jul 21 21:29:50 raspi-test dotnet[4851]: FAILED TO CONNECT TO CANLOGSERVER 192.168.82.192. Connection refused 192.168.82.192:28700. Retry...

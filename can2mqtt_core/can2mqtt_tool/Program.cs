@@ -1,5 +1,6 @@
 ﻿using can2mqtt_core;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -11,6 +12,9 @@ namespace can2mqtt_tool
         public static string _Translator = null;
         public static bool _OnlyUnkown = false;
         public static string _LogPath = null;
+        public static List<string> _SenderFilter = null;
+        public static List<string> _ReceiveFilter = null;
+        public static List<string> _IndexFilter = null;
 
         public static async Task Main(string[] args)
         {
@@ -19,7 +23,7 @@ namespace can2mqtt_tool
                 ShowHelp();
                 return;
             }
-
+            
             string serverAddress = "";
             int serverPort = 28700;
             string calculate = null;
@@ -38,6 +42,12 @@ namespace can2mqtt_tool
                     calculate = args[i + 1];
                 else if (args[i].ToLower() == "--logpath" || args[i].ToLower() == "-l")
                     _LogPath = args[i + 1];
+                else if (args[i].ToLower() == "--senderfilter" || args[i].ToLower() == "-s")
+                    _SenderFilter = new List<string>(args[i + 1].Split(new char[] { ',', ';' }));
+                else if (args[i].ToLower() == "--receiverfilter" || args[i].ToLower() == "-r")
+                    _ReceiveFilter = new List<string>(args[i + 1].Split(new char[] { ',', ';' }));
+                else if (args[i].ToLower() == "--indexfilter" || args[i].ToLower() == "-i")
+                    _IndexFilter = new List<string>(args[i + 1].Split(new char[] { ',', ';' }));
 
 
             }
@@ -192,9 +202,19 @@ namespace can2mqtt_tool
 
                             //Skip if everything is known and only unknown things should be shown
                             if (_OnlyUnkown && !string.IsNullOrWhiteSpace(canFrame.MqttValue) && !string.IsNullOrWhiteSpace(canFrame.MqttTopicExtention))
-                            {
                                 continue;
-                            }
+
+                            //Skip if Senderfilter applies
+                            if (_SenderFilter != null && !_SenderFilter.Contains(canFrame.PayloadSenderCanId))
+                                continue;
+
+                            //Skip if Receiverfilter applies
+                            if (_ReceiveFilter != null && !_ReceiveFilter.Contains(canFrame.PayloadReceiverCanId))
+                                continue;
+
+                            //Skip if Indexfilter applies
+                            if (_IndexFilter != null && !_IndexFilter.Contains(canFrame.ValueIndex))
+                                continue;
 
                             string frameTypeString = "";
                             switch(canFrame.CanFrameType)
@@ -257,8 +277,8 @@ namespace can2mqtt_tool
             Console.WriteLine("--CanServerPort  Sets the Port of canlogserver");
             Console.WriteLine("--Translator     Use a translator. Valid value: StiebelEltron");
             Console.WriteLine("--OnlyUnknown    Only when Translator is set. Show only Unknown values.");
-            Console.WriteLine("--SendFilter     Only show CAN ID(s), that were send by the given ID(s). Valid values: comma separated CAN IDs");
-            Console.WriteLine("--ReceiveFilter  Only show CAN ID(s), that were send to the given ID(s). Valid values: comma separated CAN IDs");
+            Console.WriteLine("--SenderFilter   Only show CAN ID(s), that were send by the given ID(s). Valid values: comma separated CAN IDs");
+            Console.WriteLine("--ReceiverFilter Only show CAN ID(s), that were send to the given ID(s). Valid values: comma separated CAN IDs");
             Console.WriteLine("--IndexFilter    Only show values, that are using the given Elster Index(es). Valid values: comma separated Elster Indexes");
             Console.WriteLine("--LogPath        If given, the output will be logged. Valid value: Path the a log file");
             Console.WriteLine("--Calculate      Calculates a raw value to all available value converters of a Translator");
