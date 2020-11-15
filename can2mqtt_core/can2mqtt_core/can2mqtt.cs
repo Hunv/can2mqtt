@@ -58,8 +58,6 @@ namespace can2mqtt_core
                 Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0}", config.MqttServer);
                 while (!_MqttClient.IsConnected)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-
                     try
                     {
                         await _MqttClient.ConnectAsync(_MqttClientOptions);
@@ -68,6 +66,7 @@ namespace can2mqtt_core
                     catch
                     {
                         Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED", config.MqttServer);
+                        System.Threading.Thread.Sleep(10000); //Wait 10 seconds
                     }
                 }
             });
