@@ -18,6 +18,8 @@ namespace can2mqtt_tool
 
         public static async Task Main(string[] args)
         {
+            //-cs 192.168.82.10 -t StiebelEltron -l log.txt -s 180,301,302,6A0 -r 180,301,302,6A0 -u
+
             if (args.Length == 0)
             {
                 ShowHelp();
@@ -91,7 +93,7 @@ namespace can2mqtt_tool
                             Console.WriteLine("Language:\t{0}", m.ConvertValue(calculate));
                             var n = new can2mqtt_core.Translator.StiebelEltron.ConvertTimeDomain();
                             Console.WriteLine("TimeDomain:\t{0}", n.ConvertValue(calculate));
-                            var p = new can2mqtt_core.Translator.StiebelEltron.ConvertZeit();
+                            var p = new can2mqtt_core.Translator.StiebelEltron.ConvertTime();
                             Console.WriteLine("Time:\t\t{0}", p.ConvertValue(calculate));
                             var q = new can2mqtt_core.Translator.StiebelEltron.ConvertBetriebsart();
                             Console.WriteLine("OpStatus:\t{0}", q.ConvertValue(calculate));

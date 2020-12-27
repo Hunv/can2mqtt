@@ -2,7 +2,7 @@
   "profiles": {
     "can2mqtt_tool": {
       "commandName": "Project",
-      "commandLineArgs": "-cs 192.168.82.10 -t StiebelEltron -l log.txt -s 180,301,302,6A0 -r 180,301,302,6A0 -u"
+      "commandLineArgs": "-c 8001 -t StiebelEltron"
     }
   }
 }

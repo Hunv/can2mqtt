@@ -16,7 +16,20 @@ namespace can2mqtt_core.Translator.StiebelEltron
     {
         public string ConvertValue(string hexData)
         {
-            return ((double)Convert.ToInt32(hexData, 16) / 10).ToString();
+            //This is a signed value and used i.e. for temperatures. 
+            //That means if from the binary view of this hex value the first value is a 1, it is a negative value. 
+            //A leading 1 would mean that the values are higher than 32768 (here 3276.8, because of division by 10).
+            var result = (double)Convert.ToInt32(hexData, 16) / 10;
+
+            if (result > 3276.8)
+            {
+                //it is negative
+                return ((result - 3276.8) * -1).ToString();
+            }
+            else
+            {
+                return result.ToString();
+            }
         }
     }
 
@@ -57,7 +70,7 @@ namespace can2mqtt_core.Translator.StiebelEltron
     /// <summary>
     /// Converts values (et_zeit)
     /// </summary>
-    public class ConvertZeit : IValueConverter
+    public class ConvertTime : IValueConverter
     {
         public string ConvertValue(string hexData)
         {
