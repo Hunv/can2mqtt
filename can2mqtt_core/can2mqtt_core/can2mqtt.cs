@@ -109,7 +109,7 @@ namespace can2mqtt_core
 
                 //Create TCP Stream to read the CAN Bus Data
                 NetworkStream stream = clsClient.GetStream();
-                byte[] data = new Byte[46];
+                byte[] data = new Byte[44];
                 String responseData = String.Empty;
                 int bytes = stream.Read(data, 0, data.Length);
                 var previousData = "";
@@ -128,7 +128,7 @@ namespace can2mqtt_core
                             continue;
 
                         //Each CAN frame is 45 characters and should start with a (. If not 45 chars, it is the first part of the frame received before.
-                        if (aData.Length != 45 && aData.StartsWith("("))
+                        if (aData.Length != 43 && aData.StartsWith("("))
                         {
                             //Store the data for next received packets to combine it.
                             previousData = aData;
@@ -142,7 +142,7 @@ namespace can2mqtt_core
                             };
 
                             //If the lenght is not 45 charactes and not starts with (, it is the second part of the frame stored above. Combine it and clear cache.
-                            if (aData.Length != 45 && !aData.StartsWith("("))
+                            if (aData.Length != 43 && !aData.StartsWith("("))
                             {
                                 canFrame.RawFrame = previousData + aData;
                                 previousData = "";
