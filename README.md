@@ -19,8 +19,8 @@ make
 
 ## Install Dotnet Core
 ```
-wget https://download.visualstudio.microsoft.com/download/pr/87521bd8-1522-4141-9532-91d580292c42/59116d9f6ebced4fdc8b76b9e3bbabbf/dotnet-runtime-2.2.5-linux-arm.tar.gz
-sudo tar -xvf ./dotnet-runtime-2.2.5-linux-arm.tar.gz -C /opt/dotnet/
+wget https://download.visualstudio.microsoft.com/download/pr/5a496e41-23da-4aaa-94a7-baa9ab619fc6/0d000727345f3f71858ee79367f6ec23/dotnet-runtime-5.0.4-linux-arm.tar.gz
+sudo tar -xvf ./dotnet-runtime-5.0.4-linux-arm.tar.gz -C /opt/dotnet/
 sudo ln -s /opt/dotnet/dotnet /usr/local/bin
 ```
 
