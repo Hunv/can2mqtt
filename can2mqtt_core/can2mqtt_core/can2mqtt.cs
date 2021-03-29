@@ -4,6 +4,7 @@ using MQTTnet.Client.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace can2mqtt_core
         bool _CanForwardRead = false;
         bool _CanForwardResponse = true;
         bool _NoUnits = false;
+        string _CANInterface = "";
 
         public Can2Mqtt()
         {
@@ -38,6 +40,33 @@ namespace can2mqtt_core
             _CanForwardRead = config.CanForwardRead;
             _CanForwardResponse = config.CanForwardResponse;
             _NoUnits = config.NoUnits;
+            _CANInterface = config.CANInterface == "auto" || config.CANInterface == "" ? "can" : config.CANInterface;
+
+            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+            
+            var adapter_cnt = adapters.Length;
+
+
+            foreach (NetworkInterface adapter in adapters)
+            {
+                IPInterfaceProperties properties = adapter.GetIPProperties();
+                
+
+                if (adapter.Name.Contains(_CANInterface))
+                {
+                    Console.WriteLine("Will use {0} interface.", adapter.Name);
+                    _CANInterface = adapter.Name;
+                    break;
+                }
+
+                adapter_cnt--;
+            }
+
+            if (adapter_cnt == 0)
+            {
+                Console.WriteLine("No matching CAN interface found in the system. Program abort...");
+                return;
+            }
 
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();

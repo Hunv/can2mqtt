@@ -59,7 +59,7 @@ All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="1
 | `--Daemon:CanForwardWrite`    | Should CAN frames of type "Write" be forwarded to MQTT?                                                                                                                                                                                                                   | true          | No       | `--Daemon:CanForwardWrite=true`           |
 | `--Daemon:CanForwardRead`     | Should CAN frames of type "Read" be forwarded to MQTT?                                                                                                                                                                                                                    | false         | No       | `--Daemon:CanForwardRead=false`           |
 | `--Daemon:CanForwardResponse` | Should CAN frames of type "Response" be forwarded to MQTT?                                                                                                                                                                                                                | true          | No       | `--Daemon:CanForwardResponse=true`        |
-
+| `--Daemon:CANInterface`       | Detect CAN interface for proper decoding of CAN frames. `"auto"` will select the first interface in the system which contains "can" in the interface name, unless a specifc device name is configured, e.g `"can0"` or `"slcan0"`.                                        | auto          | No       | `--Daemon:CANInterface=can0`              |
 
 ## Configure and Register Daemon for can2mqtt and canlogserver
 Execute `sudo nano etc/systemd/system/canlogserver.service` and paste the following into the file. Replace the slcan0 in case your socket has a different name:
@@ -99,7 +99,7 @@ User=pi
 WantedBy=multi-user.target
 ```
 An example for the ExecStart line is:
-```ExecStart=/usr/local/bin/dotnet /home/pi/can2mqtt_core/can2mqtt_core.dll --Daemon:MqttServer="127.0.0.1" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanlogserverPath="/home/pi/can-utils" --Daemon:CanlogserverSocket="slcan0"```
+```ExecStart=/usr/local/bin/dotnet /home/pi/can2mqtt_core/can2mqtt_core.dll --Daemon:MqttServer="127.0.0.1" --Daemon:MqttClientId="Can2Mqtt" --Daemon:CANInterface="slcan0"```
 
 To test if it works, run the following command: `sudo systemctl start can2mqtt.service`. To test if the service is running, execute `sudo systemctl status can2mqtt.service`. You will see the last lines of output. If you do not see any errors after about 10 seconds, everything is fine.
 
