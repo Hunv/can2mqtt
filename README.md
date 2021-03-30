@@ -3,10 +3,8 @@ A Linux or Windows service to forward CAN frames to MQTT messages
 
 # HowTo
 Note: This whole readme assumes the following environment:
-- You are running Rasbian on a Raspberry Pi
-- You are using the user "Pi"
-- You are using a fresh installation of the OS
-- You are using a USBtin device to connect to the CAN Bus (others might work but are not tested by me)
+- You are running Rasbian on a Raspberry Pi, however any other Linux system should work
+- You are using a USBtin or PiCAN device to connect to the CAN Bus (others might work)
 
 ## Install can-utils
 ```
@@ -25,12 +23,35 @@ sudo ln -s /opt/dotnet/dotnet /usr/local/bin
 ```
 
 ## Setup the CAN Bus connection 
+
+For either USBtin or PiCAN
+
+### USBtin
 Assuming your device has the ID ttyACM0:
 ```
 sudo ./slcan_attach -f -s1 -b 11 -o /dev/ttyACM0
 sudo ./slcand ttyACM0 slcan0
 sudo ifconfig slcan0 up
 ```
+
+### PiCAN
+Copy
+```
+# interfaces(5) file used by ifup(8) and ifdown(8)
+
+# Please note that this file is written to be used with dhcpcd
+# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'
+
+# Include files from /etc/network/interfaces.d:
+source-directory /etc/network/interfaces.d
+
+# CAN-Bus
+auto can0
+iface can0 can static
+  bitrate 50000
+```
+
+to `/etc/network/interfaces`. Adapt bitrate to your heating.
 
 ## Start canlogserver
 This is only required to test or if you like to take care of canlogserver on your own. You can also configure a daemon to do this automatically (see below).
