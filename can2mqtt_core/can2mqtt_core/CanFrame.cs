@@ -19,12 +19,12 @@ namespace can2mqtt_core
         public string Adapter { get { return RawFrame.Substring(RawFrame.IndexOf(' ') + 1, RawFrame.LastIndexOf(' ')); } }
 
         /// <summary>
-        /// Returns the transmitted timestamp extracted from RawMessage
+        /// Returns the transmitted payload extracted from RawMessage
         /// </summary>
         public string PayloadFull { get { return RawFrame.Substring(RawFrame.IndexOf(' ', RawFrame.IndexOf(' ') +1) +1); } }
 
         /// <summary>
-        /// Returns the CAN Bus Data Id of a received message
+        /// Returns the CAN Bus Data ID of a received message
         /// </summary>
         public string PayloadSenderCanId
         {
@@ -38,7 +38,7 @@ namespace can2mqtt_core
         }
 
         /// <summary>
-        /// Returns the CAN Bus Receiver Id of a received message
+        /// Returns the CAN Bus Receiver ID of a received message
         /// </summary>
         public string PayloadReceiverCanId
         {
@@ -84,19 +84,33 @@ namespace can2mqtt_core
         public string PayloadCanData { get { return PayloadFull.Substring(PayloadFull.IndexOf('#') +1); } }
 
         /// <summary>
-        /// Gets the IndexTable Index. Usually this is FA but FD was also discovered in the past
+        /// Gets the IndexTable Index. When FA then it is an extended value index
         /// </summary>
         public string IndexTableIndex { get { return PayloadFull.Substring(8,2); } }
 
         /// <summary>
         /// The Index the value belongs to
         /// </summary>
-        public string ValueIndex { get { return PayloadFull.Substring(10, 4); } }
+        public string ValueIndex { get
+            {
+                if (IndexTableIndex == "FA")
+                    return PayloadFull.Substring(10, 4); 
+                else
+                    return "00" + PayloadFull.Substring(8, 2);
+            }
+        }
 
         /// <summary>
         /// The Value that is transmitted by this CAN frame
         /// </summary>
-        public string Value { get { return PayloadFull.Substring(14, 4); } }
+        public string Value { get
+            {
+                if (IndexTableIndex == "FA")
+                    return PayloadFull.Substring(14, 4);
+                else
+                    return PayloadFull.Substring(10, 4);
+            }
+        }
 
         /// <summary>
         /// In case a translator was used, the topic may become more specified
