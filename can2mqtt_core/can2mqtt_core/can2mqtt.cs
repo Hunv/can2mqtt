@@ -4,6 +4,7 @@ using MQTTnet.Client.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace can2mqtt_core
         bool _CanForwardRead = false;
         bool _CanForwardResponse = true;
         bool _NoUnits = false;
+        string _CANInterface = "";
 
         public Can2Mqtt()
         {
@@ -38,6 +40,33 @@ namespace can2mqtt_core
             _CanForwardRead = config.CanForwardRead;
             _CanForwardResponse = config.CanForwardResponse;
             _NoUnits = config.NoUnits;
+            _CANInterface = config.CANInterface == "auto" || config.CANInterface == "" ? "can" : config.CANInterface;
+
+            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+            
+            var adapter_cnt = adapters.Length;
+
+
+            foreach (NetworkInterface adapter in adapters)
+            {
+                IPInterfaceProperties properties = adapter.GetIPProperties();
+                
+
+                if (adapter.Name.Contains(_CANInterface))
+                {
+                    Console.WriteLine("Will use {0} interface.", adapter.Name);
+                    _CANInterface = adapter.Name;
+                    break;
+                }
+
+                adapter_cnt--;
+            }
+
+            if (adapter_cnt == 0)
+            {
+                Console.WriteLine("No matching CAN interface found in the system. Program abort...");
+                return;
+            }
 
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
@@ -77,7 +106,7 @@ namespace can2mqtt_core
                 Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
 
             //Start listening on canlogservers port
-            await ConnectTcpCanBus(config.CanServer, config.CanServerPort);
+            await ConnectTcpCanBus(config.CanServer, config.CanServerPort, _CANInterface);
         }
 
         /// <summary>
@@ -85,8 +114,9 @@ namespace can2mqtt_core
         /// </summary>
         /// <param name="canServer"></param>
         /// <param name="canPort"></param>
+        /// <param name="CANInterface"></param>
         /// <returns></returns>
-        public async Task ConnectTcpCanBus(string canServer, int canPort)
+        public async Task ConnectTcpCanBus(string canServer, int canPort, string CANInterface)
         {
             try
             {
@@ -109,7 +139,7 @@ namespace can2mqtt_core
 
                 //Create TCP Stream to read the CAN Bus Data
                 NetworkStream stream = clsClient.GetStream();
-                byte[] data = new Byte[46];
+                byte[] data = new Byte[40 + CANInterface.Length];
                 String responseData = String.Empty;
                 int bytes = stream.Read(data, 0, data.Length);
                 var previousData = "";
@@ -128,7 +158,7 @@ namespace can2mqtt_core
                             continue;
 
                         //Each CAN frame is 45 characters and should start with a (. If not 45 chars, it is the first part of the frame received before.
-                        if (aData.Length != 45 && aData.StartsWith("("))
+                        if (aData.Length != ( 39 + CANInterface.Length ) && aData.StartsWith("("))
                         {
                             //Store the data for next received packets to combine it.
                             previousData = aData;
@@ -142,7 +172,7 @@ namespace can2mqtt_core
                             };
 
                             //If the lenght is not 45 charactes and not starts with (, it is the second part of the frame stored above. Combine it and clear cache.
-                            if (aData.Length != 45 && !aData.StartsWith("("))
+                            if (aData.Length != (39 + CANInterface.Length) && !aData.StartsWith("("))
                             {
                                 canFrame.RawFrame = previousData + aData;
                                 previousData = "";
@@ -178,7 +208,7 @@ namespace can2mqtt_core
             finally
             {
                 //Reconnect to the canlogserver but do not wait for this here to avoid infinite loops
-                _ = ConnectTcpCanBus(canServer, canPort); //Reconnect
+                _ = ConnectTcpCanBus(canServer, canPort, CANInterface); //Reconnect
             }
         }
 

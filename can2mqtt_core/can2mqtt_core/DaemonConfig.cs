@@ -60,5 +60,10 @@ namespace can2mqtt_core
         /// Null if the raw data should be forwarded to MQTT. Otherwise the Translator name.
         /// </summary>
         public string MqttTranslator { get; set; }
+
+        /// <summary>
+        /// CAN interface detection for proper CAN frame decoding: Automatic mode ("auto") or by manual specification of the device name.
+        /// </summary>
+        public string CANInterface { get; set; } = "auto";
     }
 }
