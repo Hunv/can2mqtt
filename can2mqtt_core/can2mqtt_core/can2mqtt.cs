@@ -1,6 +1,7 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
+using MQTTnet.Server;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,6 +21,7 @@ namespace can2mqtt_core
         bool _CanForwardRead = false;
         bool _CanForwardResponse = true;
         bool _NoUnits = false;
+        int _CanReceiveBufferSize = 48;
 
         public Can2Mqtt()
         {
@@ -38,6 +40,7 @@ namespace can2mqtt_core
             _CanForwardRead = config.CanForwardRead;
             _CanForwardResponse = config.CanForwardResponse;
             _NoUnits = config.NoUnits;
+            _CanReceiveBufferSize = config.CanReceiveBufferSize;
 
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
@@ -47,8 +50,6 @@ namespace can2mqtt_core
             _MqttClientOptions = new MqttClientOptionsBuilder()
                 .WithClientId(config.MqttClientId)
                 .WithTcpServer(config.MqttServer)
-                //.WithCredentials("bud", "%spencer%")
-                //.WithTls()
                 .WithCleanSession()
                 .Build();
 
@@ -76,7 +77,25 @@ namespace can2mqtt_core
             if (_MqttClient.IsConnected)
                 Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
 
-            //Start listening on canlogservers port
+            //Create local MQTT Broker for write-Commands
+            var mqttServer = new MqttFactory().CreateMqttServer();
+            await mqttServer.StartAsync(new MqttServerOptions());
+
+            //Create listener on local MQTT Broker(currently not like this)
+            //await _MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter("#").Build());
+            //_MqttClient.UseApplicationMessageReceivedHandler(e =>
+            //{
+            //    Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
+            //    Console.WriteLine($"+ Topic = {e.ApplicationMessage.Topic}");
+            //    Console.WriteLine($"+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+            //    Console.WriteLine($"+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}");
+            //    Console.WriteLine($"+ Retain = {e.ApplicationMessage.Retain}");
+            //    Console.WriteLine();
+
+            //    Task.Run(() => _MqttClient.PublishAsync("hello/world"));
+            //});
+
+            //Start listening on socketcand port
             await ConnectTcpCanBus(config.CanServer, config.CanServerPort);
         }
 
@@ -90,84 +109,115 @@ namespace can2mqtt_core
         {
             try
             {
-                //Create TCP Client for connection to canlogserver (=cls)
-                TcpClient clsClient = null;
-                while (clsClient == null || !clsClient.Connected)
+                //Create TCP Client for connection to socketcand (=scd)
+                TcpClient scdClient = null;
+                while (scdClient == null || !scdClient.Connected)
                 {
                     try
                     {
-                        clsClient = new TcpClient(canServer, canPort);
+                        scdClient = new TcpClient(canServer, canPort);
                     }
                     catch (Exception ea)
                     {
-                        Console.WriteLine("FAILED TO CONNECT TO CANLOGSERVER {1}. {0}. Retry...", ea.Message, canServer);
+                        Console.WriteLine("FAILED TO CONNECT TO SOCKETCAND {1}. {0}. Retry...", ea.Message, canServer);
                     }
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
                 
-                Console.WriteLine("CONNECTED TO CANLOGSERVER {0} ON PORT {1}", canServer, canPort);
+                Console.WriteLine("CONNECTED TO SOCKETCAND {0} ON PORT {1}", canServer, canPort);
 
                 //Create TCP Stream to read the CAN Bus Data
-                NetworkStream stream = clsClient.GetStream();
-                byte[] data = new Byte[46];
+                NetworkStream stream = scdClient.GetStream();
+                byte[] data = new Byte[_CanReceiveBufferSize];
                 String responseData = String.Empty;
                 int bytes = stream.Read(data, 0, data.Length);
                 var previousData = "";
 
+                if (Encoding.Default.GetString(data, 0, bytes) == "< hi >")
+                {
+                    Console.WriteLine("Handshake successful. Opening CAN interface...");
+                    stream.Write(Encoding.Default.GetBytes("< open slcan0 >"));
+                    
+                    bytes = stream.Read(data, 0, data.Length);
+                    if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
+                    {
+                        Console.WriteLine("Opening connection to slcan0 successful. Changing socketcand mode to raw...");
+                        stream.Write(Encoding.Default.GetBytes("< rawmode >"));
+
+                        bytes = stream.Read(data, 0, data.Length);
+                        if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
+                        {
+                            Console.WriteLine("Change to rawmode successful");
+                        }
+                    }
+                }
+
                 //Infinite Loop
                 while (bytes > 0)
                 {
-                    //Get the string from the received bytes. The string contains "(1561746016.537099) slcan0 180#D03CFA01120B00"
-                    responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                    //Get the string from the received bytes.
+                    responseData = previousData + Encoding.ASCII.GetString(data, 0, bytes);
 
-                    //Split by new line. canlogserver sends a line break after each CAN frame
-                    foreach (var aData in responseData.Split('\n'))
+                    //Each received frame starts with "< frame " and ends with " >".
+                    //Check if the current responseData starts with "< frame". If not, drop everything before
+                    if (!responseData.StartsWith("< frame "))
                     {
-                        //If there is nothing, ignore
-                        if (aData.Length == 0)
-                            continue;
-
-                        //Each CAN frame is 45 characters and should start with a (. If not 45 chars, it is the first part of the frame received before.
-                        if (aData.Length != 45 && aData.StartsWith("("))
+                        if (responseData.Contains("< frame "))
                         {
-                            //Store the data for next received packets to combine it.
-                            previousData = aData;
+                            //just take everything starting at "< frame "
+                            Console.WriteLine("Dropping \"{0}\" because it is not expected at the beginning of a frame.", responseData.Substring(0, responseData.IndexOf("< frame ")));
+                            responseData = responseData.Substring(responseData.IndexOf("< frame "));
                         }
                         else
                         {
-                            //Create the CAN frame
-                            var canFrame = new CanFrame
-                            {
-                                RawFrame = aData
-                            };
+                            //Drop everything
+                            responseData = "";
+                        }
+                    }
 
-                            //If the lenght is not 45 charactes and not starts with (, it is the second part of the frame stored above. Combine it and clear cache.
-                            if (aData.Length != 45 && !aData.StartsWith("("))
-                            {
-                                canFrame.RawFrame = previousData + aData;
-                                previousData = "";
-                            }
+                    //Check if the responData has a closing " >". If not, save data and go on reading.
+                    if (responseData != "" && !responseData.Contains(" >"))
+                    {
+                        Console.WriteLine("No closing tag found. Save data and get next bytes.");
+                        previousData = responseData;
+                        continue;
+                    }
 
-                            Console.WriteLine("Received CAN Frame: {0}", canFrame.RawFrame);
+                    //As long as full frames exist in responseData
+                    while (responseData.Contains(" >"))
+                    {
+                        var frame = responseData.Substring(0, responseData.IndexOf(" >") + 2);
 
-                            //If forwarding is disabled for this type of frame, ignore it.
-                            if (canFrame.CanFrameType == "0" && !_CanForwardWrite ||
-                                canFrame.CanFrameType == "1" && !_CanForwardRead ||
-                                canFrame.CanFrameType == "2" && !_CanForwardResponse)
-                                continue;
+                        //Create the CAN frame
+                        var canFrame = new CanFrame
+                        {
+                            RawFrame = frame
+                        };
 
+                        Console.WriteLine("Received CAN Frame: {0}", canFrame.RawFrame);
+                        responseData = responseData.Substring(responseData.IndexOf(" >") + 2);
+
+                        //If forwarding is disabled for this type of frame, ignore it. Otherwise send the Frame
+                        if (canFrame.CanFrameType == "0" && _CanForwardWrite ||
+                            canFrame.CanFrameType == "1" && _CanForwardRead ||
+                            canFrame.CanFrameType == "2" && _CanForwardResponse)
+                        {
                             //Sent the CAN frame via MQTT
                             await SendMQTT(canFrame);
                         }
                     }
+
+                    //Save data handled at next read
+                    previousData = responseData;
+
                     //Reset byte counter
                     bytes = 0;
 
                     //Get next packages from canlogserver
-                    bytes = stream.Read(data, 0, data.Length);                    
+                    bytes = stream.Read(data, 0, data.Length);
                 }
                 //Close the TCP Stream
-                clsClient.Close();
+                scdClient.Close();
 
                 Console.WriteLine("Disconnected from canServer {0} Port {1}", canServer, canPort);
             }

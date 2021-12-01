@@ -4,3 +4,7 @@ can2mqtt_core/can2mqtt_core/obj/
 infos/private/
 can2mqtt_core/can2mqtt_tool/bin/
 can2mqtt_core/can2mqtt_tool/obj/
+can2mqtt_core/can2mqtt_socketcandtest/bin/
+can2mqtt_core/can2mqtt_socketcandtest/obj/
+can2mqtt_core/can2mqtt_ttytool/bin/Debug/
+can2mqtt_core/can2mqtt_ttytool/bin/

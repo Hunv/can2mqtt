@@ -20,9 +20,9 @@ namespace can2mqtt_core.Translator.StiebelEltron
         public CanFrame Translate(CanFrame rawData, bool noUnit)
         {
             //Check if format is correct
-            if (string.IsNullOrEmpty(rawData.PayloadCanData) || rawData.PayloadCanData.Length != 14)
+            if (string.IsNullOrEmpty(rawData.PayloadFull) || rawData.PayloadFull.Length != 14)
             {
-                Console.WriteLine("Data is not lenght of 14: {0}", rawData.PayloadCanData);
+                Console.WriteLine("Data is not lenght of 14: {0}", rawData.PayloadFull);
                 return rawData;
             }
 
@@ -51,11 +51,15 @@ namespace can2mqtt_core.Translator.StiebelEltron
             //7 - system respond
             //20/21 (hex.) - write/read large telegram
 
-            var payloadIndex = Convert.ToInt32(rawData.PayloadCanData.Substring(6, 4), 16);
-            var payloadData = rawData.PayloadCanData.Substring(10);
+            var payloadIndex = Convert.ToInt32(rawData.PayloadFull.Substring(6, 4), 16);
+            var payloadData = rawData.PayloadFull.Substring(10);
 
             //Get IndexData
-            var indexData = ElsterIndex.ElsterTable.FirstOrDefault(x => x.Index == payloadIndex);
+            var elsterTable = new ElsterIndex();
+            var indexData = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex && x.Sender.ToString("X2") == rawData.PayloadSenderCanId );
+            if (indexData == null)
+                indexData = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex);
+            
 
             //Index not available
             if (indexData == null)
@@ -63,7 +67,12 @@ namespace can2mqtt_core.Translator.StiebelEltron
 
             rawData.MqttTopicExtention = indexData.MqttTopic;
 
-            if (!noUnit)
+            if (indexData.Converter == null) //custom converter
+            {
+                //0000=Aus,0001=Schließer-Aus,0002=Öffner-Aus,0003=Schließer
+                rawData.MqttValue = indexData.ValueList.FirstOrDefault(x => x.StartsWith(payloadData)).Substring(5);
+            }
+            else if (!noUnit)
                 rawData.MqttValue = indexData.Converter.ConvertValue(payloadData) + indexData.Unit;
             else
                 rawData.MqttValue = indexData.Converter.ConvertValue(payloadData);

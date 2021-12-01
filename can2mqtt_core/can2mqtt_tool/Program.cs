@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace can2mqtt_tool
@@ -12,9 +13,11 @@ namespace can2mqtt_tool
         public static string _Translator = null;
         public static bool _OnlyUnkown = false;
         public static string _LogPath = null;
+        public static List<string> _FrameTypeFilter = new List<string>{"0","1","2","3","4","5","6","7"}; //0,2,3,4,5,6,7
         public static List<string> _SenderFilter = null;
         public static List<string> _ReceiveFilter = null;
         public static List<string> _IndexFilter = null;
+        public static int _CanReceiveBufferSize = 48;
 
         public static async Task Main(string[] args)
         {
@@ -27,7 +30,7 @@ namespace can2mqtt_tool
             }
             
             string serverAddress = "";
-            int serverPort = 28700;
+            int serverPort = 29536;
             string calculate = null;
 
             for (var i = 0; i < args.Length; i++)
@@ -50,6 +53,10 @@ namespace can2mqtt_tool
                     _ReceiveFilter = new List<string>(args[i + 1].Split(new char[] { ',', ';' }));
                 else if (args[i].ToLower() == "--indexfilter" || args[i].ToLower() == "-i")
                     _IndexFilter = new List<string>(args[i + 1].Split(new char[] { ',', ';' }));
+                else if (args[i].ToLower() == "--canreceivebuffersize" || args[i].ToLower() == "-b")
+                    _CanReceiveBufferSize = Convert.ToInt32(args[i + 1]);
+                else if (args[i].ToLower() == "--frametypefilter" || args[i].ToLower() == "-f")
+                    _FrameTypeFilter = new List<string>(args[i + 1].Split(new char[] { ',', ';' }));
 
 
             }
@@ -83,8 +90,6 @@ namespace can2mqtt_tool
                             Console.WriteLine("Datum:\t\t{0}", d.ConvertValue(calculate));
                             var f = new can2mqtt_core.Translator.StiebelEltron.ConvertDefault();
                             Console.WriteLine("Default:\t{0}", f.ConvertValue(calculate));
-                            var g = new can2mqtt_core.Translator.StiebelEltron.ConvertDev();
-                            Console.WriteLine("Dev:\t\t{0}", g.ConvertValue(calculate));
                             var k = new can2mqtt_core.Translator.StiebelEltron.ConvertLittleEndian();
                             Console.WriteLine("LittleEndian:\t{0}", k.ConvertValue(calculate));
                             var r = new can2mqtt_core.Translator.StiebelEltron.ConvertLittleEndianDec();
@@ -95,10 +100,10 @@ namespace can2mqtt_tool
                             Console.WriteLine("TimeDomain:\t{0}", n.ConvertValue(calculate));
                             var p = new can2mqtt_core.Translator.StiebelEltron.ConvertTime();
                             Console.WriteLine("Time:\t\t{0}", p.ConvertValue(calculate));
-                            var q = new can2mqtt_core.Translator.StiebelEltron.ConvertBetriebsart();
-                            Console.WriteLine("OpStatus:\t{0}", q.ConvertValue(calculate));
-                            var s = new can2mqtt_core.Translator.StiebelEltron.ConvertBinary();
-                            Console.WriteLine("Binary:\t{0}", s.ConvertValue(calculate));
+                            var q = new can2mqtt_core.Translator.StiebelEltron.ConvertBinary();
+                            Console.WriteLine("Binary:\t{0}", q.ConvertValue(calculate));
+                            var s = new can2mqtt_core.Translator.StiebelEltron.ConvertBool();
+                            Console.WriteLine("Bool:\t{0}", s.ConvertValue(calculate));
                             
                             //var i = new can2mqtt_core.Translator.StiebelEltron.ConvertErr();
                             //Console.WriteLine("Err:\t{0}", i.ConvertValue(calculate));
@@ -130,96 +135,135 @@ namespace can2mqtt_tool
         {
             try
             {
-                //Create TCP Client for connection to canlogserver (=cls)
-                TcpClient clsClient = null;
-                while (clsClient == null || !clsClient.Connected)
+                //Create TCP Client for connection to socketcand (=scd)
+                TcpClient scdClient = null;
+                while (scdClient == null || !scdClient.Connected)
                 {
                     try
                     {
-                        clsClient = new TcpClient(canServer, canPort);
+                        scdClient = new TcpClient(canServer, canPort);
                     }
                     catch (Exception ea)
                     {
-                        await Log(string.Format("FAILED TO CONNECT TO CANLOGSERVER {1}. {0}. Retry...", ea.Message, canServer));
+                        await Log(string.Format("FAILED TO CONNECT TO SOCKETCAND {1}. {0}. Retry...", ea.Message, canServer));
                     }
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
 
-                await Log(string.Format("CONNECTED TO CANLOGSERVER {0} ON PORT {1}", canServer, canPort));
+                await Log(string.Format("CONNECTED TO SOCKETCAND {0} ON PORT {1}", canServer, canPort));
 
-                await Log(string.Format("DATE      TIME     SND REC MODE ID INDX VALU => DATA   MQTT TOPIC"), true);
                 //Create TCP Stream to read the CAN Bus Data
-                NetworkStream stream = clsClient.GetStream();
-                byte[] data = new Byte[46];
+                NetworkStream stream = scdClient.GetStream();
+                byte[] data = new Byte[_CanReceiveBufferSize];
                 String responseData = String.Empty;
                 int bytes = stream.Read(data, 0, data.Length);
                 var previousData = "";
 
+                if (Encoding.Default.GetString(data, 0, bytes) == "< hi >")
+                {
+                    Console.WriteLine("Handshake successful. Opening CAN interface...");
+                    stream.Write(Encoding.Default.GetBytes("< open slcan0 >"));
+
+                    bytes = stream.Read(data, 0, data.Length);
+                    if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
+                    {
+                        Console.WriteLine("Opening connection to slcan0 successful. Changing socketcand mode to raw...");
+                        stream.Write(Encoding.Default.GetBytes("< rawmode >"));
+
+                        bytes = stream.Read(data, 0, data.Length);
+                        if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
+                        {
+                            Console.WriteLine("Change to rawmode successful");
+                        }
+                    }
+                }
+
+                await Log(string.Format("DATE      TIME     SND REC MODE ID INDX VALU => DATA   MQTT TOPIC"), true);
+
                 //Infinite Loop
                 while (bytes > 0)
                 {
-                    //Get the string from the received bytes. The string contains "(1561746016.537099) slcan0 180#D03CFA01120B00"
-                    responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                    //Get the string from the received bytes.
+                    responseData = previousData + Encoding.ASCII.GetString(data, 0, bytes);
 
-                    //Split by new line. canlogserver sends a line break after each CAN frame
-                    foreach (var aData in responseData.Split('\n'))
+                    //Each received frame starts with "< frame " and ends with " >".
+                    //Check if the current responseData starts with "< frame". If not, drop everything before
+                    if (!responseData.StartsWith("< frame "))
                     {
-                        //If there is nothing, ignore
-                        if (aData.Length == 0)
-                            continue;
-
-                        //Each CAN frame is 45 characters and should start with a (. If not 45 chars, it is the first part of the frame received before.
-                        if (aData.Length != 45 && aData.StartsWith("("))
+                        if (responseData.Contains("< frame "))
                         {
-                            //Store the data for next received packets to combine it.
-                            previousData = aData;
+                            //just take everything starting at "< frame "
+                            Console.WriteLine("Dropping \"{0}\" because it is not expected at the beginning of a frame.", responseData.Substring(0, responseData.IndexOf("< frame ")));
+                            responseData = responseData.Substring(responseData.IndexOf("< frame "));
                         }
                         else
                         {
-                            //Create the CAN frame
-                            var canFrame = new CanFrame
-                            {
-                                RawFrame = aData
-                            };
+                            //Drop everything
+                            responseData = "";
+                        }
+                    }
 
-                            //If the lenght is not 45 charactes and not starts with (, it is the second part of the frame stored above. Combine it and clear cache.
-                            if (aData.Length != 45 && !aData.StartsWith("("))
+                    //Check if the responData has a closing " >". If not, save data and go on reading.
+                    if (responseData != "" && !responseData.Contains(" >"))
+                    {
+                        Console.WriteLine("No closing tag found. Save data and get next bytes.");
+                        previousData = responseData;
+                        continue;
+                    }
+
+                    //As long as full frames exist in responseData
+                    while (responseData.Contains(" >"))
+                    {
+                        var frame = responseData.Substring(0, responseData.IndexOf(" >") + 2);
+
+                        //Create the CAN frame
+                        var canFrame = new CanFrame
+                        {
+                            RawFrame = frame
+                        };
+
+                        //Console.WriteLine("Received CAN Frame: {0}", canFrame.RawFrame);
+
+                        //Use Translator (if selected)
+                        if (!string.IsNullOrEmpty(_Translator))
+                        {
+                            //choose the translator to use and translate the message if translator exists
+                            switch (_Translator)
                             {
-                                canFrame.RawFrame = previousData + aData;
-                                previousData = "";
+                                case "StiebelEltron":
+                                    var translator = new can2mqtt_core.Translator.StiebelEltron.StiebelEltron();
+                                    canFrame = translator.Translate(canFrame, false);
+                                    break;
                             }
+                        }
 
-                            //Use Translator (if selected)
-                            if (!string.IsNullOrEmpty(_Translator))
-                            {
-                                //choose the translator to use and translate the message if translator exists
-                                switch (_Translator)
-                                {
-                                    case "StiebelEltron":
-                                        var translator = new can2mqtt_core.Translator.StiebelEltron.StiebelEltron();
-                                        canFrame = translator.Translate(canFrame, false);
-                                        break;
-                                }
-                            }
+                        //Does a filter applies to this frame?
+                        bool isFiltered = false;
 
-                            //Skip if everything is known and only unknown things should be shown
-                            if (_OnlyUnkown && !string.IsNullOrWhiteSpace(canFrame.MqttValue) && !string.IsNullOrWhiteSpace(canFrame.MqttTopicExtention))
-                                continue;
+                        //Skip if everything is known and only unknown things should be shown
+                        if (_OnlyUnkown && !string.IsNullOrWhiteSpace(canFrame.MqttValue) && !string.IsNullOrWhiteSpace(canFrame.MqttTopicExtention))
+                            isFiltered = true;
 
-                            //Skip if Senderfilter applies
-                            if (_SenderFilter != null && !_SenderFilter.Contains(canFrame.PayloadSenderCanId))
-                                continue;
+                        //Skip if Senderfilter applies
+                        if (_SenderFilter != null && !_SenderFilter.Contains(canFrame.PayloadSenderCanId))
+                            isFiltered = true;
 
-                            //Skip if Receiverfilter applies
-                            if (_ReceiveFilter != null && !_ReceiveFilter.Contains(canFrame.PayloadReceiverCanId))
-                                continue;
+                        //Skip if Receiverfilter applies
+                        if (_ReceiveFilter != null && !_ReceiveFilter.Contains(canFrame.PayloadReceiverCanId))
+                            isFiltered = true;
 
-                            //Skip if Indexfilter applies
-                            if (_IndexFilter != null && !_IndexFilter.Contains(canFrame.ValueIndex))
-                                continue;
+                        //Skip if Indexfilter applies
+                        if (_IndexFilter != null && !_IndexFilter.Contains(canFrame.ValueIndex))
+                            isFiltered = true;
 
+                        //Skip of FrameTypeFilter applies
+                        if (_FrameTypeFilter != null && !_FrameTypeFilter.Contains(canFrame.CanFrameType))
+                            isFiltered = true;
+
+                        if (!isFiltered)
+                        {
                             string frameTypeString = "";
-                            switch(canFrame.CanFrameType)
+                            switch (canFrame.CanFrameType)
                             {
                                 case "0":
                                     frameTypeString = "wrte";
@@ -228,7 +272,22 @@ namespace can2mqtt_tool
                                     frameTypeString = "read";
                                     break;
                                 case "2":
-                                    frameTypeString = "answ";
+                                    frameTypeString = "resp";
+                                    break;
+                                case "3":
+                                    frameTypeString = "ack ";
+                                    break;
+                                case "4":
+                                    frameTypeString = "wrak";
+                                    break;
+                                case "5":
+                                    frameTypeString = "wrrp";
+                                    break;
+                                case "6":
+                                    frameTypeString = "syst";
+                                    break;
+                                case "7":
+                                    frameTypeString = "syrp";
                                     break;
                                 default:
                                     frameTypeString = "????";
@@ -248,7 +307,13 @@ namespace can2mqtt_tool
                                     canFrame.IndexTableIndex, canFrame.ValueIndex, canFrame.Value, canFrame.MqttValue, canFrame.MqttTopicExtention));
                             }
                         }
+
+                        responseData = responseData.Substring(responseData.IndexOf(" >") + 2);
                     }
+
+                    //Save data handled at next read
+                    previousData = responseData;
+
                     //Reset byte counter
                     bytes = 0;
 
@@ -256,17 +321,17 @@ namespace can2mqtt_tool
                     bytes = stream.Read(data, 0, data.Length);
                 }
                 //Close the TCP Stream
-                clsClient.Close();
+                scdClient.Close();
 
-                await Log(string.Format("Disconnected from canServer {0} Port {1}", canServer, canPort));
+                await Log(string.Format("Disconnected from cansocked {0} Port {1}", canServer, canPort));
             }
             catch (Exception ea)
             {
-                await Log(string.Format("Error while reading CanBus Server. {0}", ea));
+                await Log(string.Format("Error while reading cansocked. {0}", ea));
             }
             finally
             {
-                //Reconnect to the canlogserver but do not wait for this here to avoid infinite loops
+                //Reconnect to the cansocked but do not wait for this here to avoid infinite loops
                 _ = ConnectTcpCanBus(canServer, canPort); //Reconnect
             }
         }
@@ -276,7 +341,7 @@ namespace can2mqtt_tool
             Console.WriteLine("This tool is to analyze and debug CAN messages!");
             Console.WriteLine("Syntax: can2mqtt_tool --CanServer \"192.168.0.123\"");
             Console.WriteLine("Additional Parameters:");
-            Console.WriteLine("--CanServerPort  Sets the Port of canlogserver");
+            Console.WriteLine("--CanServerPort  Sets the Port of cansocked");
             Console.WriteLine("--Translator     Use a translator. Valid value: StiebelEltron");
             Console.WriteLine("--OnlyUnknown    Only when Translator is set. Show only Unknown values.");
             Console.WriteLine("--SenderFilter   Only show CAN ID(s), that were send by the given ID(s). Valid values: comma separated CAN IDs");
@@ -288,7 +353,7 @@ namespace can2mqtt_tool
 
         private static async Task Log(string text, bool dontLogToFile = false)
         {
-            var logText = string.Format("{0} {1}", (dontLogToFile ? "" : DateTime.Now.ToString("yyyy-MM-hh dd-mm-ss")), text);
+            var logText = string.Format("{0} {1}", (dontLogToFile ? "" : DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")), text);
             Console.WriteLine(logText);
 
             if (_LogPath != null && !dontLogToFile)

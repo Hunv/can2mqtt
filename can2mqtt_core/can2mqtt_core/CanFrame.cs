@@ -1,41 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace can2mqtt_core
 {
     public class CanFrame
     {
-        public string RawFrame { get; set; }
+        //Example socketcand frame: "< frame 6A0 1630437901.513376 3100FA000E0000 >"
+        //Example canlogserver frame: "(1561746016.537099) slcan0 180#D03CFA01120B00"
+
+        private string _RawFrame = "";
+        public string RawFrame {
+            get { return _RawFrame; }
+            set
+            {
+                _RawFrame = value;
+                var dataFrame = value.Replace("< frame ",""); // Remove the leading part
+                //Console.WriteLine("Dataframe: {0}", dataFrame);
+                PayloadSenderCanId = dataFrame.Substring(0, dataFrame.IndexOf(' '));
+                
+                dataFrame = dataFrame.Substring(PayloadSenderCanId.Length + 1);
+                //Console.WriteLine("Dataframe: {0}", dataFrame);
+                Timestamp = Convert.ToInt64(dataFrame.Substring(0, 10), new CultureInfo("en-US"));
+
+                dataFrame = dataFrame.Substring(18);
+                //Console.WriteLine("Dataframe: {0}", dataFrame);
+                PayloadFull = dataFrame.Substring(0, dataFrame.IndexOf(' '));
+
+                Adapter = "Unknown"; //Currently not implemented                
+            }
+        }
 
         /// <summary>
-        /// Returns the transmitted timestamp extracted from RawMessage
+        /// Returns the transmitted timestamp extracted from RawMessage in Unix Timestamp format (i.e. 1630437901.513376)
         /// </summary>
-        public long Timestamp { get { return Convert.ToInt64(RawFrame.Substring(0, RawFrame.IndexOf(' ')).Trim(new char[] { '(',')' })); } }
+        public double Timestamp{ get; private set; }
 
         /// <summary>
         /// Returns the transmitted adapter extracted from RawMessage
         /// </summary>
-        public string Adapter { get { return RawFrame.Substring(RawFrame.IndexOf(' ') + 1, RawFrame.LastIndexOf(' ')); } }
+        public string Adapter { get; private set; } 
 
         /// <summary>
-        /// Returns the transmitted timestamp extracted from RawMessage
+        /// Returns the transmitted Payload extracted from RawMessage
         /// </summary>
-        public string PayloadFull { get { return RawFrame.Substring(RawFrame.IndexOf(' ', RawFrame.IndexOf(' ') +1) +1); } }
+        public string PayloadFull { get; private set; }
 
         /// <summary>
         /// Returns the CAN Bus Data Id of a received message
         /// </summary>
-        public string PayloadSenderCanId
-        {
-            get
-            {
-                if (!PayloadFull.Contains('#'))
-                    return "";
-
-                return PayloadFull.Substring(0, PayloadFull.IndexOf('#'));
-            }
-        }
+        public string PayloadSenderCanId { get; private set; }
 
         /// <summary>
         /// Returns the CAN Bus Receiver Id of a received message
@@ -44,8 +59,8 @@ namespace can2mqtt_core
         {
             get
             {
-                var cat = PayloadCanData.Substring(0, 1);
-                var mod = PayloadCanData.Substring(2, 2);
+                var cat = PayloadFull.Substring(0, 1);
+                var mod = PayloadFull.Substring(2, 2);
                 var receiverId = 0;
 
                 switch(cat)
@@ -76,27 +91,22 @@ namespace can2mqtt_core
             }
         }
 
-        public string CanFrameType { get { return PayloadCanData.Substring(1, 1); } }
-
-        /// <summary>
-        /// Returns the CAN Bus Data of a recived Message
-        /// </summary>
-        public string PayloadCanData { get { return PayloadFull.Substring(PayloadFull.IndexOf('#') +1); } }
+        public string CanFrameType { get { return PayloadFull.Substring(1, 1); } }
 
         /// <summary>
         /// Gets the IndexTable Index. Usually this is FA but FD was also discovered in the past
         /// </summary>
-        public string IndexTableIndex { get { return PayloadFull.Substring(8,2); } }
+        public string IndexTableIndex { get { return PayloadFull.Substring(4,2); } }
 
         /// <summary>
         /// The Index the value belongs to
         /// </summary>
-        public string ValueIndex { get { return PayloadFull.Substring(10, 4); } }
+        public string ValueIndex { get { return PayloadFull.Substring(6, 4); } }
 
         /// <summary>
         /// The Value that is transmitted by this CAN frame
         /// </summary>
-        public string Value { get { return PayloadFull.Substring(14, 4); } }
+        public string Value { get { return PayloadFull.Substring(10, 4); } }
 
         /// <summary>
         /// In case a translator was used, the topic may become more specified

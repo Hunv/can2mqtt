@@ -19,7 +19,7 @@ namespace can2mqtt_core
         /// <summary>
         /// The CAN Server Port of canlogserver
         /// </summary>
-        public int CanServerPort { get; set; } = 28700;
+        public int CanServerPort { get; set; } = 29536;
 
         /// <summary>
         /// The Server where the MQTT broker is running on
@@ -60,5 +60,13 @@ namespace can2mqtt_core
         /// Null if the raw data should be forwarded to MQTT. Otherwise the Translator name.
         /// </summary>
         public string MqttTranslator { get; set; }
+
+
+        /// <summary>
+        /// The size of the Buffer to receive CAN messages. For Stiebel Eltron CAN bus messages this is 48 byte. 
+        /// If the size is wrong, the messages will be fragmented which requires to put the messages together again.
+        /// This is handled by this application but it is nicer to have the correct size.
+        /// </summary>
+        public int CanReceiveBufferSize { get; set; } = 48;
     }
 }

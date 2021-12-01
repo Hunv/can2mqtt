@@ -6,3 +6,14 @@ Known working CAN Ids are:
 6A0 Bedienmodul an der Heizung mit Terminaladdresse 3
 6A1 Bedienmodul an der Heizung mit Terminaladdresse 4
 6A2 ? Id für 2. Bedienmodul?
+
+
+
+
+
+180 = LWZ (Main)
+301 = Heat Circuit 1
+302 = Heat Circuit 2
+6A0 = Display at the LWZ (Terminal Address 3)
+6A1 = Display at the LWZ (Terminal Address 4)
+6BC = Display at the LWZ, but "core" for Time and Operating status (When used with Terminal Address 3, if it may change)

@@ -1,86 +1,171 @@
-﻿using System;
+﻿using can2mqtt_core.Translator.StiebelEltron;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace can2mqtt_core.Translator.StiebelEltron
 {
-    public static class ElsterIndex
+    public class ElsterIndex
     {
-        public static ElsterIndexItem[] ElsterTable = new ElsterIndexItem[] {
-            new ElsterIndexItem{Index = 0x0001, Name = "Fehlermeldung",                 Unit = "",      MqttTopic = "/error/status",                    Converter = new ConvertDefault(),       Description = "Is there any Error at the Device?"},
+        public List<ElsterIndexItem> ElsterIndexTable { get; set; }
 
-            new ElsterIndexItem{Index = 0x0003, Name = "Speichertemperatur (Soll)",     Unit = "°C",    MqttTopic = "/boiler/temperature/desired",      Converter = new ConvertDec(),           Description = "The desired temperature for the storage of the boiler"},
-            new ElsterIndexItem{Index = 0x000C, Name = "Außentemperaturfühler",         Unit = "°C",    MqttTopic = "/outdoor/temperature/measured",    Converter = new ConvertDec(),           Description = "The measured temperature by the outside sensor"},
-            new ElsterIndexItem{Index = 0x000E, Name = "Speichertemperatur",            Unit = "°C",    MqttTopic = "/boiler/temperature/measured",     Converter = new ConvertDec(),           Description = "The measured temperature in the storage of the boiler"},
-            new ElsterIndexItem{Index = 0x000F, Name = "Vorlauftemperatur",             Unit = "°C",    MqttTopic = "/flow/temperature/measured",       Converter = new ConvertDec(),           Description = "The measured temperature of the flow"},
-            new ElsterIndexItem{Index = 0x0011, Name = "Raumtemperatur HK1",            Unit = "°C",    MqttTopic = "/indoor/temperature/measured",     Converter = new ConvertDec(),           Description = "The measured temperature by the indoor sensor or the assumed temperature by the device (default: 25°C)"},
-            new ElsterIndexItem{Index = 0x0014, Name = "Verdampfertemperatur",          Unit = "°C",    MqttTopic = "/evaporator/temperature/measured", Converter = new ConvertDec(),           Description = "The measured temperature of the evaporator"},
-            new ElsterIndexItem{Index = 0x0016, Name = "Rücklauftemperatur",            Unit = "°C",    MqttTopic = "/returnflow/temperature/measured", Converter = new ConvertDec(),           Description = "The measured temperature of the return flow"},
-            new ElsterIndexItem{Index = 0x0075, Name = "Luftfeuchte HK1",               Unit = "%",     MqttTopic = "/indor/humidity/measured",         Converter = new ConvertDec(),           Description = "The measured humidity by the indoor sensor"},
+        public ElsterIndex()
+        {
+            ElsterIndexTable = new List<ElsterIndexItem>();
 
-            new ElsterIndexItem{Index = 0x0112, Name = "Programmschalter",              Unit = "",      MqttTopic = "/status/operationswitch",          Converter = new ConvertBetriebsart(),   Description = "The operationmode of the device"},
+            System.IO.StreamReader sR = new System.IO.StreamReader("StiebelEltronIndexTable.csv");
+            var content = sR.ReadToEnd().Replace("\r","").Split("\n");
+            sR.Close();
 
-            new ElsterIndexItem{Index = 0x011A, Name = "Estrichprogramm aktiv",         Unit = "",      MqttTopic = "/heating/concrete/enabled",        Converter = new ConvertBool(),          Description = "Is the concrete heating mode enabled?"},
-            new ElsterIndexItem{Index = 0x01BA, Name = "Estrichprogramm Zunahme/Tag",   Unit = "K/Tag", MqttTopic = "/heating/concrete/increaseperday", Converter = new ConvertDec(),           Description = "How many Kelvin per day should the concrete be heated more"},
-            new ElsterIndexItem{Index = 0x01BB, Name = "Estrichprogramm Sockeltemperatur",Unit = "K",   MqttTopic = "/heating/concrete/basetemperature",Converter = new ConvertDec(),           Description = ""},
-            new ElsterIndexItem{Index = 0x01BC, Name = "Estrichprogramm dauer Fußpunkt",Unit = "Tage",  MqttTopic = "/heating/concrete/basetemperaturehold",Converter = new ConvertDec(),       Description = ""},
-            new ElsterIndexItem{Index = 0x01BD, Name = "Estrichprogramm Maximum",       Unit = "K",     MqttTopic = "/heating/concrete/maxtemperature", Converter = new ConvertDec(),           Description = "The maxium temperature, that should be reached by the concrete heating program"},
-            new ElsterIndexItem{Index = 0x01BE, Name = "Estrichprogramm Maximum halten",Unit = "Tage",  MqttTopic = "/heating/concrete/maxtemperaturehold",Converter = new ConvertDec(),        Description = ""},
-            
-            new ElsterIndexItem{Index = 0x011B, Name = "Ferienbeginn Tag",              Unit = "",      MqttTopic = "/time/holiday/startday",           Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x011C, Name = "Ferienbeginn Monat",            Unit = "",      MqttTopic = "/time/holiday/startmonth",         Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x011D, Name = "Ferienbeginn Jahr",             Unit = "",      MqttTopic = "/time/holiday/startyear",          Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x011E, Name = "Ferienende Tag",                Unit = "",      MqttTopic = "/time/holiday/endday",             Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x011F, Name = "Ferienende Monat",              Unit = "",      MqttTopic = "/time/holiday/endmonth",           Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x0120, Name = "Ferienende Jahr",               Unit = "",      MqttTopic = "/time/holiday/endyear",            Converter = new ConvertLittleEndian()},
+            foreach(var aLine in content)
+            {
+                // Skip first line
+                if (aLine.StartsWith("Index"))
+                    continue;
 
-            new ElsterIndexItem{Index = 0x0121, Name = "Wochentag",                     Unit = "",      MqttTopic = "/time/dayofweek",                  Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x0122, Name = "Tag",                           Unit = "",      MqttTopic = "/time/day",                        Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x0123, Name = "Monat",                         Unit = "",      MqttTopic = "/time/month",                      Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x0124, Name = "Jahr",                          Unit = "",      MqttTopic = "/time/year",                       Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x0125, Name = "Stunde",                        Unit = "",      MqttTopic = "/time/hour",                       Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x0126, Name = "Minute",                        Unit = "",      MqttTopic = "/time/minute",                     Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x0127, Name = "Sekunde",                       Unit = "",      MqttTopic = "/time/second",                     Converter = new ConvertLittleEndian()},
-          
-            new ElsterIndexItem{Index = 0x0176, Name = "Betriebsstatus",                Unit = "",      MqttTopic = "/status/operationstatus",          Converter = new ConvertBinary()},
-            new ElsterIndexItem{Index = 0x019A, Name = "Versionsnummer",                Unit = "",      MqttTopic = "/status/softwareversion",          Converter = new ConvertDefault()},
-            new ElsterIndexItem{Index = 0x001A, Name = "Kundenkennung",                 Unit = "",      MqttTopic = "/status/customerid",               Converter = new ConvertDefault()},
+                //Skip empty rows
+                if (aLine.Replace(";","").Trim().Length == 0)
+                    continue;
 
-            new ElsterIndexItem{Index = 0x01DA, Name = "Volumenstrom",                  Unit = "l/Min", MqttTopic = "/ac/volumeflow",                   Converter = new ConvertLittleEndianDec()},
-            new ElsterIndexItem{Index = 0x033B, Name = "Lüftung Sommermodus",           Unit = "",      MqttTopic = "/ac/summeroperation",              Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x05DD, Name = "Lüftung Stufe",                 Unit = "",      MqttTopic = "/ac/coolingstatus",                Converter = new ConvertDefault(),           Description = "The ventilation level of the device"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x0571, Name = "Lüftung Außerplanm. Stufe 0",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel0",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 0 will run, when changed to"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x0572, Name = "Lüftung Außerplanm. Stufe 1",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel1",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 1 will run, when changed to"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x0573, Name = "Lüftung Außerplanm. Stufe 2",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel2",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 2 will run, when changed to"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x0574, Name = "Lüftung Außerplanm. Stufe 3",   Unit = "Min",   MqttTopic = "/ac/unplanedlevel3",               Converter = new ConvertDefault(),           Description = "Time in minutes the manually set ventilation level 3 will run, when changed to"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x056C, Name = "Lüftungsstufe Tag",             Unit = "",      MqttTopic = "/ac/daylevel",                     Converter = new ConvertDefault(),           Description = "The level of the ventilation at daytime"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x056D, Name = "Lüftungsstufe Nacht",           Unit = "",      MqttTopic = "/ac/nightlevel",                   Converter = new ConvertDefault(),           Description = "The level of the ventilation at nighttime"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x056E, Name = "Lüftungsstufe Abwesend",        Unit = "",      MqttTopic = "/ac/awaylevel",                    Converter = new ConvertDefault(),           Description = "The level of the ventilation at awaitime"}, //Differs from the original Index source
-            new ElsterIndexItem{Index = 0x056F, Name = "Lüftungsstufe Party",           Unit = "",      MqttTopic = "/ac/partylevel",                   Converter = new ConvertDefault(),           Description = "The level of the ventilation at partytime"}, //Differs from the original Index source
+                //Index;Sender;Receiver;Unit;Converter;NameDE;NameEN;MqttTopic;DescriptionDE;DescriptionEN;Default;MinValue;MaxValue;ValuesDE;ValuesEN;ReadOnly
+                var csv = aLine.Split(";");
 
-            new ElsterIndexItem{Index = 0x02CC, Name = "Stromverbrauch Heizung",        Unit = "",      MqttTopic = "/heating/power/usage",             Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x03AF, Name = "Wärmerückgewinnung Heizung",    Unit = "Wh",    MqttTopic = "/heating/recoverydaywh",           Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x03B0, Name = "Wärmerückgewinnung Heizung",    Unit = "kWh",   MqttTopic = "/heating/recoverydaykwh",          Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x03B1, Name = "Wärmerückgewinnung Heizung Gesamt",Unit = "kWh",MqttTopic = "/heating/heatrecoverysumkwh",      Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x03B6, Name = "Wärmerückgewinnung Heizung Gesamt",Unit = "MWh",MqttTopic = "/heating/heatrecoverysummwh",      Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x091E, Name = "Stromverbrauch Heizung/Tag",    Unit = "Wh",    MqttTopic = "/heating/power/usagedaywh",        Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x091F, Name = "Stromverbrauch Heizung/Tag",    Unit = "kWh",   MqttTopic = "/heating/power/usagedaykwh",       Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x0920, Name = "Stromverbrauch Heizung Gesamt", Unit = "kWh",   MqttTopic = "/heating/power/usagesumkwh",       Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x0921, Name = "Stromverbrauch Heizung Gesamt", Unit = "MWh",   MqttTopic = "/heating/power/usagesummwh",       Converter = new ConvertDouble()},
+                var eii = new ElsterIndexItem();
+                eii.Index = Convert.ToInt32(csv[0], 16);
+                eii.Sender = string.IsNullOrWhiteSpace(csv[1]) ? 0 : Convert.ToInt32(csv[1], 16);
+                eii.DefaultValue = csv[10];                
+                eii.MqttTopic = csv[7];
+                eii.ReadOnly = csv[15] == "yes";
+                eii.Unit = csv[3];
 
-            new ElsterIndexItem{Index = 0x02CE, Name = "Stromverbrauch Speicher",       Unit = "",      MqttTopic = "/boiler/power/usage",              Converter = new ConvertLittleEndian()},
-            new ElsterIndexItem{Index = 0x091A, Name = "Stromverbrauch Warmwasser/Tag", Unit = "Wh",    MqttTopic = "/boiler/power/usagewarmwaterdaywh",Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x091B, Name = "Stromverbrauch Warmwasser/Tag", Unit = "kWh",   MqttTopic = "/boiler/power/usagewarmwaterdaykwh",Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x091C, Name = "Stromverbrauch Warmwasser Gesamt",Unit = "kWh", MqttTopic = "/boiler/power/usagewarmwatersumkwh",Converter = new ConvertDouble()},
-            new ElsterIndexItem{Index = 0x091D, Name = "Stromverbrauch Warmwasser Gesamt",Unit = "MWh", MqttTopic = "/boiler/power/usagewarmwatersummwh",Converter = new ConvertDouble()},
+                switch (csv[4].ToLower())
+                {
+                    case "binary":
+                        eii.Converter = new ConvertBinary();
+                        break;
+                    case "bool":
+                        eii.Converter = new ConvertBool();
+                        break;
+                    case "byte":
+                        eii.Converter = new ConvertByte();
+                        break;
+                    case "cent":
+                        eii.Converter = new ConvertCent();
+                        break;
+                    case "custom":
+                        eii.Converter = null;
+                        break;
+                    case "datum":
+                        eii.Converter = new ConvertDatum();
+                        break;
+                    case "dec":
+                        eii.Converter = new ConvertDec();
+                        break;
+                    case "default":
+                        eii.Converter = new ConvertDefault();
+                        break;
+                    case "double":
+                        eii.Converter = new ConvertDouble();
+                        break;
+                    case "err":
+                        eii.Converter = new ConvertErr();
+                        break;
+                    case "littlebool":
+                        eii.Converter = new ConvertLittleBool();
+                        break;
+                    case "littleendian":
+                        eii.Converter = new ConvertLittleEndian();
+                        break;
+                    case "littleendiandec":
+                        eii.Converter = new ConvertLittleEndianDec();
+                        break;
+                    case "mille":
+                        eii.Converter = new ConvertMille();
+                        break;
+                    case "sprache":
+                        eii.Converter = new ConvertSprache();
+                        break;
+                    case "time":
+                        eii.Converter = new ConvertTime();
+                        break;
+                    case "timedomain":
+                        eii.Converter = new ConvertTimeDomain();
+                        break;
+                    case "timerange":
+                        eii.Converter = new ConvertTimeRange();
+                        break;
+                    case "timerangelittleendian":
+                        eii.Converter = new ConvertTimeRangeLittleEndian();
+                        break;
+                    case "triple":
+                        eii.Converter = new ConvertTriple();
+                        break;
+                    default:
+                        eii.Converter = new ConvertDefault();
+                        break;
+                }
 
-            new ElsterIndexItem{Index = 0x059F, Name = "HK1 Fußpunkt",                  Unit = "°C",    MqttTopic = "/heating/hk1/base",                Converter = new ConvertDec()},
-            new ElsterIndexItem{Index = 0x010F, Name = "HK1 Raumeinfluss",              Unit = "",      MqttTopic = "/heating/hk1/roominfluence",       Converter = new ConvertDefault()},
-            new ElsterIndexItem{Index = 0x059E, Name = "HK1 Anteil Vorlauf",            Unit = "",      MqttTopic = "/heating/hk1/flowpercent",         Converter = new ConvertDefault()},
-            //new ElsterIndexItem{Index = , Name = "HK1 Maximum (Soll)",            Unit = "°C",    MqttTopic = "/heating/hk1/maximum/desired",     Converter = new ConvertDefault()},
-            new ElsterIndexItem{Index = 0x012B, Name = "HK1 Minimum (Soll)",            Unit = "°C",    MqttTopic = "/heating/hk1/minimum/desired",     Converter = new ConvertDefault()},
+                //Set default values if it is a numeric based type
+                if (eii.Converter != null && 
+                    (eii.Converter.GetType() == typeof(ConvertBool) || eii.Converter.GetType() == typeof(ConvertByte) || eii.Converter.GetType() == typeof(ConvertCent) ||
+                    eii.Converter.GetType() == typeof(ConvertDec) || eii.Converter.GetType() == typeof(ConvertDefault) || eii.Converter.GetType() == typeof(ConvertDouble) ||
+                    eii.Converter.GetType() == typeof(ConvertLittleBool) || eii.Converter.GetType() == typeof(ConvertLittleEndian) || eii.Converter.GetType() == typeof(ConvertLittleEndianDec) ||
+                    eii.Converter.GetType() == typeof(ConvertMille) || eii.Converter.GetType() == typeof(ConvertTriple)))
+                {
+                    if (!string.IsNullOrWhiteSpace(csv[12]))
+                        eii.MaxValue = Convert.ToDouble(csv[12]);
+                    if (!string.IsNullOrWhiteSpace(csv[11]))
+                        eii.MinValue = Convert.ToDouble(csv[11]);
+                }
 
-        };
+                CultureInfo ci = CultureInfo.InstalledUICulture;
+                if (ci.TwoLetterISOLanguageName == "DE")
+                {
+                    eii.Name = csv[5];
+                    eii.Description = csv[8];
+                    eii.ValueList = csv[13].Split(",");
+                }
+                else
+                {
+                    eii.Name = csv[6];
+                    eii.Description = csv[9];
+                    eii.ValueList = csv[14].Split(",");
+                }
+
+                ElsterIndexTable.Add(eii);
+            }
+        }
+
+        public ElsterIndexItem[] ErrorList =
+        {
+              new ElsterIndexItem{Index = 0x0002, Name = "Schuetz klebt"},
+              new ElsterIndexItem{Index = 0x0003, Name = "ERR HD-SENSOR"},
+              new ElsterIndexItem{Index = 0x0004, Name = "Hochdruck"},
+              new ElsterIndexItem{Index = 0x0005, Name = "Verdampferfuehler"},
+              new ElsterIndexItem{Index = 0x0006, Name = "Relaistreiber"},
+              new ElsterIndexItem{Index = 0x0007, Name = "Relaispegel"},
+              new ElsterIndexItem{Index = 0x0008, Name = "Hexschalter"},
+              new ElsterIndexItem{Index = 0x0009, Name = "Drehzahl Luefter"},
+              new ElsterIndexItem{Index = 0x000a, Name = "Lueftertreiber"},
+              new ElsterIndexItem{Index = 0x000b, Name = "Reset Baustein"},
+              new ElsterIndexItem{Index = 0x000c, Name = "ND"},
+              new ElsterIndexItem{Index = 0x000d, Name = "ROM"},
+              new ElsterIndexItem{Index = 0x000e, Name = "QUELLEN MINTEMP"},
+              new ElsterIndexItem{Index = 0x0010, Name = "Abtauen"},
+              new ElsterIndexItem{Index = 0x0012, Name = "ERR T-HEI IWS"},
+              new ElsterIndexItem{Index = 0x0017, Name = "ERR T-FRO IWS"},
+              new ElsterIndexItem{Index = 0x001a, Name = "Niederdruck"},
+              new ElsterIndexItem{Index = 0x001b, Name = "ERR ND-DRUCK"},
+              new ElsterIndexItem{Index = 0x001c, Name = "ERR HD-DRUCK"},
+              new ElsterIndexItem{Index = 0x001d, Name = "HD-SENSOR-MAX"},
+              new ElsterIndexItem{Index = 0x001e, Name = "HEISSGAS-MAX"},
+              new ElsterIndexItem{Index = 0x001f, Name = "ERR HD-SENSOR"},
+              new ElsterIndexItem{Index = 0x0020, Name = "Einfrierschutz"},
+              new ElsterIndexItem{Index = 0x0021, Name = "KEINE LEISTUNG"},
+              new ElsterIndexItem{Index = 0x3800, Name = "Fühler im zweiten WW-Speicher (Fehlercode 56)"}
+            };
+    }
 
         //Source: http://juerg5524.ch/data/ElsterTable.inc
         //The Indexes are not completly verified!
@@ -3722,43 +3807,67 @@ namespace can2mqtt_core.Translator.StiebelEltron
         //      new ElsterIndexItem{Name = "INFOBLOCK_6"                                     , Index = 0xfe07, Type = "0"}
         //    };
 
-        public static ElsterIndexItem[] ErrorList =
-        {
-              new ElsterIndexItem{Index = 0x0002, Name = "Schuetz klebt"},
-              new ElsterIndexItem{Index = 0x0003, Name = "ERR HD-SENSOR"},
-              new ElsterIndexItem{Index = 0x0004, Name = "Hochdruck"},
-              new ElsterIndexItem{Index = 0x0005, Name = "Verdampferfuehler"},
-              new ElsterIndexItem{Index = 0x0006, Name = "Relaistreiber"},
-              new ElsterIndexItem{Index = 0x0007, Name = "Relaispegel"},
-              new ElsterIndexItem{Index = 0x0008, Name = "Hexschalter"},
-              new ElsterIndexItem{Index = 0x0009, Name = "Drehzahl Luefter"},
-              new ElsterIndexItem{Index = 0x000a, Name = "Lueftertreiber"},
-              new ElsterIndexItem{Index = 0x000b, Name = "Reset Baustein"},
-              new ElsterIndexItem{Index = 0x000c, Name = "ND"},
-              new ElsterIndexItem{Index = 0x000d, Name = "ROM"},
-              new ElsterIndexItem{Index = 0x000e, Name = "QUELLEN MINTEMP"},
-              new ElsterIndexItem{Index = 0x0010, Name = "Abtauen"},
-              new ElsterIndexItem{Index = 0x0012, Name = "ERR T-HEI IWS"},
-              new ElsterIndexItem{Index = 0x0017, Name = "ERR T-FRO IWS"},
-              new ElsterIndexItem{Index = 0x001a, Name = "Niederdruck"},
-              new ElsterIndexItem{Index = 0x001b, Name = "ERR ND-DRUCK"},
-              new ElsterIndexItem{Index = 0x001c, Name = "ERR HD-DRUCK"},
-              new ElsterIndexItem{Index = 0x001d, Name = "HD-SENSOR-MAX"},
-              new ElsterIndexItem{Index = 0x001e, Name = "HEISSGAS-MAX"},
-              new ElsterIndexItem{Index = 0x001f, Name = "ERR HD-SENSOR"},
-              new ElsterIndexItem{Index = 0x0020, Name = "Einfrierschutz"},
-              new ElsterIndexItem{Index = 0x0021, Name = "KEINE LEISTUNG"}
-            };
-
-    }
 
     public class ElsterIndexItem
     {
+        /// <summary>
+        /// The Index as decimal number
+        /// </summary>
         public int Index { get; set; }
+
+        /// <summary>
+        /// The name of the Index
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// The CAN Device ID where this Index/MQTT Topic is valid. If 0 it is for all
+        /// </summary>
+        public int Sender { get; set; }
+
+        /// <summary>
+        /// The Converter to convert the raw value to a processable value
+        /// </summary>
         public IValueConverter Converter { get; set; }
+
+        /// <summary>
+        /// The MQTT Topic
+        /// </summary>
         public string MqttTopic { get; set; }
+
+        /// <summary>
+        /// The Unit
+        /// </summary>
         public string Unit { get; set; }
+
+        /// <summary>
+        /// A description
+        /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// The default value set by StiebelEltron
+        /// </summary>
+        public string DefaultValue { get; set; }
+
+        /// <summary>
+        /// If value is a number, the max number
+        /// </summary>
+        public double MaxValue { get; set; }
+
+        /// <summary>
+        /// If value is a number, the min number
+        /// </summary>
+        public double MinValue { get; set; }
+
+        /// <summary>
+        /// Values that are valid for this dataset. Used if converter is null.
+        /// </summary>
+        public string[] ValueList { get; set; }
+
+        /// <summary>
+        /// If the value can just be read but not set
+        /// </summary>
+        public bool ReadOnly { get; set; }
     }
 }

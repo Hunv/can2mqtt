@@ -18,13 +18,17 @@ namespace can2mqtt_core.Translator.StiebelEltron
         {
             //This is a signed value and used i.e. for temperatures. 
             //That means if from the binary view of this hex value the first value is a 1, it is a negative value. 
-            //A leading 1 would mean that the values are higher than 32768 (here 3276.8, because of division by 10).
+            //A leading 1 would mean that the values are higher than 32768 (here: 3276.8, because of division by 10).
+            //6553 = -1°C
+            //6553,5 exists, after that 0°C
             var result = (double)Convert.ToInt32(hexData, 16) / 10;
 
-            if (result > 3276.8)
+            if (result > 2000)
             {
                 //it is negative
-                return ((result - 3276.8) * -1).ToString();
+                //return ((result - 3276.8) * -1).ToString();
+                return Math.Round(result - 6553.6, 1).ToString();
+                //return result.ToString();
             }
             else
             {
@@ -67,18 +71,65 @@ namespace can2mqtt_core.Translator.StiebelEltron
             return result.ToString();
         }
     }
+
     /// <summary>
-    /// Converts values (et_zeit)
+    /// Converts values. Each increase is 15 Minutes (0001 = 00:15).
     /// </summary>
     public class ConvertTime : IValueConverter
     {
         public string ConvertValue(string hexData)
         {
-            var hour = Convert.ToInt32(hexData.Substring(2), 16);
-            var min = Convert.ToInt32(hexData.Substring(0,2), 16);
+            var result = Convert.ToInt32(hexData, 16);
 
-            //Untested
-            return (hour.ToString() + ":" + min.ToString());
+            var time = new TimeSpan(0, result * 15, 0);
+
+
+            return time.Hours.ToString("D2") + ":" + time.Minutes.ToString("D2");
+        }
+    }
+
+
+    /// <summary>
+    /// Converts values. 0100 = 00:00-00:15
+    /// </summary>
+    public class ConvertTimeRangeLittleEndian : IValueConverter
+    {
+        public string ConvertValue(string hexData)
+        {
+            var result1 = Convert.ToInt32(hexData.Substring(0,2), 16);
+            var result2 = Convert.ToInt32(hexData.Substring(2,2), 16);
+
+            var time1 = "---";
+            var time2 = "---";
+            if (result1 != 128)
+                time1 = (new TimeSpan(0, result1 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result1 * 15, 0)).Minutes.ToString("D2");
+
+            if (result2 != 128)
+                time2 = (new TimeSpan(0, result2 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result2 * 15, 0)).Minutes.ToString("D2");
+
+            return time2 + " - " + time1;
+        }
+    }
+
+    /// <summary>
+    /// Converts values. 0001 = 00:00-00:15
+    /// </summary>
+    public class ConvertTimeRange : IValueConverter
+    {
+        public string ConvertValue(string hexData)
+        {
+            var result1 = Convert.ToInt32(hexData.Substring(0, 2), 16);
+            var result2 = Convert.ToInt32(hexData.Substring(2, 2), 16);
+
+            var time1 = "---";
+            var time2 = "---";
+            if (result1 != 128)
+                time1 = (new TimeSpan(0, result1 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result1 * 15, 0)).Minutes.ToString("D2");
+
+            if (result2 != 128)
+                time2 = (new TimeSpan(0, result2 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result2 * 15, 0)).Minutes.ToString("D2");
+
+            return time1 + " - " + time2;
         }
     }
 
@@ -172,17 +223,6 @@ namespace can2mqtt_core.Translator.StiebelEltron
     }
 
     /// <summary>
-    /// Converts values (et_dev_nr)
-    /// </summary>
-    public class ConvertDev : IValueConverter
-    {
-        public string ConvertValue(string hexData)
-        {
-            return (Convert.ToInt32(hexData, 16) + 1).ToString();
-        }
-    }
-
-    /// <summary>
     /// Converts values (et_err_nr)
     /// </summary>
     public class ConvertErr : IValueConverter
@@ -224,27 +264,6 @@ namespace can2mqtt_core.Translator.StiebelEltron
             return Convert.ToInt32(hexData, 16).ToString();
         }
     }
-
-    /// <summary>
-    /// Converts values (et_betriebsart)
-    /// </summary>
-    public class ConvertBetriebsart : IValueConverter
-    {
-        public string ConvertValue(string hexData)
-        {
-            switch (hexData)
-            {
-                case "0000": return "Notbetrieb";
-                case "0100": return "Bereitschaft";
-                case "0200": return "Automatik";
-                case "0300": return "Tagbetrieb";
-                case "0400": return "Absenkbetrieb";
-                case "0500": return "Warmwasser";
-                case "0B00": return "???";
-                default: return "Unbekannt";
-            }
-        }
-    }
     
     /// <summary>
      /// Converts values (et_betriebsart)
@@ -268,7 +287,7 @@ namespace can2mqtt_core.Translator.StiebelEltron
                 case "0A00": return "Finnisch"; //?
                 case "0B00": return "Dänisch"; //?
 
-                default: return "Unbekannt";
+                default: return "Unbekannt (" + hexData + ")";
             }
         }
     }
@@ -290,6 +309,17 @@ namespace can2mqtt_core.Translator.StiebelEltron
     }
 
     /// <summary>
+    /// Converts a Hex Value to a Binary value (i.e. for operating status)
+    /// </summary>
+    public class ConvertBinary : IValueConverter
+    {
+        public string ConvertValue(string hexData)
+        {
+            return Convert.ToString(Convert.ToInt64(hexData, 16), 2);
+        }
+    }
+
+    /// <summary>
     /// Converts values (et_little_bool)
     /// </summary>
     public class ConvertLittleBool : IValueConverter
@@ -302,19 +332,6 @@ namespace can2mqtt_core.Translator.StiebelEltron
                 case "0100": return "Ein";
                 default: return "???";
             }
-        }
-    }
-
-
-
-    /// <summary>
-    /// Converts a Hex Value to a Binary value (i.e. for operating status)
-    /// </summary>
-    public class ConvertBinary : IValueConverter
-    {
-        public string ConvertValue(string hexData)
-        {
-            return Convert.ToString(Convert.ToInt64(hexData, 16), 2);
         }
     }
 }
