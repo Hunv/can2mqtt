@@ -1,0 +1,423 @@
+﻿Index;Sender;Receiver;Unit;Converter;NameDE;NameEN;MqttTopic;DescriptionDE;DescriptionEN;Default;MinValue;MaxValue;ValuesDE;ValuesEN;ReadOnly
+000C;180;6A0;°C;Dec;Außentemperatur;Outside Temperature;/outside/temperature/measured;;;;;;;;true
+000F;302;6A0;°C;Dec;Istwert HK2;Actual Value HC2;/heatcircle/hc2/temperature/measured;;;;;;;;true
+0004;302;6A0;°C;Dec;Sollwert HK2;Set Value HC2;/heatcircle/hc2/temperature/desired;;;;;;;;true
+000F;301;6A0;°C;Dec;Istwert HK1;Actual Value HC1;/heatcircle/hc1/temperature/measured;;;;;;;;true
+0004;301;6A0;°C;Dec;Sollwert HK1;Set Value HC1;/heatcircle/hc1/temperature/desired;;;;;;;;true
+000D;180;6A0;°C;Dec;Vorlauftemperatur;Flow Temperature;/flow/temperature/measured;;;;;;;;true
+0016;180;6A0;°C;Dec;Rücklauftemperatur;Return Temperature;/returnflow/temperature/measured;;;;;;;;true
+064A;180;6A0;bar;Dec;Druck Heizkreis;Pressure Heat Circle;/heatcircle/pressure/measured;;;;;;;;true
+01DA;180;6A0;l/min;Default;Volumenstrom;Flow Rate;/flow/flowrate/measured;;;;;;;;true
+0011;301;6A0;°C;Dec;Raumtemperatur HK1;Room Temperature HC1;/room/hc1/temperature/measured;;;;;;;;true
+0011;302;6A0;°C;Dec;Raumtemperatur HK2;Room Temperature HC2;/room/hc2/temperature/measured;;;;;;;;true
+0075;301;6A0;°C;Dec;Raumfeuchte HK1;Room Humidity HC1;/room/hc1/humidity/measured;;;;;;;;true
+0075;302;6A0;°C;Dec;Raumfeuchte HK2;Room Humidity HC2;/room/hc2/humidity/measured;;;;;;;;true
+0012;301;6A0;°C;Dec;Raumsolltemperatur HK1;Set Room Temperature HC1;/room/hc1/temperature/desired;;;;;;;;true
+0012;302;6A0;°C;Dec;Raumsolltemperatur HK2;Set Room Temperature HC2;/room/hc2/temperature/desired;;;;;;;;true
+000E;180;6A0;°C;Dec;Warmwasser Temperatur;DWH Temperature;/dwh/temperature/measured;;;;;;;;true
+0003;180;6A0;°C;Dec;Warmwasser Soll-Temperatur;Set DWH Temperature;/dwh/temperature/desired;;;;;;;;true
+0597;180;6A0;Hz;Default;Zuluft Ist;Supply Air Actual;/air/supply/measured;;;;;;;;true
+0596;180;6A0;m³/h;Default;Zuluft Soll;Supply Air Set;/air/supply/desired;;;;;;;;true
+0599;180;6A0;Hz;Default;Abluft Ist;Extract Air Actual;/air/extract/measured;;;;;;;;true
+0598;180;6A0;m³/h;Default;Abluft Soll;Extract Air Set;/air/extract/desired;;;;;;;;true
+C0EF;180;6A0;%;Default;Abluftfeuchte;Extract Air Humidity;/air/extract/humidity/measured;;;;;;;;true
+0694;180;6A0;°C;Dec;Ablufttemperatur;Extract Air Temperature;/air/extract/temperature/measured;;;;;;;;true
+C0F6;180;6A0;°C;Dec;Ablufttaupunkt;Extract Air DEW Point;/air/extract/dew;;;;;;;;true
+0264;301;6A0;°C;Dec;Taupunkttemperatur HK1;DEW Point Temperature Heat Circle 1;/heatcircle/hc1/dew;;;;;;;;true
+0264;302;6A0;°C;Dec;Taupunkttemperatur HK2;DEW Point Temperature Heat Circle 2;/heatcircle/hc2/dew;;;;;;;;true
+AAAA;301;6A0;°C;Dec;Kollektortemperatur;Collector Temperature;/collector/temperature/measured;;;;;;;;true
+05BB;301;6A0;;Default;Heizstufe;Heat Stage;/heating/heatstage;;;;;;;;false
+0264;;;°C;Dec;Heisgastemperatur;Hot Gas Temperature;/hotgas/temperature/measured;;;;;;;;false
+07A6;180;6A0;bar;Cent;Hochdruck;High Pressure;/highpressure/pressure/measured;;;;;;;;false
+07A7;180;6A0;bar;Cent;Niederdruck;Low Pressure;/lowpressure/pressure/measured;;;;;;;;false
+0014;180;6A0;°C;Dec;Verdampfertemperatur;Evaporator Temperature;/evaporator/temperature/measured;;;;;;;;false
+059C;180;6A0;°C;Dec;Verflüssigertemperatur;Condenser Temperature;/condenser/temperature/measured;;;;;;;;false
+0693;180;6A0;°C;Dec;Ölsumpftemperatur;Oil Sump Temperature;/oilsump/temperature/measured;;;;;;;;false
+059A;180;6A0;Hz;Default;Fortluft Ist;Exhaust Air Actual;/air/exaust/measured;;;;;;;;false
+059B;180;6A0;%;Default;Fortluft Soll;Exhaust Air Set;/air/exaust/desired;;;;;;;;false
+059C;180;6A0;Pa;Default;Differenz-Druck Verdampfer;Difference Pressure Evaporator;/evaporator/pressure/difference;;;;;;;;false
+C0F4;180;6A0;;Default;Verdichterstarts (4.-6. Stelle);Compressor Starts (4.-6. digit);/compressor/counter1;;;;;;;;false
+C0F5;180;6A0;;Default;Verdichterstarts (1.-3. Stelle);Compressor Starts (1.-3. digit);/compressor/counter1000;;;;;;;;false
+092E;180;6A0;Wh;Default;Wärmemenge Heizen Tag;Heat Meter Heating Day;/meter/heating/day/Wh;;;;;;;;false
+092F;180;6A0;KWh;Default;Wärmemenge Heizen Tag;Heat Meter Heating Day;/meter/heating/day/KWh;;;;;;;;false
+0930;180;6A0;KWh;Default;Wärmemenge Heizen Summe;Heat Meter Heating Total;/meter/heating/total/KWh;;;;;;;;false
+0931;180;6A0;MWh;Default;Wärmemenge Heizen Summe;Heat Meter Heating Total;/meter/heating/total/MWh;;;;;;;;false
+092A;180;6A0;Wh;Default;Wärmemenge Warmwasser Tag;Heat Meter DWH Day;/meter/dwh/day/Wh;;;;;;;;false
+092B;180;6A0;KWh;Default;Wärmemenge Warmwasser Tag;Heat Meter DWH Day;/meter/dwh/day/KWh;;;;;;;;false
+092C;180;6A0;KWh;Default;Wärmemenge Warmwasser Summe;Heat Meter DWH Total;/meter/dwh/total/KWh;;;;;;;;false
+092D;180;6A0;MWh;Default;Wärmemenge Warmwasser Summe;Heat Meter DWH Total;/meter/dwh/total/MWh;;;;;;;;false
+0929;180;6A0;KWh;Default;Wärmemenge Notheizung Heizen Tag;Heat Meter Boost Heating Day;/meter/boost/heat/day/KWh;;;;;;;;false
+0928;180;6A0;Wh;Default;Wärmemenge Notheizung Heizen Tag;Heat Meter Boost Heating Day;/meter/boost/heat/day/Wh;;;;;;;;false
+0924;180;6A0;KWh;Default;Wärmemenge Notheizung Heizen Summe;Heat Meter Boost Heating Total;/meter/boost/heat/total/KWh;;;;;;;;false
+0925;180;6A0;MWh;Default;Wärmemenge Notheizung Heizen Summe;Heat Meter Boost Heating Total;/meter/boost/heat/total/MWh;;;;;;;;false
+03AF;180;6A0;KWh;Default;Wärmemenge Wärmerückgewinnung Tag;Heat Meter Recovery Day;/meter/recovery/day/KWh;;;;;;;;false
+03AE;180;6A0;Wh;Default;Wärmemenge Wärmerückgewinnung Tag;Heat Meter Recovery Day;/meter/recovery/day/Wh;;;;;;;;false
+03B1;180;6A0;KWh;Default;Wärmemenge Wärmerückgewinnung Summe;Heat Meter Recovery Total;/meter/recovery/total/KWh;;;;;;;;false
+03B0;180;6A0;MWh;Default;Wärmemenge Wärmerückgewinnung Summe;Heat Meter Recovery Total;/meter/recovery/total/MWh;;;;;;;;false
+0640;180;6A0;Wh;Default;Wärmemenge Solar Heizung Tag;Heat Meter Solar Heating Day;/meter/solar/heat/day/Wh;;;;;;;;false
+0641;180;6A0;KWh;Default;Wärmemenge Solar Heizung Tag;Heat Meter Solar Heating Day;/meter/solar/heat/day/KWh;;;;;;;;false
+0642;180;6A0;KWh;Default;Wärmemenge Solar Heizung Summe;Heat Meter Solar Heating Total;/meter/solar/heat/total/KWh;;;;;;;;false
+0643;180;6A0;MWh;Default;Wärmemenge Solar Heizung Summe;Heat Meter Solar Heating Total;/meter/solar/heat/total/MWh;;;;;;;;false
+0644;180;6A0;Wh;Default;Wärmemenge Solar Warmwasser Tag;Heat Meter Solar DHW Day;/meter/solar/dwh/day/Wh;;;;;;;;false
+0645;180;6A0;KWh;Default;Wärmemenge Solar Warmwasser Tag;Heat Meter Solar DHW Day;/meter/solar/dwh/day/KWh;;;;;;;;false
+0646;180;6A0;KWh;Default;Wärmemenge Solar Warmwasser Summe;Heat Meter Solar DHW Total;/meter/solar/dwh/total/KWh;;;;;;;;false
+0647;180;6A0;MWh;Default;Wärmemenge Solar Warmwasser Summe;Heat Meter Solar DHW Total;/meter/solar/dwh/total/MWh;;;;;;;;false
+0648;180;6A0;KWh;Default;Wärmemenge Kühlen Summe;Heat Meter Cooling Total;/meter/cooling/total/KWh;;;;;;;;false
+0649;180;6A0;MWh;Default;Wärmemenge Kühlen Summe;Heat Meter Cooling Total;/meter/cooling/total/MWh;;;;;;;;false
+05A4;180;6A0;h;Default;Verdichter Heizen;Compressor Heating;/compressor/heating/time;;;;;;;;false
+05A5;180;6A0;h;Default;Verdichter Kühlen;Compressor Cooling;/compressor/cooling/time;;;;;;;;false
+05A6;180;6A0;h;Default;Verdichter Warmwasser;Compressor DHW;/compressor/dwh/time;;;;;;;;false
+05A8;180;6A0;h;Default;Elektrische Notheizung Heizen;Electric Booster Heating;/boost/heating/time;;;;;;;;false
+05A7;180;6A0;h;Default;Elektrische Notheizung Warmwasser;Electric Booster DHW;/boost/dwh/time;;;;;;;;false
+091F;180;6A0;KWh;Default;Stomverbrauch Heizung Tag;Power Consumption Heating Day;/meter/heating/power/day/KWh;;;;;;;;false
+091E;180;6A0;Wh;Default;Stomverbrauch Heizung Tag;Power Consumption Heating Day;/meter/heating/power/day/Wh;;;;;;;;false
+0921;180;6A0;MWh;Default;Stromverbrauch Heizung Summe;Power Consumption Heating Total;/meter/heating/power/total/MWh;;;;;;;;false
+0920;180;6A0;KWh;Default;Stromverbrauch Heizung Summe;Power Consumption Heating Total;/meter/heating/power/total/KWh;;;;;;;;false
+091A;180;6A0;Wh;Default;Stromverbrauch Warmwasser Tag;Power Consumption DHW Day;/meter/dwh/power/day/Wh;;;;;;;;false
+091B;180;6A0;KWh;Default;Stromverbrauch Warmwasser Tag;Power Consumption DHW Day;/meter/dwh/power/day/KWh;;;;;;;;false
+091D;180;6A0;MWh;Default;Stromverbrauch Warmwasser Summe;Power Consumption DHW Total;/meter/dwh/power/total/MWh;;;;;;;;false
+091C;180;6A0;KWh;Default;Stromverbrauch Warmwasser Summe;Power Consumption DHW Total;/meter/dwh/power/total/KWh;;;;;;;;false
+1410;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Montag Zeitspanne 1;Heating Program Heating Circuit 1 Monday Time Period 1;/program/heating/hc1/mon/p1;;;00:00-24:00;;;;;false
+1411;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Montag Zeitspanne 2;Heating Program Heating Circuit 1 Monday Time Period 2;/program/heating/hc1/mon/p2;;;---;;;;;false
+1412;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Montag Zeitspanne 3;Heating Program Heating Circuit 1 Monday Time Period 3;/program/heating/hc1/mon/p3;;;---;;;;;false
+1420;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Dienstag Zeitspanne 1;Heating Program Heating Circuit 1 Tuesday Time Period 1;/program/heating/hc1/tue/p1;;;00:00-24:00;;;;;false
+1421;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Dienstag Zeitspanne 2;Heating Program Heating Circuit 1 Tuesday Time Period 2;/program/heating/hc1/tue/p2;;;---;;;;;false
+1422;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Dienstag Zeitspanne 3;Heating Program Heating Circuit 1 Tuesday Time Period 3;/program/heating/hc1/tue/p3;;;---;;;;;false
+1430;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mittwoch Zeitspanne 1;Heating Program Heating Circuit 1 Wednesday Time Period 1;/program/heating/hc1/wed/p1;;;00:00-24:00;;;;;false
+1431;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mittwoch Zeitspanne 2;Heating Program Heating Circuit 1 Wednesday Time Period 2;/program/heating/hc1/wed/p2;;;---;;;;;false
+1432;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mittwoch Zeitspanne 3;Heating Program Heating Circuit 1 Wednesday Time Period 3;/program/heating/hc1/wed/p3;;;---;;;;;false
+1440;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Donnerstag Zeitspanne 1;Heating Program Heating Circuit 1 Thursday Time Period 1;/program/heating/hc1/thu/p1;;;00:00-24:00;;;;;false
+1441;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Donnerstag Zeitspanne 2;Heating Program Heating Circuit 1 Thursday Time Period 2;/program/heating/hc1/thu/p2;;;---;;;;;false
+1442;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Donnerstag Zeitspanne 3;Heating Program Heating Circuit 1 Thursday Time Period 3;/program/heating/hc1/thu/p3;;;---;;;;;false
+1450;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Freitag Zeitspanne 1;Heating Program Heating Circuit 1 Friday Time Period 1;/program/heating/hc1/fri/p1;;;00:00-24:00;;;;;false
+1451;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Freitag Zeitspanne 2;Heating Program Heating Circuit 1 Friday Time Period 2;/program/heating/hc1/fri/p2;;;---;;;;;false
+1452;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Freitag Zeitspanne 3;Heating Program Heating Circuit 1 Friday Time Period 3;/program/heating/hc1/fri/p3;;;---;;;;;false
+1460;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Samstag Zeitspanne 1;Heating Program Heating Circuit 1 Saturday Time Period 1;/program/heating/hc1/sat/p1;;;00:00-24:00;;;;;false
+1461;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Samstag Zeitspanne 2;Heating Program Heating Circuit 1 Saturday Time Period 2;/program/heating/hc1/sat/p2;;;---;;;;;false
+1462;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Samstag Zeitspanne 3;Heating Program Heating Circuit 1 Saturday Time Period 3;/program/heating/hc1/sat/p3;;;---;;;;;false
+1470;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Sonntag Zeitspanne 1;Heating Program Heating Circuit 1 Sunday Time Period 1;/program/heating/hc1/sun/p1;;;00:00-24:00;;;;;false
+1471;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Sonntag Zeitspanne 2;Heating Program Heating Circuit 1 Sunday Time Period 2;/program/heating/hc1/sun/p2;;;---;;;;;false
+1472;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Sonntag Zeitspanne 3;Heating Program Heating Circuit 1 Sunday Time Period 3;/program/heating/hc1/sun/p3;;;---;;;;;false
+1480;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mo-Fr Zeitspanne 1;Heating Program Heating Circuit 1 MON-FRI Time Period 1;/program/heating/hc1/weekdays/p1;;;00:00-24:00;;;;;false
+1481;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mo-Fr Zeitspanne 2;Heating Program Heating Circuit 1 MON-FRI Time Period 2;/program/heating/hc1/weekdays/p2;;;---;;;;;false
+1482;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mo-Fr Zeitspanne 3;Heating Program Heating Circuit 1 MON-FRI Time Period 3;/program/heating/hc1/weekdays/p3;;;---;;;;;false
+1490;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Sa-So Zeitspanne 1;Heating Program Heating Circuit 1 SAT-SUN Time Period 1;/program/heating/hc1/weekend/p1;;;00:00-24:00;;;;;false
+1491;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Sa-So Zeitspanne 2;Heating Program Heating Circuit 1 SAT-SUN Time Period 2;/program/heating/hc1/weekend/p2;;;---;;;;;false
+1492;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Sa-So Zeitspanne 3;Heating Program Heating Circuit 1 SAT-SUN Time Period 3;/program/heating/hc1/weekend/p3;;;---;;;;;false
+14A0;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mo-So Zeitspanne 1;Heating Program Heating Circuit 1 MON-SUN Time Period 1;/program/heating/hc1/all/p1;;;00:00-24:00;;;;;false
+14A1;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mo-So Zeitspanne 2;Heating Program Heating Circuit 1 MON-SUN Time Period 2;/program/heating/hc1/all/p2;;;---;;;;;false
+14A2;301;6A0;;TimeRange;Heizprogramm Heizkreis 1 Mo-So Zeitspanne 3;Heating Program Heating Circuit 1 MON-SUN Time Period 3;/program/heating/hc1/all/p3;;;---;;;;;false
+1410;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Montag Zeitspanne 1;Heating Program Heating Circuit 2 Monday Time Period 1;/program/heating/hc2/mon/p1;;;00:00-24:00;;;;;false
+1411;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Montag Zeitspanne 2;Heating Program Heating Circuit 2 Monday Time Period 2;/program/heating/hc2/mon/p2;;;---;;;;;false
+1412;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Montag Zeitspanne 3;Heating Program Heating Circuit 2 Monday Time Period 3;/program/heating/hc2/mon/p3;;;---;;;;;false
+1420;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Dienstag Zeitspanne 1;Heating Program Heating Circuit 2 Tuesday Time Period 1;/program/heating/hc2/tue/p1;;;00:00-24:00;;;;;false
+1421;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Dienstag Zeitspanne 2;Heating Program Heating Circuit 2 Tuesday Time Period 2;/program/heating/hc2/tue/p2;;;---;;;;;false
+1422;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Dienstag Zeitspanne 3;Heating Program Heating Circuit 2 Tuesday Time Period 3;/program/heating/hc2/tue/p3;;;---;;;;;false
+1430;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mittwoch Zeitspanne 1;Heating Program Heating Circuit 2 Wednesday Time Period 1;/program/heating/hc2/wed/p1;;;00:00-24:00;;;;;false
+1431;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mittwoch Zeitspanne 2;Heating Program Heating Circuit 2 Wednesday Time Period 2;/program/heating/hc2/wed/p2;;;---;;;;;false
+1432;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mittwoch Zeitspanne 3;Heating Program Heating Circuit 2 Wednesday Time Period 3;/program/heating/hc2/wed/p3;;;---;;;;;false
+1440;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Donnerstag Zeitspanne 1;Heating Program Heating Circuit 2 Thursday Time Period 1;/program/heating/hc2/thu/p1;;;00:00-24:00;;;;;false
+1441;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Donnerstag Zeitspanne 2;Heating Program Heating Circuit 2 Thursday Time Period 2;/program/heating/hc2/thu/p2;;;---;;;;;false
+1442;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Donnerstag Zeitspanne 3;Heating Program Heating Circuit 2 Thursday Time Period 3;/program/heating/hc2/thu/p3;;;---;;;;;false
+1450;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Freitag Zeitspanne 1;Heating Program Heating Circuit 2 Friday Time Period 1;/program/heating/hc2/fri/p1;;;00:00-24:00;;;;;false
+1451;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Freitag Zeitspanne 2;Heating Program Heating Circuit 2 Friday Time Period 2;/program/heating/hc2/fri/p2;;;---;;;;;false
+1452;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Freitag Zeitspanne 3;Heating Program Heating Circuit 2 Friday Time Period 3;/program/heating/hc2/fri/p3;;;---;;;;;false
+1460;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Samstag Zeitspanne 1;Heating Program Heating Circuit 2 Saturday Time Period 1;/program/heating/hc2/sat/p1;;;00:00-24:00;;;;;false
+1461;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Samstag Zeitspanne 2;Heating Program Heating Circuit 2 Saturday Time Period 2;/program/heating/hc2/sat/p2;;;---;;;;;false
+1462;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Samstag Zeitspanne 3;Heating Program Heating Circuit 2 Saturday Time Period 3;/program/heating/hc2/sat/p3;;;---;;;;;false
+1470;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Sonntag Zeitspanne 1;Heating Program Heating Circuit 2 Sunday Time Period 1;/program/heating/hc2/sun/p1;;;00:00-24:00;;;;;false
+1471;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Sonntag Zeitspanne 2;Heating Program Heating Circuit 2 Sunday Time Period 2;/program/heating/hc2/sun/p2;;;---;;;;;false
+1472;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Sonntag Zeitspanne 3;Heating Program Heating Circuit 2 Sunday Time Period 3;/program/heating/hc2/sun/p3;;;---;;;;;false
+1480;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mo-Fr Zeitspanne 1;Heating Program Heating Circuit 2 MON-FRI Time Period 1;/program/heating/hc2/weekdays/p1;;;00:00-24:00;;;;;false
+1481;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mo-Fr Zeitspanne 2;Heating Program Heating Circuit 2 MON-FRI Time Period 2;/program/heating/hc2/weekdays/p2;;;---;;;;;false
+1482;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mo-Fr Zeitspanne 3;Heating Program Heating Circuit 2 MON-FRI Time Period 3;/program/heating/hc2/weekdays/p3;;;---;;;;;false
+1490;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Sa-So Zeitspanne 1;Heating Program Heating Circuit 2 SAT-SUN Time Period 1;/program/heating/hc2/weekend/p1;;;00:00-24:00;;;;;false
+1491;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Sa-So Zeitspanne 2;Heating Program Heating Circuit 2 SAT-SUN Time Period 2;/program/heating/hc2/weekend/p2;;;---;;;;;false
+1492;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Sa-So Zeitspanne 3;Heating Program Heating Circuit 2 SAT-SUN Time Period 3;/program/heating/hc2/weekend/p3;;;---;;;;;false
+14A0;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mo-So Zeitspanne 1;Heating Program Heating Circuit 2 MON-SUN Time Period 1;/program/heating/hc2/all/p1;;;00:00-24:00;;;;;false
+14A1;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mo-So Zeitspanne 2;Heating Program Heating Circuit 2 MON-SUN Time Period 2;/program/heating/hc2/all/p2;;;---;;;;;false
+14A2;302;6A0;;TimeRange;Heizprogramm Heizkreis 2 Mo-So Zeitspanne 3;Heating Program Heating Circuit 2 MON-SUN Time Period 3;/program/heating/hc2/all/p3;;;---;;;;;false
+1710;180;6A0;;TimeRange;Warmwasserprogramm Montag Zeitspanne 1;DWH Program Monday Time Period 1;/program/dwh/mon/p1;;;00:00-24:00;;;;;false
+1711;180;6A0;;TimeRange;Warmwasserprogramm Montag Zeitspanne 2;DWH Program Monday Time Period 2;/program/dwh/mon/p2;;;---;;;;;false
+1712;180;6A0;;TimeRange;Warmwasserprogramm Montag Zeitspanne 3;DWH Program Monday Time Period 3;/program/dwh/mon/p3;;;---;;;;;false
+1720;180;6A0;;TimeRange;Warmwasserprogramm Dienstag Zeitspanne 1;DWH Program Tuesday Time Period 1;/program/dwh/tue/p1;;;00:00-24:00;;;;;false
+1721;180;6A0;;TimeRange;Warmwasserprogramm Dienstag Zeitspanne 2;DWH Program Tuesday Time Period 2;/program/dwh/tue/p2;;;---;;;;;false
+1722;180;6A0;;TimeRange;Warmwasserprogramm Dienstag Zeitspanne 3;DWH Program Tuesday Time Period 3;/program/dwh/tue/p3;;;---;;;;;false
+1730;180;6A0;;TimeRange;Warmwasserprogramm Mittwoch Zeitspanne 1;DWH Program Wednesday Time Period 1;/program/dwh/wed/p1;;;00:00-24:00;;;;;false
+1731;180;6A0;;TimeRange;Warmwasserprogramm Mittwoch Zeitspanne 2;DWH Program Wednesday Time Period 2;/program/dwh/wed/p2;;;---;;;;;false
+1732;180;6A0;;TimeRange;Warmwasserprogramm Mittwoch Zeitspanne 3;DWH Program Wednesday Time Period 3;/program/dwh/wed/p3;;;---;;;;;false
+1740;180;6A0;;TimeRange;Warmwasserprogramm Donnerstag Zeitspanne 1;DWH Program Thursday Time Period 1;/program/dwh/thu/p1;;;00:00-24:00;;;;;false
+1741;180;6A0;;TimeRange;Warmwasserprogramm Donnerstag Zeitspanne 2;DWH Program Thursday Time Period 2;/program/dwh/thu/p2;;;---;;;;;false
+1742;180;6A0;;TimeRange;Warmwasserprogramm Donnerstag Zeitspanne 3;DWH Program Thursday Time Period 3;/program/dwh/thu/p3;;;---;;;;;false
+1750;180;6A0;;TimeRange;Warmwasserprogramm Freitag Zeitspanne 1;DWH Program Friday Time Period 1;/program/dwh/fri/p1;;;00:00-24:00;;;;;false
+1751;180;6A0;;TimeRange;Warmwasserprogramm Freitag Zeitspanne 2;DWH Program Friday Time Period 2;/program/dwh/fri/p2;;;---;;;;;false
+1752;180;6A0;;TimeRange;Warmwasserprogramm Freitag Zeitspanne 3;DWH Program Friday Time Period 3;/program/dwh/fri/p3;;;---;;;;;false
+1760;180;6A0;;TimeRange;Warmwasserprogramm Samstag Zeitspanne 1;DWH Program Saturday Time Period 1;/program/dwh/sat/p1;;;00:00-24:00;;;;;false
+1761;180;6A0;;TimeRange;Warmwasserprogramm Samstag Zeitspanne 2;DWH Program Saturday Time Period 2;/program/dwh/sat/p2;;;---;;;;;false
+1762;180;6A0;;TimeRange;Warmwasserprogramm Samstag Zeitspanne 3;DWH Program Saturday Time Period 3;/program/dwh/sat/p3;;;---;;;;;false
+1770;180;6A0;;TimeRange;Warmwasserprogramm Sonntag Zeitspanne 1;DWH Program Sunday Time Period 1;/program/dwh/sun/p1;;;00:00-24:00;;;;;false
+1771;180;6A0;;TimeRange;Warmwasserprogramm Sonntag Zeitspanne 2;DWH Program Sunday Time Period 2;/program/dwh/sun/p2;;;---;;;;;false
+1772;180;6A0;;TimeRange;Warmwasserprogramm Sonntag Zeitspanne 3;DWH Program Sunday Time Period 3;/program/dwh/sun/p3;;;---;;;;;false
+1780;180;6A0;;TimeRange;Warmwasserprogramm Mo-Fr Zeitspanne 1;DWH Program MON-FRI Time Period 1;/program/dwh/weekdays/p1;;;00:00-24:00;;;;;false
+1781;180;6A0;;TimeRange;Warmwasserprogramm Mo-Fr Zeitspanne 2;DWH Program MON-FRI Time Period 2;/program/dwh/weekdays/p2;;;---;;;;;false
+1782;180;6A0;;TimeRange;Warmwasserprogramm Mo-Fr Zeitspanne 3;DWH Program MON-FRI Time Period 3;/program/dwh/weekdays/p3;;;---;;;;;false
+1790;180;6A0;;TimeRange;Warmwasserprogramm Sa-So Zeitspanne 1;DWH Program SAT-SUN Time Period 1;/program/dwh/weekend/p1;;;00:00-24:00;;;;;false
+1791;180;6A0;;TimeRange;Warmwasserprogramm Sa-So Zeitspanne 2;DWH Program SAT-SUN Time Period 2;/program/dwh/weekend/p2;;;---;;;;;false
+1792;180;6A0;;TimeRange;Warmwasserprogramm Sa-So Zeitspanne 3;DWH Program SAT-SUN Time Period 3;/program/dwh/weekend/p3;;;---;;;;;false
+17A0;180;6A0;;TimeRange;Warmwasserprogramm Mo-So Zeitspanne 1;DWH Program MON-SUN Time Period 1;/program/dwh/all/p1;;;00:00-24:00;;;;;false
+17A1;180;6A0;;TimeRange;Warmwasserprogramm Mo-So Zeitspanne 2;DWH Program MON-SUN Time Period 2;/program/dwh/all/p2;;;---;;;;;false
+17A2;180;6A0;;TimeRange;Warmwasserprogramm Mo-So Zeitspanne 3;DWH Program MON-SUN Time Period 3;/program/dwh/all/p3;;;---;;;;;false
+1D10;180;6A0;;TimeRange;Lüfterprogramm Montag Zeitspanne 1;Fan Program Monday Time Period 1;/program/fan/mon/p1;;;00:00-24:00;;;;;false
+1D11;180;6A0;;TimeRange;Lüfterprogramm Montag Zeitspanne 2;Fan Program Monday Time Period 2;/program/fan/mon/p2;;;---;;;;;false
+1D12;180;6A0;;TimeRange;Lüfterprogramm Montag Zeitspanne 3;Fan Program Monday Time Period 3;/program/fan/mon/p3;;;---;;;;;false
+1D20;180;6A0;;TimeRange;Lüfterprogramm Dienstag Zeitspanne 1;Fan Program Tuesday Time Period 1;/program/fan/tue/p1;;;00:00-24:00;;;;;false
+1D21;180;6A0;;TimeRange;Lüfterprogramm Dienstag Zeitspanne 2;Fan Program Tuesday Time Period 2;/program/fan/tue/p2;;;---;;;;;false
+1D22;180;6A0;;TimeRange;Lüfterprogramm Dienstag Zeitspanne 3;Fan Program Tuesday Time Period 3;/program/fan/tue/p3;;;---;;;;;false
+1D30;180;6A0;;TimeRange;Lüfterprogramm Mittwoch Zeitspanne 1;Fan Program Wednesday Time Period 1;/program/fan/wed/p1;;;00:00-24:00;;;;;false
+1D31;180;6A0;;TimeRange;Lüfterprogramm Mittwoch Zeitspanne 2;Fan Program Wednesday Time Period 2;/program/fan/wed/p2;;;---;;;;;false
+1D32;180;6A0;;TimeRange;Lüfterprogramm Mittwoch Zeitspanne 3;Fan Program Wednesday Time Period 3;/program/fan/wed/p3;;;---;;;;;false
+1D40;180;6A0;;TimeRange;Lüfterprogramm Donnerstag Zeitspanne 1;Fan Program Thursday Time Period 1;/program/fan/thu/p1;;;00:00-24:00;;;;;false
+1D41;180;6A0;;TimeRange;Lüfterprogramm Donnerstag Zeitspanne 2;Fan Program Thursday Time Period 2;/program/fan/thu/p2;;;---;;;;;false
+1D42;180;6A0;;TimeRange;Lüfterprogramm Donnerstag Zeitspanne 3;Fan Program Thursday Time Period 3;/program/fan/thu/p3;;;---;;;;;false
+1D50;180;6A0;;TimeRange;Lüfterprogramm Freitag Zeitspanne 1;Fan Program Friday Time Period 1;/program/fan/fri/p1;;;00:00-24:00;;;;;false
+1D51;180;6A0;;TimeRange;Lüfterprogramm Freitag Zeitspanne 2;Fan Program Friday Time Period 2;/program/fan/fri/p2;;;---;;;;;false
+1D52;180;6A0;;TimeRange;Lüfterprogramm Freitag Zeitspanne 3;Fan Program Friday Time Period 3;/program/fan/fri/p3;;;---;;;;;false
+1D60;180;6A0;;TimeRange;Lüfterprogramm Samstag Zeitspanne 1;Fan Program Saturday Time Period 1;/program/fan/sat/p1;;;00:00-24:00;;;;;false
+1D61;180;6A0;;TimeRange;Lüfterprogramm Samstag Zeitspanne 2;Fan Program Saturday Time Period 2;/program/fan/sat/p2;;;---;;;;;false
+1D62;180;6A0;;TimeRange;Lüfterprogramm Samstag Zeitspanne 3;Fan Program Saturday Time Period 3;/program/fan/sat/p3;;;---;;;;;false
+1D70;180;6A0;;TimeRange;Lüfterprogramm Sonntag Zeitspanne 1;Fan Program Sunday Time Period 1;/program/fan/sun/p1;;;00:00-24:00;;;;;false
+1D71;180;6A0;;TimeRange;Lüfterprogramm Sonntag Zeitspanne 2;Fan Program Sunday Time Period 2;/program/fan/sun/p2;;;---;;;;;false
+1D72;180;6A0;;TimeRange;Lüfterprogramm Sonntag Zeitspanne 3;Fan Program Sunday Time Period 3;/program/fan/sun/p3;;;---;;;;;false
+1D80;180;6A0;;TimeRange;Lüfterprogramm Mo-Fr Zeitspanne 1;Fan Program MON-FRI Time Period 1;/program/fan/weekdays/p1;;;00:00-24:00;;;;;false
+1D81;180;6A0;;TimeRange;Lüfterprogramm Mo-Fr Zeitspanne 2;Fan Program MON-FRI Time Period 2;/program/fan/weekdays/p2;;;---;;;;;false
+1D82;180;6A0;;TimeRange;Lüfterprogramm Mo-Fr Zeitspanne 3;Fan Program MON-FRI Time Period 3;/program/fan/weekdays/p3;;;---;;;;;false
+1D90;180;6A0;;TimeRange;Lüfterprogramm Sa-So Zeitspanne 1;Fan Program SAT-SUN Time Period 1;/program/fan/weekend/p1;;;00:00-24:00;;;;;false
+1D91;180;6A0;;TimeRange;Lüfterprogramm Sa-So Zeitspanne 2;Fan Program SAT-SUN Time Period 2;/program/fan/weekend/p2;;;---;;;;;false
+1D92;180;6A0;;TimeRange;Lüfterprogramm Sa-So Zeitspanne 3;Fan Program SAT-SUN Time Period 3;/program/fan/weekend/p3;;;---;;;;;false
+1DA0;180;6A0;;TimeRange;Lüfterprogramm Mo-So Zeitspanne 1;Fan Program MON-SUN Time Period 1;/program/fan/all/p1;;;00:00-24:00;;;;;false
+1DA1;180;6A0;;TimeRange;Lüfterprogramm Mo-So Zeitspanne 2;Fan Program MON-SUN Time Period 2;/program/fan/all/p2;;;---;;;;;false
+1DA2;180;6A0;;TimeRange;Lüfterprogramm Mo-So Zeitspanne 3;Fan Program MON-SUN Time Period 3;/program/fan/all/p3;;;---;;;;;false
+011B;180;6A0;;LittleEndian;Ferienprogramm Ferienbeginn Tag;Holidayprogram Holiday Beginning Day;/program/holiday/beginn/day;;;1;1;31;;;false
+011C;180;6A0;;LittleEndian;Ferienprogramm Ferienbeginn Monat;Holidayprogram Holiday Beginning Month;/program/holiday/beginn/month;;;1;1;12;;;false
+011D;180;6A0;;LittleEndian;Ferienprogramm Ferienbeginn Jahr;Holidayprogram Holiday Beginning Year;/program/holiday/beginn/year;;;11;0;99;;;false
+05D3;180;6A0;;TimeRangeLittleEndian;Ferienprogramm Ferienbeginn Zeit;Holidayprogram Holiday Beginning Time;/program/holiday/beginn/time;;;;00:00;24:00;;;false
+011E;180;6A0;;LittleEndian;Ferienprogramm Ferienende Tag;Holidayprogram Holiday Ending Day;/program/holiday/end/day;;;1;1;31;;;false
+011F;180;6A0;;LittleEndian;Ferienprogramm Ferienende Monat;Holidayprogram Holiday Ending Month;/program/holiday/end/month;;;1;1;12;;;false
+0120;180;6A0;;LittleEndian;Ferienprogramm Ferienende Jahr;Holidayprogram Holiday Ending Year;/program/holiday/end/year;;;11;0;99;;;false
+05D4;180;6A0;;TimeRangeLittleEndian;Ferienprogramm Ferienende Zeit;Holidayprogram Holiday Ending Time;/program/holiday/end/time;;;;00:00;24:00;;;false
+05D1;180;6A0;;TimeRangeLittleEndian;Partyprogramm Start;Party Program Start;/program/party/start;;;;00:00;23:45;;;false
+05D2;180;6A0;;TimeRangeLittleEndian;Partyprogramm Ende;Party Program End;/program/party/end;;;;00:00;23:45;;;false
+0110;180;6A0;Min;Default;Max Vorverlegung;Max. Advance;/program/maxadvance;;;;0;300;;;false
+0005;301;6A0;°C;Dec;Raumtemperatur Tag HK1;Room Temperature Day HC1;/room/hc1/temperature/day;;;21;10;30;;;false
+0008;301;6A0;°C;Dec;Raumtemperatur Nacht HK1;Room Temperature Night HC1;/room/hc1/temperature/night;;;21;10;30;;;false
+013D;301;6A0;°C;Dec;Raumtemperatur Bereitschaft HK1;Room Temperature Standby HC1;/room/hc1/temperature/standby;;;10;10;30;;;false
+0129;301;6A0;°C;Dec;Heizkreissoll Hand HK1;Manual Set HC1;/room/hc1/temperature/manual;;;35;10;65;;;false
+0011;301;6A0;°C;Dec;Raumtemperatur HK1;Room Temperature HC1;/room/hc1/temperature/measured;;;;;;;;true
+0005;302;6A0;°C;Dec;Raumtemperatur Tag HK2;Room Temperature Day HC2;/room/hc2/temperature/day;;;21;10;30;;;false
+0008;302;6A0;°C;Dec;Raumtemperatur Nacht HK2;Room Temperature Night HC2;/room/hc2/temperature/night;;;21;10;30;;;false
+013D;302;6A0;°C;Dec;Raumtemperatur Bereitschaft HK2;Room Temperature Standby HC2;/room/hc2/temperature/standby;;;10;10;30;;;false
+0129;302;6A0;°C;Dec;Heizkreissoll Hand HK2;Manual Set HC2;/room/hc2/temperature/manual;;;35;10;65;;;false
+0011;302;6A0;°C;Dec;Raumtemperatur HK2;Room Temperature HC2;/room/hc2/temperature/measured;;;;;;;;true
+010E;301;6A0;;Cent;Steigung HK1;Gradient HC1;/heatcircle/hc1/gradient;;;0,3;0;5;;;false
+059E;301;6A0;°C;Dec;Fusspunkt HK1;Low End HC1;/heatcircle/hc1/lowend;;;3;0;20;;;false
+010F;301;6A0;;Default;Raumeinfluss HK1;Room Influence HC1;/heatcircle/hc1/roominfluence;;;0;0;100;;;false
+059D;301;6A0;%;Default;Anteil Vorlauf HK1;Flow Proportion HC1;/heatcircle/hc1/flowproportion;;;30;0;100;;;false
+0028;301;6A0;°C;Dec;Sollwert Maximum HK1;Maximum Set Value HC1;/heatcircle/hc1/maximumset;;;55;10;65;;;false
+012B;301;6A0;°C;Dec;Sollwert Minimum HK1;Minimum Set Value HC1;/heatcircle/hc1/minimumset;;;10;0;40;;;false
+010E;302;6A0;;Cent;Steigung HK2;Gradient HC2;/heatcircle/hc2/gradient;;;0,3;0;5;;;false
+059E;302;6A0;°C;Dec;Fusspunkt HK2;Low End HC2;/heatcircle/hc2/lowend;;;3;0;20;;;false
+010F;302;6A0;;Default;Raumeinfluss HK2;Room Influence HC2;/heatcircle/hc2/roominfluence;;;0;0;100;;;false
+059D;302;6A0;%;Default;Anteil Vorlauf HK2;Flow Proportion HC2;/heatcircle/hc2/flowproportion;;;30;0;100;;;false
+0028;302;6A0;°C;Dec;Sollwert Maximum HK2;Maximum Set Value HC2;/heatcircle/hc2/maximumset;;;55;10;65;;;false
+012B;302;6A0;°C;Dec;Sollwert Minimum HK2;Minimum Set Value HC2;/heatcircle/hc2/minimumset;;;10;0;40;;;false
+C0DF;180;6A0;%/K;Dec;Proportionaler Anteil;Proportional Component;/heating/proportionalcomponent;;;2;0;10;;;false
+C0E0;180;6A0;Kmin;Default;Integralanteil Inverter;I Component Inverter;/heating/icomponentinverter;;;500;0;500;;;false
+059F;180;6A0;;Default;Maximale NE-Stufe HZ;Maximum Booster Stage Heating;/heating/maxboosterstage;;;3;0;3;;;false
+0027;180;6A0;°C;Dec;Maximale Vorlauftemperatur Heizung;Maximum Flow Temperature Heating;/heating/maxflowtemperature;;;60;10;75;;;false
+0116;180;6A0;°C;Dec;Sommerbetrieb;Summer Mode;/heating/summermode;;;17;10;25;;;false
+05A2;180;6A0;K;Dec;Hysterese Sommerbetrieb;Hysteresis Summer Mode;/heating/hysteresissummermode;;;4;1;7;;;false
+010C;180;6A0;h;Default;Dämpfung Außentemperatur;Outside Temperature Adjustment;/heating/outsidetemperatureadjustment;;;1;0;24;;;false
+01AC;180;6A0;°C;Dec;Bivalenzpunkt;Dual Mode Point;/heating/dualmodepoint;;;-10;-20;10;;;false
+05A0;180;6A0;min;Default;Zeitsperre Notheizung;Booster Timeout;/heating/boostertimeout;;;20;0;60;;;false
+05A3;180;6A0;°C;Dec;Korrektur Außentemperatur;Outside Temperature Correction;/heating/outsidetemperaturecorrection;;;0;-20;30;;;false
+0611;180;6A0;s;Default;Unterdrückung Temperatur Messung;Suppress Temperature Measure;/heating/suppresstemperaturemeasure;;;60;0;120;;;false
+C0D6;180;6A0;°C;Dec;Auslegungstemperatur Heizen;Design Temperature;/heating/designtemperature;;;-20;-25;5;;;false
+C0F1;180;6A0;%;Default;Leistung Auslegung Heizen;Heating System Output Sizing;/heating/heatingsystemoutputsizing;;;100;40;100;;;false
+0013;180;6A0;°C;Dec;Warmwasser Soll Tag;DWH Set Day;/dwh/temperature/day;;;45;10;65;;;false
+05BF;180;6A0;°C;Dec;Warmwasser Soll Nacht;DWH Set Night;/dwh/temperature/night;;;45;10;65;;;false
+0581;180;6A0;°C;Dec;Warmwasser Soll Bereitschaft;DWH Set Standby;/dwh/temperature/standby;;;10;10;65;;;false
+0580;180;6A0;°C;Dec;Warmwasser Soll Handbetrieb;DWH Set Manual;/dwh/temperature/manual;;;45;10;65;;;false
+000E;180;6A0;°C;Dec;Warmwasser Temperatur;DWH Temperature;/dwh/temperature/measured;;;;;;;;true
+0140;180;6A0;K;Dec;Hysterese;Hysteresis;/dwh/hysteresis;;;2;2;10;;;false
+0588;180;6A0;min;Default;Zeitsperren Notheizung;Booster Timeout;/dwh/boostertimeout;;;90;0;360;;;false
+0589;180;6A0;°C;Dec;Temperatur Freigabe Notheizung;Booster Temperature Activate;/dwh/boostertemperatureactive;;;-10;-20;10;;;false
+0586;180;6A0;d;Default;Antilegionellen;Pasteurisation;/dwh/pasteurisation;;;30;1;30;;;false
+0180;180;6A0;h;Default;Maximale Dauer Warmwasser-Erzeugung;Maximum DWH Heating Duration;/dwh/maxduration;;;12;6;12;;;false
+0587;180;6A0;°C;Dec;Warmwasser Temperatur Legionellen;Pasteurisation Temperature;/dwh/pasteurisationtemperature;;;30;10;65;;;false
+0666;180;6A0;Uhr;Time;Antilegionellen Zeit;Pasteurisation Time;/dwh/pasteurisationtime;;;02:00;00:00;23:45;;;false
+058A;180;6A0;;Default;Notheizung Stufe Warmwasser;DHW Booster Stage;/dwh/boosterstate;;;3;0;3;;;false
+058B;180;6A0;;Bool;Warmwasser Pufferbetrieb;DHW Buffer Mode;/dwh/buffermode;;;0;0;1;;;false
+058C;180;6A0;°C;Dec;Maximale Vorlauftemperatur Warmwasser;Maximum Flow Temperature DHW;/dwh/maxflowtemperature;;;75;10;75;;;false
+058D;180;6A0;;Bool;Warmwasser Eco;DHW Eco;/dwh/eco;;;1;0;1;;;false
+0690;180;6A0;%;Default;Warmwasser Leistung Sommer;DHW Output Summer;/dwh/outputsummer;;;60;30;100;;;false
+0691;180;6A0;%;Default;Warmwasser Leistung Winter;DHW Output Winter;/dwh/outputwinter;;;60;30;100;;;false
+C0DB;180;6A0;;Custom;Integralsensor;Integral Sensor;/dwh/integralsensor;;;Aus;;;0000=Aus,0001=Ein,0002=Regelung;;false
+C0DE;180;6A0;;Bool;2. WW-Speicher;2nd DHW Cylinder;/dwh/2ndcylinder;;;0;0;1;;;false
+C0FA;180;6A0;;Custom;Lüfterregelung;Fan Control;/fan/control;;;;;;0000=Volumenstrom,0001=Differenzdruck,?=Unbekannt;;false
+C0FB;180;6A0;Pa;Default;Differenzdruck Sollwert;Set Differential Pressure;/fan/differentialpreasure;;;;;;;;false
+C0FC;180;6A0;Pa/m²;Dec;I-Faktor;I Factor;/fan/ifactor;;;;;;;;false
+C0FD;180;6A0;Pa/m²;Dec;P-Faktor;P Factor;/fan/pfactor;;;;;;;;false
+056C;180;6A0;;Default;Stufe Tag;Day Stage;/fan/day;;;2;0;3;;;false
+056D;180;6A0;;Default;Stufe Nacht;Night Stage;/fan/night;;;1;0;3;;;false
+056F;180;6A0;;Default;Stufe Bereitschaft;Standby Stage;/fan/standby;;;0;0;3;;;false
+0570;180;6A0;;Default;Stufe Party;Party Stage;/fan/party;;;3;0;3;;;false
+0612;180;6A0;;Default;Stufe Hand;Manual Stage;/fan/manual;;;2;0;3;;;false
+0571;180;6A0;;Default;Lüftungszeit Außerplanmäßig Stufe 0;Unscheduled Ventilation Time Stage 0;/fan/unscheduled/stage1;;;60;0;1000;;;false
+0572;180;6A0;;Default;Lüftungszeit Außerplanmäßig Stufe 1;Unscheduled Ventilation Time Stage 1;/fan/unscheduled/stage2;;;60;0;1000;;;false
+0573;180;6A0;;Default;Lüftungszeit Außerplanmäßig Stufe 2;Unscheduled Ventilation Time Stage 2;/fan/unscheduled/stage3;;;60;0;1000;;;false
+0574;180;6A0;;Default;Lüftungszeit Außerplanmäßig Stufe 3;Unscheduled Ventilation Time Stage 3;/fan/unscheduled/stage4;;;60;0;1000;;;false
+0576;180;6A0;m³/h;Default;Lüfterstufe Zuluft 1;Fan Stage Ventilation Air 1;/fan/ventilation/stage1;;;140;10;300;;;false
+0577;180;6A0;m³/h;Default;Lüfterstufe Zuluft 2;Fan Stage Ventilation Air 2;/fan/ventilation/stage2;;;170;80;300;;;false
+0578;180;6A0;m³/h;Default;Lüfterstufe Zuluft 3;Fan Stage Ventilation Air 3;/fan/ventilation/stage3;;;220;80;300;;;false
+0579;180;6A0;m³/h;Default;Lüfterstufe Abluft 1;Fan Stage Extract Air 1;/fan/extract/stage1;;;140;10;300;;;false
+057A;180;6A0;m³/h;Default;Lüfterstufe Abluft 2;Fan Stage Extract Air 2;/fan/extract/stage2;;;170;80;300;;;false
+057B;180;6A0;m³/h;Default;Lüfterstufe Abluft 3;Fan Stage Extract Air 3;/fan/extract/stage3;;;220;80;300;;;false
+0575;180;6A0;;Custom;Passivkühlung;Passive Cooling;/fan/cooling;;;Aus;;;0000=Aus,0001=Ablüften,0002=Zulüften,0003=Bypass,0004=Sommerkassette,?=Unbekannt;;false
+05DB;180;6A0;;Bool;Passivkühlung Fortluft;Passive Cooling Expand Air;/fan/coolingexpandair;;;0;0;1;;;false
+C0F2;180;6A0;;Bool;Luftstop Sommer Warmwasser;Air Stop Summer DHW;/fan/coolingairstopsummer;;;0;0;1;;;false
+09D1;180;6A0;;Bool;Feuchteschutz;Humidity Protection;/fan/humidity/protection;;;0;0;1;;;false
+0650;180;6A0;%;Default;Feuchte Schwellwert;Humidity Threshold Value;/fan/humidity/thresholdvalue;;;55;30;70;;;false
+008E;180;6A0;%;Default;Feuchte Hysterese;Humidity Hysteresis;/fan/humidtiy/hysteresis;;;5;2;10;;;false
+064F;180;6A0;min;Default;Feuchte Maskierzeit;Humidity Masking Time;/fan/humidity/maskingtime;;;5;1;10;;;false
+09D2;180;6A0;%;Default;Feuchtesoll Minimum;Set Humidity Minimum;/fan/humidity/min;;;50;30;60;;;false
+06A4;180;6A0;%;Default;Leistungsreduktion;Output Reduction;/fan/humidtiy/outputreduction;;;0;50;0;;;false
+09D3;180;6A0;%;Default;Fechtesoll Maximum;Set Humidity Maximum;/fan/humidity/max;;;60;60;90;;;false
+06A5;180;6A0;%;Default;Leistungserhöhung;Output Increase;/fan/humidity/outputincrease;;;0;0;100;;;false
+057C;180;6A0;;Custom;Lüften;Stove / Fireplace;/fan/stove;;;Aus;;;0000=Aus,0001=Schließer-Aus,0002=Öffner-Aus,0003=Schließer-Überwach.,0004=Öffner-Überwach.,?=Unbekannt;;false
+057D;180;6A0;min;Default;Maximale Abtaudauer;Maximum Defrost Duration;/fan/maxdefrostduration;;;60;60;250;;;false
+057E;180;6A0;%;Default;Abtaubeginnschwelle;Defrost Start Threshold;/fan/defrostthreshold;;;20;0;50;;;false
+057F;180;6A0;%;Default;Drehzahlfilter;Filter Speed;/fan/filterspeed;;;20;0;100;;;false
+C0FE;180;6A0;1000m³;Default;Filterwechsel-Volumen;Filter Change Volume;/fan/filtervolume;;;;;;;;false
+0341;180;6A0;d;Default;Laufzeit Filter;Runtime Filter;/fan/runtimefilterdays;;;0;0;1204;;;false
+C111;180;6A0;%;Default;Laufzeit Filter;Runtime Filter;/fan/runtimefilterpercent;;;;;;;;false
+033B;180;6A0;;Bool;Reset Filter;Reset Filter;/fan/resetfilter;;;0;0;1;;;false
+0569;301;6A0;°C;Dec;Raumtemperatur Tag HK1;Room Temperature Day HC1;/cooling/hc1/temperature/day;;;25;10;30;;;false
+056B;301;6A0;°C;Dec;Raumtemperatur Nacht HK1;Room Temperature Night HC1;/cooling/hc1/temperature/night;;;25;10;30;;;false
+056A;301;6A0;°C;Dec;Raumtemperatur Bereitschaft HK1;Room Temperature Standby HC1;/cooling/hc1/temperature/standby;;;30;10;30;;;false
+0011;301;6A0;°C;Dec;Raumtemperatur HK1;Room Temperature HC1;/room/hc1/temperature/measured;;;;;;;;true
+0569;302;6A0;°C;Dec;Raumtemperatur Tag HK2;Room Temperature Day HC2;/cooling/hc2/temperature/day;;;25;10;30;;;false
+056B;302;6A0;°C;Dec;Raumtemperatur Nacht HK2;Room Temperature Night HC2;/cooling/hc2/temperature/night;;;25;10;30;;;false
+056A;302;6A0;°C;Dec;Raumtemperatur Bereitschaft HK2;Room Temperature Standby HC2;/cooling/hc2/temperature/standby;;;30;10;30;;;false
+0011;302;6A0;°C;Dec;Raumtemperatur HK2;Room Temperature HC2;/room/hc2/temperature/measured;;;;;;;;true
+0287;301;6A0;;Bool;Kühlbetrieb HK1;Cooling Mode HC1;/cooling/hc1/enable;;;0;0;1;;;false
+0613;301;6A0;;Custom;Kühlsystem HK1;Cooling System HC1;/cooling/hc1/system;;;0;;;0000=Flächenkühlung,0001=Gebläsekühlung,?=Unbekannt;;false
+0582;301;6A0;°C;Dec;Temperatur Kühlen HK1;Temperature Cooling HC1;/cooling/hc1/temperature;;;18;10;25;;;false
+0584;301;6A0;K;Dec;Hysterese Raumtemperatur HK1;Hysteresis Room Temperature HC1;/cooling/hc1/hysteresistemperature;;;0,5;0,5;3;;;false
+0287;302;6A0;;Bool;Kühlbetrieb HK2;Cooling Mode HC2;/cooling/hc2/enable;;;0;0;1;;;false
+0613;302;6A0;;Custom;Kühlsystem HK2;Cooling System HC2;/cooling/hc2/system;;;0;;;0000=Flächenkühlung,0001=Gebläsekühlung,?=Unbekannt;;false
+0582;302;6A0;°C;Dec;Temperatur Kühlen HK2;Temperature Cooling HC2;/cooling/hc2/temperature;;;18;10;25;;;false
+0584;302;6A0;K;Dec;Hysterese Raumtemperatur HK2;Hysteresis Room Temperature HC2;/cooling/hc2/hysteresistemperature;;;0,5;0,5;3;;;false
+0692;180;6A0;%;Default;Leistung Kühlen;Cooling Capacity;/cooling/capacity;;;30;30;50;;;false
+C0F3;180;6A0;%;Dec;Prop-Band Kühlen;??? Cooling;/cooling/proportionalcooling;;;10;0,1;100;;;false
+0583;180;6A0;K;Dec;Hysterese Vorlauftemperatur;Hysteresis Flow Temperature;/cooling/hysteresisflowtemperature;;;0,5;5;1,5;;;false
+03C1;180;6A0;;Bool;Freigabe Solar;Solar Activation;/solar/enable;;;0;0;1;;;false
+01B8;180;6A0;K;Dec;Temperatur Differenz;Temperature Differential;/solar/temperaturediff;;;8;2;15;;;false
+058E;180;6A0;min;Default;Verzögerung Verdichter Warmwasser;DHW Compressor Delay;/solar/dwhcompressordelay;;;60;0;500;;;false
+05BE;180;6A0;°C;Dec;Warmwasser Temperatur;DHW Solar Temperature;/solar/dwhtemperature;;;60;10;75;;;false
+058F;180;6A0;K;Dec;Hysterese Solar;Solar Hysteresis;/solar/hysteresis;;;5;0,6;10;;;false
+02F6;180;6A0;°C;Dec;Kollektorgrenztemperatur;Collector Temperature Limit;/solar/collectorlimit;;;70;50;80;;;false
+03BB;180;6A0;°C;Dec;Kollektorschutztemperatur;Collector Protect Temperature;/solar/collectorprotect;;;120;100;150;;;false
+03B8;180;6A0;°C;Dec;Kollektorsperrtemperatur;Collector Cut-Off Temperature;/solar/collectorcutoff;;;180;130;200;;;false
+02F5;180;6A0;;Bool;Kollektorschutz;Collector Protection;/solar/collectorprotectenable;;;0;0;1;;;false
+064C;180;6A0;;Custom;Vorrang Solar;Priority Solar;/solar/priority;;;Solar;;;0000=Solar,0001=Kühlen,0002=Kühlzeit,?=Unbekannt;;false
+064D;180;6A0;Uhr;TimeDomain;Kühlzeit;Cooling Time;/solar/coolingtime;;;;00:00;23:59;;;false
+011A;180;6A0;;Bool;Trockenheizprogramm;Screed Drying Program;/concrete/enable;;;0;0;1;;;false
+01BB;180;6A0;°C;Dec;Sockeltemperatur;Low End Temperature;/concrete/lowend;;;25;20;40;;;false
+01BD;180;6A0;°C;Dec;Maximale Temperatur;High End Temperature;/concrete/highend;;;40;25;55;;;false
+01BC;180;6A0;Tage;Default;Dauer Sockeltemperatur;Temperature Rising Period;/concrete/risingperiod;;;3;0;30;;;false
+01BE;180;6A0;Tage;Default;Dauer Maximale Temperatur;Maximum High End Temperature;/concrete/maxhighendperiod;;;3;0;30;;;false
+01BA;180;6A0;K/d;Default;Steigung;Gradient;/concrete/gradient;;;1;1;10;;;false
+0109;180;6A0;°C;Dec;Korrektur Raumtemperatur Bedienteil;Room Temperature Correction;/controller/roomtemperaturecorrection;;;0;-5;5;;;false
+019A;180;6A0;;Cent;Softwarestand;Software Version;/system/version;;;;;;;;true
+024B;180;6A0;;Default;Software-ID;Software ID;/system/id;;;;;;;;true
+00FB;180;6A0;;Bool;Reset Regler;Reset Controller;/system/resetcontroller;;;0;0;1;;;false
+00EF;180;6A0;;Bool;Werkseinstellung;Factory Setting;/system/factorydefault;;;0;0;1;;;false
+07CB;180;6A0;;Custom;Gerätetyp;Appliance Type;/system/appliancetype;;;0;7;37;0007=504Inv,?=Unbekannt;;false
+001A;180;6A0;;Default;Kundennummer;Customer ID;/system/customerid;;;;;;;;false
+0122;180;6BC;;LittleEndian;Tag;Day;/time/day;;;1;1;31;;;false
+0123;180;6BC;;LittleEndian;Monat;Month;/time/month;;;1;1;12;;;false
+0124;180;6BC;;LittleEndian;Jahr;Year;/time/year;;;0;0;99;;;false
+0125;180;6BC;;LittleEndian;Stunde;Hour;/time/hour;;;0;0;23;;;false
+0126;180;6BC;;LittleEndian;Minute;Minute;/time/minute;;;0;0;59;;;false
+FDDF;180;6A0;;Custom;Sommerzeit Manuell Beginn (Monat);Summertime Manual Begin (Month);/time/summertime/beginmonth;;;3;1;12;0100=Januar,0200=Februar,0300=März,0400=April,0500=Mai,0600=Juni,0700=Juli,0800=August,0900=September,0A00=Oktober,0B00=November,0C00=Dezember;0100=January,0200=February,0300=March,0400=April,0500=May,0600=June,0700=July,0800=August,0900=September,0A00=October,0B00=November,0C00=December;false
+FDDE;180;6A0;;LittleEndian;Sommerzeit Manuell Beginn (Tag);Summertime Manual Begin (Day);/time/summertime/beginday;;;21;1;31;;;false
+FDD0;180;6A0;;LittleEndian;Sommerzeit Manuell Ende (Tag);Summertime Manual End (Month);/time/summertime/endmonth;;;25;1;31;;;false
+FDD1;180;6A0;;Custom;Sommerzeit Manuell Ende (Monat);Summertime Manual End (Day);/time/summertime/endday;;;10;1;12;0100=Januar,0200=Februar,0300=März,0400=April,0500=Mai,0600=Juni,0700=Juli,0800=August,0900=September,0A00=Oktober,0B00=November,0C00=Dezember;0100=January,0200=February,0300=March,0400=April,0500=May,0600=June,0700=July,0800=August,0900=September,0A00=October,0B00=November,0C00=December;false
+0944;180;6A0;;Bool;Sommerzeit Automatik;Summertime Automatic;/time/summertime/auto;;;1;0;1;;;false
+0121;180;6BC;;Custom;Wochentag;Day of Week;/time/dayofweek;;;;;;0000=Montag,0100=Dienstag,0200=Mittwoch,0300=Donnerstag,0400=Freitag,0500=Samstag,0600=Sonntag;0000=Monday,0100=Tuesday,0200=Wednesday,0300=Thursday,0400=Friday,0500=Saturday,0600=Sunday;false
+0127;180;6BC;;LittleEndian;Sekunde;Second;/time/second;;;0;0;59;;;false
+027A;180;6A0;;Bool;Fehlerspeicher löschen;Delete Fault Memory;/system/errorlistdelete;;;0;0;1;;;false
+05C7;180;6A0;;Bool;Stopp Ereigniss;Stop Event;/system/stopevent;;;0;0;64;;;false
+0001;180;6BC;;;Fehlerspeicher;Error List;/system/errorlist;;;;;;;;false
+05B2;180;6A0;°C;Dec;Temperatur Abtauende;Defrost End Temperature;/defrost/endtemperature;;;30;0;30;;;false
+03AB;180;6A0;min;Default;Maximale Abtaudauer;Maximum Defrost Duration;/defrost/maxduration;;;10;2;60;;;false
+05B3;180;6A0;min;Dec;Einfrierschutz Notheizung;Booster Refrost Guard;/defrost/boosterrefrostguard;;;15;10;30;;;false
+05B4;180;6A0;min;Dec;Abtauabbruch;Defrost Stop;/defrost/defroststop;;;10;0;20;;;false
+05B5;180;6A0;min;Default;Verdichter Taktung;Compressor Cycling;/setting/compressorcycling;;;20;0;20;;;false
+05B6;180;6A0;%;Default;Drehzahl Fortlüftung;Exhaust Air Speed;/setting/exhaustspeed;;;60;10;100;;;false
+C0AD;180;6A0;A;Default;Anlaufstrombegrenzung;Starting Current Limiter;/setting/CurrentLimiterStart;;;20;5;30;;;false
+C113;180;6A0;;Bool;Lüftung;Ventilation;/fan/enable;;;;0;1;;;false
+02CC;180;6A0;%;Dec;Pumpendrehzahl Warmwasser;Pump Speed DHW;/setting/dwhpumpspeed;;;80;40;100;;;false
+02CB;180;6A0;%;Dec;Pumpendrehzahl Heizen;Pump Speed Heating;/setting/heatingpumpspeed;;;80;40;100;;;false
+C0E3;180;6A0;%;Default;Verhältniss Mischer-Heizen;Mixer/Heating Ratio;/setting/mixerheatingration;;;100;0;100;;;false
+0651;180;6A0;min;Default;Mischer-P;Mixer P Run-On;/setting/mixerprunon;;;10;0;120;;;false
+C0E2;180;6A0;;Default;Mischer-P Typ;Mixer P Type;/setting/mixerptype;;;0;0;2;;;false
+C0E1;180;6A0;;Default;Solar-P Typ;Solar P Type;/setting/solarptype;;;0;0;2;;;false
+05B8;180;6A0;1/d;Default;Minimale Zyklen;Minimum Cycles;/setting/minpumpcycles;;;1;1;24;;;false
+05B7;180;6A0;1/d;Default;Maximale Zyklen;Maximum Cycles;/setting/maxpumpcycles;;;100;25;288;;;false
+05BA;180;6A0;°C;Dec;Außentemperatur Minimale Zyklen;Outside Temperature Minimum Cycles;/setting/minpumpcyclesoutside;;;20;0;25;;;false
+05B9;180;6A0;°C;Dec;Außentemperatur Maximale Zyklen;Outside Temperature Maximum Cycles;/setting/maxpumpcyclesoutside;;;0;0;20;;;false
+065A;180;6A0;;Bool;Notbetrieb Auto;Emergency Mode Auto;/setting/emergencymodeauto;;;0;0;1;;;false
+01D3;180;6A0;;Default;EVU-Sperre;Power-Off;/setting/poweroff;;;5;0;5;;;false
+0833;180;6A0;%;Default;Lüfter (Prozent);Fan (PRC);/processvalues/fanprc;;;;;;;;true
+000C;180;6A0;°C;Dec;Außentemperatur;Outside Temperature;/outside/temperature/measured;;;;;;;;true
+07A9;180;6A0;°C;Dec;Verdampferausgang Temperatur;Evaporator Outlet Temperature;/processvalues/evaporatoroutlettemp;;;;;;;;true
+0265;180;6A0;°C;Dec;Heisgastemperatur;Hot Gas Temperature;/processvalues/hotgastemp;;;;;;;;true
+000D;180;6A0;°C;Dec;Vorlauftemperatur;Flow Temperature;/processvalues/flowtemp;;;;;;;;true
+059C;180;6A0;°C;Dec;Verflüssigertemperatur;Condenser Temperature;/processvalues/condensertemp;;;;;;;;true
+0016;180;6A0;°C;Dec;Rücklauftemperatur;Return Temperature;/processvalues/returntemp;;;;;;;;true
+063F;180;6A0;°C;Dec;Kühlungstemperatur;Cooling Temperature;/processvalues/coolingtemp;;;;;;;;true
+07A6;180;6A0;bar;Cent;Hochdruck;High Pressure;/processvalues/highpressure;;;;;;;;true
+07A7;180;6A0;bar;Cent;Niederdruck;Low Pressure;/processvalues/lowpressure;;;;;;;;true
+080D;180;6A0;bar;Cent;Niederdruck Gefiltert;Low Pressure Filtered;/processvalues/lowpressurefiltered;;;;;;;;true
+064B;180;6A0;;Default;Position Ventil;Position Valve;/processvalues/positionvalve;;;;;;;;true
+0698;180;6A0;%;Dec;PWM Solarpumpe;PWM Solar Pump;/processvalues/pwmsolarpump;;;;;;;;true
+C0F0;180;6A0;%;Dec;PWM Heizkreispumpe;PWM Heat Circuit Pump;/processvalues/pwmheatcircuitpump;;;;;;;;true
+0699;180;6A0;%;Dec;PWM Mischerpumpe;PWM Mixer Pump;/processvalues/pwmmixerpump;;;;;;;;true
+069A;180;6A0;%;Default;Heizleistung Relativ;Heating Output Relative;/processvalues/heatingoutput;;;;;;;;true
+069B;180;6A0;%;Default;Vorgabe Verdichter;Compressor Set Output;/processvalues/compressoroutput;;;;;;;;true
+069C;180;6A0;Hz;Default;Verdichter N. Soll Unbegrenzt;Compressor N Set Val. Unlimited;/processvalues/compressornsetvalunlimited;;;;;;;;true
+069D;180;6A0;Hz;Default;Verdichter N. Soll Begrenzt;Compressor N Set Val. Limited;/processvalues/compressprnsetvallimited;;;;;;;;true
+0813;180;6A0;;Binary;Prozessstatus;Process Status;/processstatus;;;;;;;;true
+0067;180;6A0;;Default;Aktuell Mode IWS;Current Mode IWS;/analysis/currentmodeiws;;;;;;;;true
+07F2;180;6A0;;Default;Aktuell Mode EVE;Current Mode EVE;/analysis/currentmodeeve;;;;;;;;true
+07F3;180;6A0;°C;Dec;Überh. Verdichter Soll;Superheating Evaporateur Set;/analysis/superheatingevaporateurset;;;;;;;;true
+07F4;180;6A0;°C;Dec;Überh. Verdichter Ist;Superheating Evaporateur Actual;/analysis/superheatingevaporateuracutal;;;;;;;;true
+07F5;180;6A0;°C;Dec;Überh. Rekup. Ist;Superheating Recup. Actual;/analysis/superheatingrecopactual;;;;;;;;true
+07FA;180;6A0;%;Dec;Pendeln Rel.;Cycling Rel.;/analysis/cyclingrel;;;;;;;;true
+07FB;180;6A0;;Cent;Dynamik Faktor;Dynamic Factor;/analysis/dynamicfactor;;;;;;;;true
+07F7;180;6A0;;Cent;P-Faktor;P Factor;/analysis/pfactor;;;;;;;;true
+07F8;180;6A0;;Cent;I-Faktor;I Factor;/analysis/ifactor;;;;;;;;true
+07F9;180;6A0;;Cent;D-Faktor;D Factor;/analysis/dfactor;;;;;;;;true
+07F6;180;6A0;%;Dec;Öffnung EXV Vorst.;Opening EXV Pre Control;/analysis/openingexvprecontrol;;;;;;;;true
+07CA;180;6A0;%;Dec;Öffnung EXV;Opening EXV;/analysis/openingexv;;;;;;;;true
+C0EE;180;6A0;%;Dec;Öffnung EXV Kühlen;Opening EXV Cooling;/analysis/openingexvcooling;;;;;;;;true
+081C;180;6A0;%;Dec;Heiz-/Kühlleistung gemessen;Actual Heat/Cool Output;/analysis/heatcooloutput;;;;;;;;true
+069E;180;6A0;Hz;Default;Verdichterdrehzahl;Compressor Speed;/inverter/compressorspeed;;;;;;;;true
+069F;180;6A0;A;Default;Motorstrom;Motor Current;/inverter/motorcurrent;;;;;;;;true
+06A0;180;6A0;KW;Cent;Motorleistung;Motor Power;/inverter/power;;;;;;;;true
+06A1;180;6A0;V;Default;Motorspannung;Motor Voltage;/inverter/voltage;;;;;;;;true
+06A2;180;6A0;°C;Dec;Invertertemperatur;Inverter Temperature;/inverter/temperature;;;;;;;;true
+06A3;180;6A0;;Bool;Inverterfehler;Inverter Fault;/inverter/fault;;;;;;;;true
+0112;180;6BC;;Binary;Programmschalter;OperationSwitch;/status/operationswitch;;;;;;;;true
+0176;180;6BC;;Bool;Betriebsstatus;OperationStatus;/status/operationstatus;;;;;;;;true

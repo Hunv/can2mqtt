@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace can2mqtt_core.Translator.StiebelEltron
 {
@@ -14,32 +15,21 @@ namespace can2mqtt_core.Translator.StiebelEltron
         {
             ElsterIndexTable = new List<ElsterIndexItem>();
 
-            System.IO.StreamReader sR = new System.IO.StreamReader("StiebelEltronIndexTable.csv");
-            var content = sR.ReadToEnd().Replace("\r","").Split("\n");
-            sR.Close();
+            var jsonString = File.ReadAllText("./translator/stiebel_eltron/StiebelEltron.json");
+            var jsonObject = JsonNode.Parse(jsonString);
+            //Note: Need to check which format above is to uncomment below and handle as array
 
-            foreach(var aLine in content)
+            foreach (var aLine in jsonObject.AsArray())
             {
-                // Skip first line
-                if (aLine.StartsWith("Index"))
-                    continue;
-
-                //Skip empty rows
-                if (aLine.Replace(";","").Trim().Length == 0)
-                    continue;
-
-                //Index;Sender;Receiver;Unit;Converter;NameDE;NameEN;MqttTopic;DescriptionDE;DescriptionEN;Default;MinValue;MaxValue;ValuesDE;ValuesEN;ReadOnly
-                var csv = aLine.Split(";");
-
                 var eii = new ElsterIndexItem();
-                eii.Index = Convert.ToInt32(csv[0], 16);
-                eii.Sender = string.IsNullOrWhiteSpace(csv[1]) ? 0 : Convert.ToInt32(csv[1], 16);
-                eii.DefaultValue = csv[10];                
-                eii.MqttTopic = csv[7];
-                eii.ReadOnly = csv[15] == "yes";
-                eii.Unit = csv[3];
+                eii.Index = Convert.ToInt32(aLine["Index"].ToString(), 16);
+                eii.Sender = string.IsNullOrWhiteSpace(aLine["Sender"].ToString()) ? 0 : Convert.ToInt32(aLine["Sender"].ToString(), 16);
+                eii.DefaultValue = aLine["Default"].ToString();
+                eii.MqttTopic = aLine["MqttTopic"].ToString();
+                eii.ReadOnly = Convert.ToBoolean(aLine["ReadOnly"].ToString());
+                eii.Unit = aLine["Unit"].ToString();
 
-                switch (csv[4].ToLower())
+                switch (aLine["Converter"].ToString().ToLower())
                 {
                     case "binary":
                         eii.Converter = new ConvertBinary();
@@ -107,30 +97,37 @@ namespace can2mqtt_core.Translator.StiebelEltron
                 }
 
                 //Set default values if it is a numeric based type
-                if (eii.Converter != null && 
+                if (eii.Converter != null &&
                     (eii.Converter.GetType() == typeof(ConvertBool) || eii.Converter.GetType() == typeof(ConvertByte) || eii.Converter.GetType() == typeof(ConvertCent) ||
-                    eii.Converter.GetType() == typeof(ConvertDec) || eii.Converter.GetType() == typeof(ConvertDefault) || eii.Converter.GetType() == typeof(ConvertDouble) ||
+                    eii.Converter.GetType() == typeof(ConvertDec) || eii.Converter.GetType() == typeof(ConvertDouble) ||
                     eii.Converter.GetType() == typeof(ConvertLittleBool) || eii.Converter.GetType() == typeof(ConvertLittleEndian) || eii.Converter.GetType() == typeof(ConvertLittleEndianDec) ||
                     eii.Converter.GetType() == typeof(ConvertMille) || eii.Converter.GetType() == typeof(ConvertTriple)))
                 {
-                    if (!string.IsNullOrWhiteSpace(csv[12]))
-                        eii.MaxValue = Convert.ToDouble(csv[12]);
-                    if (!string.IsNullOrWhiteSpace(csv[11]))
-                        eii.MinValue = Convert.ToDouble(csv[11]);
+                    try
+                    {
+                        if (!string.IsNullOrWhiteSpace(aLine["MaxValue"].ToString()))
+                            eii.MaxValue = Convert.ToDouble(aLine["MaxValue"].ToString());
+                        if (!string.IsNullOrWhiteSpace(aLine["MinValue"].ToString()))
+                            eii.MinValue = Convert.ToDouble(aLine["MinValue"].ToString());
+                    }
+                    catch(Exception ea)
+                    {
+                        Console.WriteLine(ea.ToString());
+                    }
                 }
 
                 CultureInfo ci = CultureInfo.InstalledUICulture;
                 if (ci.TwoLetterISOLanguageName == "DE")
                 {
-                    eii.Name = csv[5];
-                    eii.Description = csv[8];
-                    eii.ValueList = csv[13].Split(",");
+                    eii.Name = aLine["NameDE"].ToString();
+                    eii.Description = aLine["DescriptionDE"].ToString();
+                    eii.ValueList = aLine["ValuesDE"].ToString().Split(",");
                 }
                 else
                 {
-                    eii.Name = csv[6];
-                    eii.Description = csv[9];
-                    eii.ValueList = csv[14].Split(",");
+                    eii.Name = aLine["NameEN"].ToString();
+                    eii.Description = aLine["DescriptionEN"].ToString();
+                    eii.ValueList = aLine["ValuesEN"].ToString().Split(",");
                 }
 
                 ElsterIndexTable.Add(eii);

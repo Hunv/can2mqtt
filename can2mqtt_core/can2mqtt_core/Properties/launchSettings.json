@@ -2,7 +2,11 @@
   "profiles": {
     "can2mqtt_core": {
       "commandName": "Project",
-      "commandLineArgs": "--Daemon:CanServer=\"192.168.82.175\" --Daemon:CanServerPort=29536 --Daemon:MqttServer=\"192.168.82.10\" --Daemon:MqttClientId=\"Can2Mqtt\" --Daemon:MqttTopic=\"Heating\" --Daemon:MqttTranslator=\"StiebelEltron\""
+      "workingDirectory": "./bin/Debug/net6.0",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true
     }
   }
 }

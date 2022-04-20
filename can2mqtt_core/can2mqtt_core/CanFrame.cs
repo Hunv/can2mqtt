@@ -35,22 +35,22 @@ namespace can2mqtt_core
         /// <summary>
         /// Returns the transmitted timestamp extracted from RawMessage in Unix Timestamp format (i.e. 1630437901.513376)
         /// </summary>
-        public double Timestamp{ get; private set; }
+        public double Timestamp { get; private set; }
 
         /// <summary>
         /// Returns the transmitted adapter extracted from RawMessage
         /// </summary>
-        public string Adapter { get; private set; } 
+        public string Adapter { get; private set; } = "";
 
         /// <summary>
         /// Returns the transmitted Payload extracted from RawMessage
         /// </summary>
-        public string PayloadFull { get; private set; }
+        public string PayloadFull { get; private set; } = "";
 
         /// <summary>
         /// Returns the CAN Bus Data Id of a received message
         /// </summary>
-        public string PayloadSenderCanId { get; private set; }
+        public string PayloadSenderCanId { get; private set; } = "";
 
         /// <summary>
         /// Returns the CAN Bus Receiver Id of a received message
@@ -59,7 +59,7 @@ namespace can2mqtt_core
         {
             get
             {
-                var cat = PayloadFull.Substring(0, 1);
+                string cat = PayloadFull.Substring(0, 1);
                 var mod = PayloadFull.Substring(2, 2);
                 var receiverId = 0;
 
@@ -111,11 +111,11 @@ namespace can2mqtt_core
         /// <summary>
         /// In case a translator was used, the topic may become more specified
         /// </summary>
-        public string MqttTopicExtention { get; set; }
+        public string MqttTopicExtention { get; set; } = "";
 
         /// <summary>
         /// In case a translator was used, the value was extracted from the payload
         /// </summary>
-        public string MqttValue { get; set; }
+        public string MqttValue { get; set; } = "";
     }
 }

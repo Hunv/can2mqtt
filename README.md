@@ -1,12 +1,34 @@
 # can2mqtt
 A Linux or Windows service to forward CAN frames to MQTT messages
 
+# Latest Updates
+This software was just updated. The main and breaking changes are:
+- Running on .NET 6.0 instead of Dotnet Core 2.2
+- Using SOCKETCAND instead of CANLOGSERVER
+- MQTT Topics changed
+- Supporting MQTT Sends
+- Supporting authentication on MQTT broker
+- Moved config to json file instead of parameters
+
 # HowTo
 Note: This whole readme assumes the following environment:
-- You are running Rasbian on a Raspberry Pi
-- You are using the user "Pi"
+- You are running and Ubuntu based Linux distribution on a Raspberry Pi (Tested with Raspberry Pi OS and openHABian)
+- You are using the user "Pi" (if you have something else, just replace the username wherever stated)
 - You are using a fresh installation of the OS
 - You are using a USBtin device to connect to the CAN Bus (others might work but are not tested by me)
+
+## Install socketcand
+```
+sudo apt-get install git autoconf
+cd ~
+git clone https://github.com/linux-can/socketcand.git
+cd socketcand
+./autogen.sh
+./configure
+make
+make install
+sudo mv ~/socketcand /opt
+```
 
 ## Install can-utils
 ```
@@ -17,26 +39,41 @@ cd can-utils
 make
 ```
 
-## Install Dotnet Core
+## Install .NET 6.0 Runtime
+Note, the packagelink may be differnt if you are not using a OS based on ubuntu 21.04 or 21.10. Check this page for other releases: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+This are the links from https://dotnet.microsoft.com/en-us/download/dotnet/6.0 for the differente Processor architectures for Linux:
+ARM32: https://download.visualstudio.microsoft.com/download/pr/f8e1ab66-58f7-4ebb-a9bb-9decfa03501f/88e1fb49af6f75dc54c23383162409c5/dotnet-runtime-6.0.4-linux-arm.tar.gz
+ARM64: https://download.visualstudio.microsoft.com/download/pr/3641affa-8bb0-486f-93d9-68adff4f4af7/1e3df9fb86cba7299b9e575233975734/dotnet-runtime-6.0.4-linux-arm64.tar.gz
+x64: https://download.visualstudio.microsoft.com/download/pr/5b08d331-15ac-4a53-82a5-522fa45b1b99/65ae300dd160ae0b88b91dd78834ce3e/dotnet-runtime-6.0.4-linux-x64.tar.gz
+Use the link you need for your installation in the command below. Below I will uses ARM32.
 ```
-wget https://download.visualstudio.microsoft.com/download/pr/87521bd8-1522-4141-9532-91d580292c42/59116d9f6ebced4fdc8b76b9e3bbabbf/dotnet-runtime-2.2.5-linux-arm.tar.gz
-sudo tar -xvf ./dotnet-runtime-2.2.5-linux-arm.tar.gz -C /opt/dotnet/
+wget https://download.visualstudio.microsoft.com/download/pr/f8e1ab66-58f7-4ebb-a9bb-9decfa03501f/88e1fb49af6f75dc54c23383162409c5/dotnet-runtime-6.0.4-linux-arm.tar.gz -O ~/dotnet6.0.4.tar.gz
+sudo tar -xvf dotnet6.0.4.tar.gz -C /opt/dotnet/
 sudo ln -s /opt/dotnet/dotnet /usr/local/bin
 ```
+
+Check the setup by run "dotnet --info". It should return the installed version and some other details.
 
 ## Setup the CAN Bus connection 
 Assuming your device has the ID ttyACM0:
 ```
-sudo ./slcan_attach -f -s1 -b 11 -o /dev/ttyACM0
-sudo ./slcand ttyACM0 slcan0
+sudo /opt/can-utils/slcan_attach -f -s1 -b 11 -o /dev/ttyACM0
+sudo /opt/can-utils/slcand ttyACM0 slcan0
 sudo ifconfig slcan0 up
 ```
 
-## Start canlogserver
-This is only required to test or if you like to take care of canlogserver on your own. You can also configure a daemon to do this automatically (see below).
+To add this to autostart and setup the adapter on every reboot, run "sudo nano /etc/rc.local"
+paste three lines above at the end before the "EXIT 0".
+
+## Start socketcand
+This is only required to test or if you like to take care of socketcand on your own. You can also configure a daemon to do this automatically (see below).
+You need to replace eth0 if your network interface is called different than eth0.
 ```
-~/can-utils/canlogserver slcan0
+ /opt/socketcand/socketcand -i slcan0 -l eth0 -v
 ```
+
+## MQTT Broker
+You need an MQTT Broker, that is handling the MQTT Traffic. You need to define this in the settings.
 
 ## Start can2mqtt: 
 This is only required to test or if you like to take care of can2mqtt on your own. You can also configure a daemon to do this automatically (see below).
@@ -62,7 +99,7 @@ All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="1
 
 
 ## Configure and Register Daemon for can2mqtt and canlogserver
-Execute `sudo nano etc/systemd/system/canlogserver.service` and paste the following into the file. Replace the slcan0 in case your socket has a different name:
+Execute `sudo nano /etc/systemd/system/canlogserver.service` and paste the following into the file. Replace the slcan0 in case your socket has a different name:
 ```
 [Unit]
 Description=canlogserver
@@ -81,7 +118,7 @@ WantedBy=multi-user.target
 ```
 Run `sudo systemctl start canlogserver.service` to test if the service starts (it should). To see if it runs, execute `sudo systemctl status canlogserver.service`. You should see something similar like this if everything went well in the last line: `Jul 03 19:09:16 raspi-test systemd[1]: Started canlogserver.`
 
-Now we repeat this for the can2mqtt daemon. Execute `sudo nano etc/systemd/system/can2mqtt.service` and paste the following into the file. Replace the placeholder with your parameters:
+Now we repeat this for the can2mqtt daemon. Execute `sudo nano /etc/systemd/system/can2mqtt.service` and paste the following into the file. Replace the placeholder with your parameters:
 ```
 [Unit]
 Description=can2mqtt

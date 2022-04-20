@@ -1,4 +1,6 @@
-﻿using MQTTnet;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using MQTTnet.Server;
@@ -7,24 +9,43 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace can2mqtt_core
 {
-    public class Can2Mqtt
+    public class Can2Mqtt : BackgroundService
     {
-        IMqttClient _MqttClient = null;
-        IMqttClientOptions _MqttClientOptions = null;
+        private readonly ILogger<Can2Mqtt> _logger;
+        IMqttClient _MqttClient;
+        IMqttClientOptions _MqttClientOptions;
         string _MqttTopic = "";
-        string _CanTranslator = null;
+        string _CanTranslator;
+        string _CanServer;
+        int _CanServerPort = 29536;
         bool _CanForwardWrite = true;
         bool _CanForwardRead = false;
         bool _CanForwardResponse = true;
         bool _NoUnits = false;
         int _CanReceiveBufferSize = 48;
-
-        public Can2Mqtt()
+        string _MqttUser;
+        string _MqttPassword;
+        string _MqttServer;
+        string _MqttClientId;
+        
+        public Can2Mqtt(ILogger<Can2Mqtt> logger)
         {
+            _logger = logger;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                await Task.Delay(1000, stoppingToken);
+            }
         }
 
         /// <summary>
@@ -32,15 +53,37 @@ namespace can2mqtt_core
         /// </summary>
         /// <param name="config">Commandline parameters</param>
         /// <returns></returns>
-        public async Task Start(DaemonConfig config)
+        public override async Task StartAsync(CancellationToken stoppingToken)
         {
-            _MqttTopic = config.MqttTopic;
-            _CanTranslator = config.MqttTranslator;
-            _CanForwardWrite = config.CanForwardWrite;
-            _CanForwardRead = config.CanForwardRead;
-            _CanForwardResponse = config.CanForwardResponse;
-            _NoUnits = config.NoUnits;
-            _CanReceiveBufferSize = config.CanReceiveBufferSize;
+            if (!File.Exists("./config.json"))
+            {
+                Console.WriteLine("Cannot find config.json. Copy and rename the config-sample.json and adjust your settings in that config file.");
+                return;
+            }
+
+            var jsonString = File.ReadAllText("config.json");
+            var config = JsonNode.Parse(jsonString);
+
+            if (config == null)
+            {
+                Console.WriteLine("Unable to read config file.");
+                return;
+            }
+
+            _MqttTopic = Convert.ToString(config["MqttTopic"]);
+            _CanTranslator = Convert.ToString(config["MqttTranslator"]);
+            _CanForwardWrite = bool.Parse(config["CanForwardWrite"].ToString());
+            _CanForwardRead = bool.Parse(config["CanForwardRead"].ToString());
+            _CanForwardResponse = Convert.ToBoolean(config["CanForwardResponse"].ToString());
+            _NoUnits = Convert.ToBoolean(config["NoUnits"].ToString());
+            _CanReceiveBufferSize = Convert.ToInt32(config["CanReceiveBufferSize"].ToString());
+            _MqttUser = Convert.ToString(config["MqttUser"]);
+            _MqttPassword = Convert.ToString(config["MqttPassword"]);
+            _MqttClientId = Convert.ToString(config["MqttClientId"]);
+            _MqttServer = Convert.ToString(config["MqttServer"]);
+            _CanServer = Convert.ToString(config["CanServer"]);
+            _CanServerPort = Convert.ToInt32(config["CanServerPort"].ToString());
+
 
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
@@ -48,25 +91,35 @@ namespace can2mqtt_core
 
             // Create TCP based options using the builder.
             _MqttClientOptions = new MqttClientOptionsBuilder()
-                .WithClientId(config.MqttClientId)
-                .WithTcpServer(config.MqttServer)
+                .WithClientId(_MqttClientId)
+                .WithTcpServer(_MqttServer)
                 .WithCleanSession()
                 .Build();
+
+            if (_MqttUser != null && _MqttPassword != null)
+            {
+                _MqttClientOptions = new MqttClientOptionsBuilder()
+                   .WithClientId(_MqttClientId)
+                   .WithTcpServer(_MqttServer)
+                   .WithCredentials(_MqttUser, _MqttPassword)
+                   .WithCleanSession()
+                   .Build();
+            }
 
             //Handle reconnect on loosing connection to MQTT Server
             _MqttClient.UseDisconnectedHandler(async e =>
             {
-                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0}", config.MqttServer);
+                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0}", _MqttServer);
                 while (!_MqttClient.IsConnected)
                 {
                     try
                     {
                         await _MqttClient.ConnectAsync(_MqttClientOptions);
-                        Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
+                        Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", _MqttServer, _MqttClientId);
                     }
                     catch
                     {
-                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED", config.MqttServer);
+                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED", _MqttServer);
                         System.Threading.Thread.Sleep(10000); //Wait 10 seconds
                     }
                 }
@@ -75,7 +128,7 @@ namespace can2mqtt_core
             //Connect the MQTT Client to the MQTT Broker
             await _MqttClient.ConnectAsync(_MqttClientOptions);
             if (_MqttClient.IsConnected)
-                Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", config.MqttServer, config.MqttClientId);
+                Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", _MqttServer, _MqttClientId); 
 
             //Create local MQTT Broker for write-Commands
             var mqttServer = new MqttFactory().CreateMqttServer();
@@ -96,7 +149,7 @@ namespace can2mqtt_core
             //});
 
             //Start listening on socketcand port
-            await ConnectTcpCanBus(config.CanServer, config.CanServerPort);
+            await ConnectTcpCanBus(_CanServer, _CanServerPort);
         }
 
         /// <summary>
