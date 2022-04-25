@@ -13,47 +13,51 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace can2mqtt_core
+namespace can2mqtt
 {
     public class Can2Mqtt : BackgroundService
     {
-        private readonly ILogger<Can2Mqtt> _logger;
-        IMqttClient _MqttClient;
-        IMqttClientOptions _MqttClientOptions;
-        string _MqttTopic = "";
-        string _CanTranslator;
-        string _CanServer;
-        int _CanServerPort = 29536;
-        bool _CanForwardWrite = true;
-        bool _CanForwardRead = false;
-        bool _CanForwardResponse = true;
-        bool _NoUnits = false;
-        int _CanReceiveBufferSize = 48;
-        string _MqttUser;
-        string _MqttPassword;
-        string _MqttServer;
-        string _MqttClientId;
-        
+        private readonly ILogger<Can2Mqtt> Logger;
+        private IMqttClient MqttClient;
+        private IMqttClientOptions MqttClientOptions;
+        private string CanTranslator;
+        private string CanServer;
+        private int CanServerPort = 29536;
+        private bool CanForwardWrite = true;
+        private bool CanForwardRead = false;
+        private bool CanForwardResponse = true;
+        private int CanReceiveBufferSize = 48;
+        private string CanSenderId;
+        private bool NoUnits = false;
+        private string MqttTopic = "";
+        private string MqttUser;
+        private string MqttPassword;
+        private string MqttServer;
+        private string MqttClientId;
+        private bool MqttAcceptSet = false;
+        private NetworkStream TcpCanStream;
+        private TcpClient ScdClient = null;
+        private Translator.StiebelEltron.StiebelEltron Translator = null;
+
+
         public Can2Mqtt(ILogger<Can2Mqtt> logger)
         {
-            _logger = logger;
+            Logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                Logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 await Task.Delay(1000, stoppingToken);
             }
         }
 
         /// <summary>
-        /// Start the Can2Mqtt service.
+        /// Loads the config.json to the local variables.
         /// </summary>
-        /// <param name="config">Commandline parameters</param>
-        /// <returns></returns>
-        public override async Task StartAsync(CancellationToken stoppingToken)
+        private void LoadConfig()
         {
             if (!File.Exists("./config.json"))
             {
@@ -70,86 +74,173 @@ namespace can2mqtt_core
                 return;
             }
 
-            _MqttTopic = Convert.ToString(config["MqttTopic"]);
-            _CanTranslator = Convert.ToString(config["MqttTranslator"]);
-            _CanForwardWrite = bool.Parse(config["CanForwardWrite"].ToString());
-            _CanForwardRead = bool.Parse(config["CanForwardRead"].ToString());
-            _CanForwardResponse = Convert.ToBoolean(config["CanForwardResponse"].ToString());
-            _NoUnits = Convert.ToBoolean(config["NoUnits"].ToString());
-            _CanReceiveBufferSize = Convert.ToInt32(config["CanReceiveBufferSize"].ToString());
-            _MqttUser = Convert.ToString(config["MqttUser"]);
-            _MqttPassword = Convert.ToString(config["MqttPassword"]);
-            _MqttClientId = Convert.ToString(config["MqttClientId"]);
-            _MqttServer = Convert.ToString(config["MqttServer"]);
-            _CanServer = Convert.ToString(config["CanServer"]);
-            _CanServerPort = Convert.ToInt32(config["CanServerPort"].ToString());
-
-
+            // Read the config file
+            MqttTopic = Convert.ToString(config["MqttTopic"]);
+            CanTranslator = Convert.ToString(config["MqttTranslator"]);
+            CanForwardWrite = bool.Parse(config["CanForwardWrite"].ToString());
+            CanForwardRead = bool.Parse(config["CanForwardRead"].ToString());
+            CanForwardResponse = Convert.ToBoolean(config["CanForwardResponse"].ToString());
+            NoUnits = Convert.ToBoolean(config["NoUnits"].ToString());
+            CanReceiveBufferSize = Convert.ToInt32(config["CanReceiveBufferSize"].ToString());
+            MqttUser = Convert.ToString(config["MqttUser"]);
+            MqttPassword = Convert.ToString(config["MqttPassword"]);
+            MqttClientId = Convert.ToString(config["MqttClientId"]);
+            MqttServer = Convert.ToString(config["MqttServer"]);
+            CanServer = Convert.ToString(config["CanServer"]);
+            CanServerPort = Convert.ToInt32(config["CanServerPort"].ToString());
+            MqttAcceptSet = Convert.ToBoolean(config["MqttAcceptSet"].ToString());
+            CanSenderId = Convert.ToString(config["CanSenderId"]);
+        }
+        
+        /// <summary>
+        /// Start the Can2Mqtt service.
+        /// </summary>
+        /// <param name="config">Commandline parameters</param>
+        /// <returns></returns>
+        public override async Task StartAsync(CancellationToken stoppingToken)
+        {
+            // Load the config from the config file
+            LoadConfig();
+            
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
-            _MqttClient = mqttFactory.CreateMqttClient();
+            MqttClient = mqttFactory.CreateMqttClient();
 
             // Create TCP based options using the builder.
-            _MqttClientOptions = new MqttClientOptionsBuilder()
-                .WithClientId(_MqttClientId)
-                .WithTcpServer(_MqttServer)
+            MqttClientOptions = new MqttClientOptionsBuilder()
+                .WithClientId(MqttClientId)
+                .WithTcpServer(MqttServer)
                 .WithCleanSession()
                 .Build();
 
-            if (_MqttUser != null && _MqttPassword != null)
+            // If authentication at the MQTT broker is enabled, create the options with credentials
+            if (!string.IsNullOrEmpty(MqttUser) && MqttPassword != null)
             {
-                _MqttClientOptions = new MqttClientOptionsBuilder()
-                   .WithClientId(_MqttClientId)
-                   .WithTcpServer(_MqttServer)
-                   .WithCredentials(_MqttUser, _MqttPassword)
+                MqttClientOptions = new MqttClientOptionsBuilder()
+                   .WithClientId(MqttClientId)
+                   .WithTcpServer(MqttServer)
+                   .WithCredentials(MqttUser, MqttPassword)
                    .WithCleanSession()
                    .Build();
             }
 
             //Handle reconnect on loosing connection to MQTT Server
-            _MqttClient.UseDisconnectedHandler(async e =>
+            MqttClient.UseDisconnectedHandler(async e =>
             {
-                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0}", _MqttServer);
-                while (!_MqttClient.IsConnected)
+                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0}", MqttServer);
+                while (!MqttClient.IsConnected)
                 {
                     try
                     {
-                        await _MqttClient.ConnectAsync(_MqttClientOptions);
-                        Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", _MqttServer, _MqttClientId);
+                        // Connect the MQTT Client
+                        await MqttClient.ConnectAsync(MqttClientOptions);
+                        Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
                     }
                     catch
                     {
-                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED", _MqttServer);
-                        System.Threading.Thread.Sleep(10000); //Wait 10 seconds
+                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED", MqttServer);
+                        Thread.Sleep(10000); //Wait 10 seconds
                     }
                 }
             });
 
-            //Connect the MQTT Client to the MQTT Broker
-            await _MqttClient.ConnectAsync(_MqttClientOptions);
-            if (_MqttClient.IsConnected)
-                Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", _MqttServer, _MqttClientId); 
+            // Connect the MQTT Client to the MQTT Broker
+            await MqttClient.ConnectAsync(MqttClientOptions);
+            if (MqttClient.IsConnected)
+                Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
 
-            //Create local MQTT Broker for write-Commands
-            var mqttServer = new MqttFactory().CreateMqttServer();
-            await mqttServer.StartAsync(new MqttServerOptions());
-
-            //Create listener on local MQTT Broker(currently not like this)
-            //await _MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter("#").Build());
-            //_MqttClient.UseApplicationMessageReceivedHandler(e =>
-            //{
-            //    Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
-            //    Console.WriteLine($"+ Topic = {e.ApplicationMessage.Topic}");
-            //    Console.WriteLine($"+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
-            //    Console.WriteLine($"+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}");
-            //    Console.WriteLine($"+ Retain = {e.ApplicationMessage.Retain}");
-            //    Console.WriteLine();
-
-            //    Task.Run(() => _MqttClient.PublishAsync("hello/world"));
-            //});
+            // Only accept set commands, if they are enabled.
+            if (MqttAcceptSet)
+            {
+                //Create listener on MQTT Broker to accept all messages with the MqttTopic from the config.
+                await MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter(MqttTopic + "/#").Build());
+                MqttClient.UseApplicationMessageReceivedHandler(async e =>
+                {
+                    // Check if it is a set topic and handle only if so.
+                    if (e.ApplicationMessage.Topic.EndsWith("/set"))
+                    {
+                        Console.Write("Received MQTT Message; Topic = {0}", e.ApplicationMessage.Topic);
+                        if (e.ApplicationMessage.Payload != null)
+                        {
+                            Console.WriteLine($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                            await SendCan(e.ApplicationMessage.Topic, e.ApplicationMessage.Payload, CanServer, CanServerPort);
+                        }
+                        else
+                            Console.WriteLine(" WITH NO PAYLOAD");
+                        //Console.WriteLine($"+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}");
+                        //Console.WriteLine($"+ Retain = {e.ApplicationMessage.Retain}");
+                    }
+                });
+            }
 
             //Start listening on socketcand port
-            await ConnectTcpCanBus(_CanServer, _CanServerPort);
+            await TcpCanBusListener(CanServer, CanServerPort);
+        }
+
+        private async Task SendCan(string topic, byte[] payload, string canServer, int canPort)
+        {
+            await ConnectTcpCanBus(canServer, canPort);
+
+            //Get the data
+            var data = Encoding.UTF8.GetString(payload);
+
+            //Convert the data to the required format
+            var canFrame = Translator.TranslateBack(topic, data, CanSenderId);
+
+            // < send can_id can_datalength [data]* >
+            Console.WriteLine("Sending CAN Frame: {0}", canFrame);
+            //TcpCanStream.Write(Encoding.Default.GetBytes(string.Format("< send {0} {1} {2} >", CanSenderId, canFrame.Length, canFrame)));
+        }
+
+
+        public async Task ConnectTcpCanBus(string canServer, int canPort)
+        {
+            if (ScdClient != null && ScdClient.Connected)
+            {
+                Console.WriteLine("Already connected to SocketCanD.");
+                return;
+            }
+
+            //Create TCP Client for connection to socketcand (=scd)
+            while (ScdClient == null || !ScdClient.Connected)
+            {
+                try
+                {
+                    ScdClient = new TcpClient(canServer, canPort);
+                }
+                catch (Exception ea)
+                {
+                    Console.WriteLine("FAILED TO CONNECT TO SOCKETCAND {1}. {0}. Retry...", ea.Message, canServer);
+                }
+                await Task.Delay(TimeSpan.FromSeconds(5));
+            }
+
+            Console.WriteLine("CONNECTED TO SOCKETCAND {0} ON PORT {1}", canServer, canPort);
+
+            //Create TCP Stream to read the CAN Bus Data
+            byte[] data = new byte[CanReceiveBufferSize];
+            TcpCanStream = ScdClient.GetStream();
+            int bytes = TcpCanStream.Read(data, 0, data.Length);
+
+
+            if (Encoding.Default.GetString(data, 0, bytes) == "< hi >")
+            {
+                Console.WriteLine("Handshake successful. Opening CAN interface...");
+                TcpCanStream.Write(Encoding.Default.GetBytes("< open slcan0 >"));
+
+                bytes = TcpCanStream.Read(data, 0, data.Length);
+                if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
+                {
+                    Console.WriteLine("Opening connection to slcan0 successful. Changing socketcand mode to raw...");
+                    TcpCanStream.Write(Encoding.Default.GetBytes("< rawmode >"));
+
+                    bytes = TcpCanStream.Read(data, 0, data.Length);
+                    if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
+                    {
+                        Console.WriteLine("Change to rawmode successful");
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -158,52 +249,16 @@ namespace can2mqtt_core
         /// <param name="canServer"></param>
         /// <param name="canPort"></param>
         /// <returns></returns>
-        public async Task ConnectTcpCanBus(string canServer, int canPort)
+        public async Task TcpCanBusListener(string canServer, int canPort)
         {
             try
             {
-                //Create TCP Client for connection to socketcand (=scd)
-                TcpClient scdClient = null;
-                while (scdClient == null || !scdClient.Connected)
-                {
-                    try
-                    {
-                        scdClient = new TcpClient(canServer, canPort);
-                    }
-                    catch (Exception ea)
-                    {
-                        Console.WriteLine("FAILED TO CONNECT TO SOCKETCAND {1}. {0}. Retry...", ea.Message, canServer);
-                    }
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-                }
-                
-                Console.WriteLine("CONNECTED TO SOCKETCAND {0} ON PORT {1}", canServer, canPort);
-
-                //Create TCP Stream to read the CAN Bus Data
-                NetworkStream stream = scdClient.GetStream();
-                byte[] data = new Byte[_CanReceiveBufferSize];
-                String responseData = String.Empty;
-                int bytes = stream.Read(data, 0, data.Length);
+                byte[] data = new byte[CanReceiveBufferSize];
+                string responseData = string.Empty;
                 var previousData = "";
 
-                if (Encoding.Default.GetString(data, 0, bytes) == "< hi >")
-                {
-                    Console.WriteLine("Handshake successful. Opening CAN interface...");
-                    stream.Write(Encoding.Default.GetBytes("< open slcan0 >"));
-                    
-                    bytes = stream.Read(data, 0, data.Length);
-                    if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
-                    {
-                        Console.WriteLine("Opening connection to slcan0 successful. Changing socketcand mode to raw...");
-                        stream.Write(Encoding.Default.GetBytes("< rawmode >"));
-
-                        bytes = stream.Read(data, 0, data.Length);
-                        if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
-                        {
-                            Console.WriteLine("Change to rawmode successful");
-                        }
-                    }
-                }
+                await ConnectTcpCanBus(canServer, canPort);
+                int bytes = TcpCanStream.Read(data, 0, data.Length);
 
                 //Infinite Loop
                 while (bytes > 0)
@@ -251,9 +306,9 @@ namespace can2mqtt_core
                         responseData = responseData.Substring(responseData.IndexOf(" >") + 2);
 
                         //If forwarding is disabled for this type of frame, ignore it. Otherwise send the Frame
-                        if (canFrame.CanFrameType == "0" && _CanForwardWrite ||
-                            canFrame.CanFrameType == "1" && _CanForwardRead ||
-                            canFrame.CanFrameType == "2" && _CanForwardResponse)
+                        if (canFrame.CanFrameType == "0" && CanForwardWrite ||
+                            canFrame.CanFrameType == "1" && CanForwardRead ||
+                            canFrame.CanFrameType == "2" && CanForwardResponse)
                         {
                             //Sent the CAN frame via MQTT
                             await SendMQTT(canFrame);
@@ -267,10 +322,10 @@ namespace can2mqtt_core
                     bytes = 0;
 
                     //Get next packages from canlogserver
-                    bytes = stream.Read(data, 0, data.Length);
+                    bytes = TcpCanStream.Read(data, 0, data.Length);
                 }
                 //Close the TCP Stream
-                scdClient.Close();
+                ScdClient.Close();
 
                 Console.WriteLine("Disconnected from canServer {0} Port {1}", canServer, canPort);
             }
@@ -281,7 +336,7 @@ namespace can2mqtt_core
             finally
             {
                 //Reconnect to the canlogserver but do not wait for this here to avoid infinite loops
-                _ = ConnectTcpCanBus(canServer, canPort); //Reconnect
+                _ = TcpCanBusListener(canServer, canPort); //Reconnect
             }
         }
 
@@ -299,29 +354,29 @@ namespace can2mqtt_core
                     return;
 
                 //Use Translator (if selected)
-                if (!string.IsNullOrEmpty(_CanTranslator))
+                if (!string.IsNullOrEmpty(CanTranslator))
                 {
                     //choose the translator to use and translate the message if translator exists
-                    switch (_CanTranslator)
+                    switch (CanTranslator)
                     {
                         case "StiebelEltron":
-                            var translator = new Translator.StiebelEltron.StiebelEltron();
-                            canMsg = translator.Translate(canMsg, _NoUnits);
+                            Translator = new Translator.StiebelEltron.StiebelEltron();
+                            canMsg = Translator.Translate(canMsg, NoUnits);
                             break;
                     }
                 }
 
                 //Verify connection to MQTT Broker is established
-                while (!_MqttClient.IsConnected)
+                while (!MqttClient.IsConnected)
                 {
                     Console.WriteLine("UNHANDLED DISCONNECT FROM MQTT BROKER");
-                    while (!_MqttClient.IsConnected)
+                    while (!MqttClient.IsConnected)
                     {
                         await Task.Delay(TimeSpan.FromSeconds(5));
 
                         try
                         {
-                            await _MqttClient.ConnectAsync(_MqttClientOptions);
+                            await MqttClient.ConnectAsync(MqttClientOptions);
                             Console.WriteLine("CONNECTED TO MQTT BROKER");
                         }
                         catch
@@ -331,22 +386,22 @@ namespace can2mqtt_core
                     }
                 }
 
-                //Logoutput with or without tranlated MQTT message
+                //Logoutput with or without translated MQTT message
                 if (string.IsNullOrEmpty(canMsg.MqttValue))
-                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}", canMsg.PayloadFull.Trim(), _MqttTopic);
+                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}", canMsg.PayloadFull.Trim(), MqttTopic);
                 else
-                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}{2}", canMsg.MqttValue, _MqttTopic, canMsg.MqttTopicExtention);
+                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}{2}", canMsg.MqttValue, MqttTopic, canMsg.MqttTopicExtention);
 
                 //Create MQTT Message
                 var message = new MqttApplicationMessageBuilder()
-                    .WithTopic(_MqttTopic + canMsg.MqttTopicExtention)
+                    .WithTopic(MqttTopic + canMsg.MqttTopicExtention)
                     .WithPayload(string.IsNullOrEmpty(canMsg.MqttValue) ? canMsg.PayloadFull : canMsg.MqttValue)
                     .WithExactlyOnceQoS()
                     .WithRetainFlag()
                     .Build();
 
                 //Publish MQTT Message
-                await _MqttClient.PublishAsync(message);
+                await MqttClient.PublishAsync(message);
             }
             catch (Exception ea)
             {

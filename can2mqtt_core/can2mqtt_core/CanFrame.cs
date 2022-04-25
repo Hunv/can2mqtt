@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace can2mqtt_core
+namespace can2mqtt
 {
     public class CanFrame
     {

@@ -2,7 +2,7 @@
   "profiles": {
     "can2mqtt_tool": {
       "commandName": "Project",
-      "commandLineArgs": "-cs 192.168.82.175 -cp 29536 -t StiebelEltron -b 48 -f 0,2,3,4,5,6,7"
+      "commandLineArgs": "-cs 192.168.82.10 -cp 29536 -t StiebelEltron -b 48 -f 0,2,3,4,5,6,7"
     }
   }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace can2mqtt_core.Translator.StiebelEltron
+namespace can2mqtt.Translator.StiebelEltron
 {
     internal class IndexItem
     {        

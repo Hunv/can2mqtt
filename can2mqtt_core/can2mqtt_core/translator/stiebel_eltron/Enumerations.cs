@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace can2mqtt_core.Translator.StiebelEltron
+namespace can2mqtt.Translator.StiebelEltron
 {
     public class Enumerations
     {

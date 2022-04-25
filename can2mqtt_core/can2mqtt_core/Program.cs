@@ -1,4 +1,4 @@
-﻿using can2mqtt_core;
+﻿using can2mqtt;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

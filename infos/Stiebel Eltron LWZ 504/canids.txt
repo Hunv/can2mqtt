@@ -17,3 +17,15 @@ Known working CAN Ids are:
 6A0 = Display at the LWZ (Terminal Address 3)
 6A1 = Display at the LWZ (Terminal Address 4)
 6BC = Display at the LWZ, but "core" for Time and Operating status (When used with Terminal Address 3, if it may change)
+
+68E = ?
+69F = Terminal
+
+
+A Guess:
+Some IDs belong to the configured terminal ID:
+Terminal ID 1: 69E
+Terminal ID 2: 69F
+Terminal ID 3: 6A0
+Terminal ID 4: 6A1
+Terminal ID 5: 6A2

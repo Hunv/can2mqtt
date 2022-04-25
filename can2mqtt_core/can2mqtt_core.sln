@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "can2mqtt_core", "can2mqtt_core\can2mqtt_core.csproj", "{26F0D3B8-CCC2-4339-B73D-56E1939C37C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "can2mqtt", "can2mqtt_core\can2mqtt.csproj", "{26F0D3B8-CCC2-4339-B73D-56E1939C37C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "can2mqtt_tool", "can2mqtt_tool\can2mqtt_tool.csproj", "{4F751CDC-4ED8-48B9-BA92-EC74BA2099EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "can2mqtt.Tests", "can2mqtt_tests\can2mqtt.Tests.csproj", "{3CA6268F-F918-4DEA-B95A-EC35255B351B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "can2mqtt.Playgroupd", "can2mqtt.Playgroupd\can2mqtt.Playgroupd.csproj", "{FEEAF908-095D-459F-8CAD-D3C52C61E179}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{4F751CDC-4ED8-48B9-BA92-EC74BA2099EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F751CDC-4ED8-48B9-BA92-EC74BA2099EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F751CDC-4ED8-48B9-BA92-EC74BA2099EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CA6268F-F918-4DEA-B95A-EC35255B351B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CA6268F-F918-4DEA-B95A-EC35255B351B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CA6268F-F918-4DEA-B95A-EC35255B351B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CA6268F-F918-4DEA-B95A-EC35255B351B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEEAF908-095D-459F-8CAD-D3C52C61E179}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEEAF908-095D-459F-8CAD-D3C52C61E179}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEEAF908-095D-459F-8CAD-D3C52C61E179}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEEAF908-095D-459F-8CAD-D3C52C61E179}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

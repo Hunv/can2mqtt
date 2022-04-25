@@ -1,11 +1,11 @@
-﻿using can2mqtt_core.Translator.StiebelEltron;
+﻿using can2mqtt.Translator.StiebelEltron;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Text.Json.Nodes;
 
-namespace can2mqtt_core.Translator.StiebelEltron
+namespace can2mqtt.Translator.StiebelEltron
 {
     public class ElsterIndex
     {
@@ -47,7 +47,7 @@ namespace can2mqtt_core.Translator.StiebelEltron
                         eii.Converter = null;
                         break;
                     case "datum":
-                        eii.Converter = new ConvertDatum();
+                        eii.Converter = new ConvertDate();
                         break;
                     case "dec":
                         eii.Converter = new ConvertDec();
@@ -74,7 +74,7 @@ namespace can2mqtt_core.Translator.StiebelEltron
                         eii.Converter = new ConvertMille();
                         break;
                     case "sprache":
-                        eii.Converter = new ConvertSprache();
+                        eii.Converter = new ConvertLanguage();
                         break;
                     case "time":
                         eii.Converter = new ConvertTime();

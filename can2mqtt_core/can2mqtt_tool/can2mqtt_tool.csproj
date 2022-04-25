@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\can2mqtt_core\can2mqtt_core.csproj" />
+    <ProjectReference Include="..\can2mqtt_core\can2mqtt.csproj" />
   </ItemGroup>
 
 </Project>

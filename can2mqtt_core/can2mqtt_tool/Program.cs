@@ -1,4 +1,4 @@
-﻿using can2mqtt_core;
+﻿using can2mqtt;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -70,42 +70,42 @@ namespace can2mqtt_tool
                     switch (_Translator)
                     {
                         case "StiebelEltron":
-                            var a = new can2mqtt_core.Translator.StiebelEltron.ConvertBool();
+                            var a = new can2mqtt.Translator.StiebelEltron.ConvertBool();
                             Console.WriteLine("Bool:\t\t{0}", a.ConvertValue(calculate));
-                            var j = new can2mqtt_core.Translator.StiebelEltron.ConvertLittleBool();
+                            var j = new can2mqtt.Translator.StiebelEltron.ConvertLittleBool();
                             Console.WriteLine("LitteBool:\t{0}", j.ConvertValue(calculate));
-                            var h = new can2mqtt_core.Translator.StiebelEltron.ConvertDouble();
+                            var h = new can2mqtt.Translator.StiebelEltron.ConvertDouble();
                             Console.WriteLine("Double:\t\t{0}", h.ConvertValue(calculate));
-                            var o = new can2mqtt_core.Translator.StiebelEltron.ConvertTriple();
+                            var o = new can2mqtt.Translator.StiebelEltron.ConvertTriple();
                             Console.WriteLine("Triple:\t\t{0}", o.ConvertValue(calculate));
-                            var b = new can2mqtt_core.Translator.StiebelEltron.ConvertByte();
+                            var b = new can2mqtt.Translator.StiebelEltron.ConvertByte();
                             Console.WriteLine("Byte:\t\t{0}", b.ConvertValue(calculate));
-                            var e = new can2mqtt_core.Translator.StiebelEltron.ConvertDec();
+                            var e = new can2mqtt.Translator.StiebelEltron.ConvertDec();
                             Console.WriteLine("Dec:\t\t{0}", e.ConvertValue(calculate));
-                            var c = new can2mqtt_core.Translator.StiebelEltron.ConvertCent();
+                            var c = new can2mqtt.Translator.StiebelEltron.ConvertCent();
                             Console.WriteLine("Cent:\t\t{0}", c.ConvertValue(calculate));
-                            var l = new can2mqtt_core.Translator.StiebelEltron.ConvertMille();
+                            var l = new can2mqtt.Translator.StiebelEltron.ConvertMille();
                             Console.WriteLine("Mille:\t\t{0}", l.ConvertValue(calculate));
-                            var d = new can2mqtt_core.Translator.StiebelEltron.ConvertDatum();
+                            var d = new can2mqtt.Translator.StiebelEltron.ConvertDate();
                             Console.WriteLine("Datum:\t\t{0}", d.ConvertValue(calculate));
-                            var f = new can2mqtt_core.Translator.StiebelEltron.ConvertDefault();
+                            var f = new can2mqtt.Translator.StiebelEltron.ConvertDefault();
                             Console.WriteLine("Default:\t{0}", f.ConvertValue(calculate));
-                            var k = new can2mqtt_core.Translator.StiebelEltron.ConvertLittleEndian();
+                            var k = new can2mqtt.Translator.StiebelEltron.ConvertLittleEndian();
                             Console.WriteLine("LittleEndian:\t{0}", k.ConvertValue(calculate));
-                            var r = new can2mqtt_core.Translator.StiebelEltron.ConvertLittleEndianDec();
+                            var r = new can2mqtt.Translator.StiebelEltron.ConvertLittleEndianDec();
                             Console.WriteLine("Ltl.EndianDec:\t{0}", r.ConvertValue(calculate));
-                            var m = new can2mqtt_core.Translator.StiebelEltron.ConvertSprache();
+                            var m = new can2mqtt.Translator.StiebelEltron.ConvertLanguage();
                             Console.WriteLine("Language:\t{0}", m.ConvertValue(calculate));
-                            var n = new can2mqtt_core.Translator.StiebelEltron.ConvertTimeDomain();
+                            var n = new can2mqtt.Translator.StiebelEltron.ConvertTimeDomain();
                             Console.WriteLine("TimeDomain:\t{0}", n.ConvertValue(calculate));
-                            var p = new can2mqtt_core.Translator.StiebelEltron.ConvertTime();
+                            var p = new can2mqtt.Translator.StiebelEltron.ConvertTime();
                             Console.WriteLine("Time:\t\t{0}", p.ConvertValue(calculate));
-                            var q = new can2mqtt_core.Translator.StiebelEltron.ConvertBinary();
+                            var q = new can2mqtt.Translator.StiebelEltron.ConvertBinary();
                             Console.WriteLine("Binary:\t{0}", q.ConvertValue(calculate));
-                            var s = new can2mqtt_core.Translator.StiebelEltron.ConvertBool();
+                            var s = new can2mqtt.Translator.StiebelEltron.ConvertBool();
                             Console.WriteLine("Bool:\t{0}", s.ConvertValue(calculate));
                             
-                            //var i = new can2mqtt_core.Translator.StiebelEltron.ConvertErr();
+                            //var i = new can2mqtt.Translator.StiebelEltron.ConvertErr();
                             //Console.WriteLine("Err:\t{0}", i.ConvertValue(calculate));
 
                             break;
@@ -231,7 +231,7 @@ namespace can2mqtt_tool
                             switch (_Translator)
                             {
                                 case "StiebelEltron":
-                                    var translator = new can2mqtt_core.Translator.StiebelEltron.StiebelEltron();
+                                    var translator = new can2mqtt.Translator.StiebelEltron.StiebelEltron();
                                     canFrame = translator.Translate(canFrame, false);
                                     break;
                             }

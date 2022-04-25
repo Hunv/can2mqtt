@@ -1,15 +1,15 @@
-Enthält die Aufschlüsselung von Betriebszustand zu den Icons im Display
-Gezählt wird von hinten nach vorne. Beispiel der Bits:
+Contains the resolution of the binary string to the icons displayed in the display
+First bit is on the right. Example: Beispiel der Bits:
 0000010100000111
 
-1. Bit: Sanduhr (1. von Links) oder Doppel-Filter-Symbol (5. von Links)
-2. Bit: Trapezsymbol (2. von Links)
-3. Bit: Heizungssymbol (3. von Links)
+1. Bit: Sandglas (1. icon from left) or double filter symbol (5. icon from left)
+2. Bit: Trapezsymbol (2. icon from left)
+3. Bit: Heatsymbol (3. icon from left)
 4. Bit: 
-5. Bit: Wasserhahnsymbol (3. von Links)
+5. Bit: Watersymbol (3. icon from left)
 6. Bit: 
 7. Bit: 
-8. Bit: Kein Strom für Kompressor (Sperrzeit) (5. von Links)
-9. Bit: Sanduhr (1. von Links) oder Doppel-Filter-Symbol (5. von Links)
+8. Bit: No power for compressor ("Sperrzeit" (German)) (5. from left)
+9. Bit: Sandglas (1. icon from left) or double filter symbol (5. icon from left)
 10.Bit:
-11.Bit: "Play"-Symbol (7. von Links)
+11.Bit: "Play"-Symbol (7. icon from left)

@@ -16,29 +16,10 @@ Note: This whole readme assumes the following environment:
 - You are using the user "Pi" (if you have something else, just replace the username wherever stated)
 - You are using a fresh installation of the OS
 - You are using a USBtin device to connect to the CAN Bus (others might work but are not tested by me)
+- In thoery (and also during development I did this), socketcand and canutils can run the Raspberry Pi while can2mqtt is running on a another device in the network. That way you can also use a Raspberry Pi Zero (1st Gen) for socketcand and can-utils while running can2mqtt on another system that supports the Dotnet Framework (requires ARMv7 or later architecture).
 
-## Install socketcand
-```
-sudo apt-get install git autoconf
-cd ~
-git clone https://github.com/linux-can/socketcand.git
-cd socketcand
-./autogen.sh
-./configure
-make
-make install
-sudo mv ~/socketcand /opt
-```
 
-## Install can-utils
-```
-sudo apt-get install git
-cd ~
-git clone https://github.com/linux-can/can-utils.git
-cd can-utils
-make
-```
-
+# Installation and Setup
 ## Install .NET 6.0 Runtime
 Note, the packagelink may be differnt if you are not using a OS based on ubuntu 21.04 or 21.10. Check this page for other releases: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
 This are the links from https://dotnet.microsoft.com/en-us/download/dotnet/6.0 for the differente Processor architectures for Linux:
@@ -54,7 +35,17 @@ sudo ln -s /opt/dotnet/dotnet /usr/local/bin
 
 Check the setup by run "dotnet --info". It should return the installed version and some other details.
 
-## Setup the CAN Bus connection 
+## can-utils installation and setup
+### Install can-utils
+```
+sudo apt-get install git
+cd ~
+git clone https://github.com/linux-can/can-utils.git
+cd can-utils
+make
+```
+
+### Setup the CAN Bus connection 
 Assuming your device has the ID ttyACM0:
 ```
 sudo /opt/can-utils/slcan_attach -f -s1 -b 11 -o /dev/ttyACM0
@@ -62,52 +53,40 @@ sudo /opt/can-utils/slcand ttyACM0 slcan0
 sudo ifconfig slcan0 up
 ```
 
-To add this to autostart and setup the adapter on every reboot, run "sudo nano /etc/rc.local"
-paste three lines above at the end before the "EXIT 0".
+To add this to autostart and setup the adapter on every reboot, run 'sudo nano /etc/rc.local'
+Paste three lines above at the end before the "EXIT 0".
 
-## Start socketcand
-This is only required to test or if you like to take care of socketcand on your own. You can also configure a daemon to do this automatically (see below).
+## socketcand installation and setup
+### Install socketcand
+```
+sudo apt-get install git autoconf
+cd ~
+git clone https://github.com/linux-can/socketcand.git
+cd socketcand
+./autogen.sh
+./configure
+make
+make install
+sudo mv ~/socketcand /opt
+```
+
+### Start socketcand
+This is only required to test or if you like to take care of socketcand on your own.
 You need to replace eth0 if your network interface is called different than eth0.
 ```
  /opt/socketcand/socketcand -i slcan0 -l eth0 -v
 ```
 
-## MQTT Broker
-You need an MQTT Broker, that is handling the MQTT Traffic. You need to define this in the settings.
-
-## Start can2mqtt: 
-This is only required to test or if you like to take care of can2mqtt on your own. You can also configure a daemon to do this automatically (see below).
-
-Minimum parameter: `./can2mqtt_core --Daemon:MqttServer="192.168.0.192"`
-
-All parameter: `./can2mqtt_core --Daemon:Name="Can2MqttSE" --Daemon:CanServer="192.168.0.192" --Daemon:CanServerPort=28700 --Daemon:MqttServer="192.168.0.192" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanForwardWrite=true --Daemon:CanForwardRead=false --Daemon:CanForwardResponse=true`
-
-### Startup Parameters:
-
-| Parameter                     | Description                                                                                                                                                                                                                                                               | Default Value | Required | Example                                   |
-|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|----------|-------------------------------------------|
-| `--Daemon:Name`               | Define the name of your Daemon                                                                                                                                                                                                                                            | Can2Mqtt      | No       | `--Daemon:Name="Can2MqttSE"`              |
-| `--Daemon:CanServer`          | This is the address where your canlogserver is running                                                                                                                                                                                                                    | 127.0.0.1     | No       | `--Daemon:CanServer="192.168.0.192"`      |
-| `--Daemon:CanServerPort`      | This is the port of the canlogserver                                                                                                                                                                                                                                      | 28700         | No       | `--Daemon:CanServerPort=28700`            |
-| `--Daemon:MqttServer`         | This is the address of the MQTT Broker.                                                                                                                                                                                                                                   |               | Yes      | `--Daemon:MqttServer="192.168.0.192"`     |
-| `--Daemon:MqttClientId`       | This is the clientId of the MQTT Client. Choose any name you like                                                                                                                                                                                                         | Can2Mqtt      | No       | `--Daemon:MqttClientId="Can2Mqtt"`        |
-| `--Daemon:MqttTopic`          | This is the MQTT Root Topic of all MQTT message                                                                                                                                                                                                                           | Can2Mqtt      | No       | `--Daemon:MqttTopic="Heating"`            |
-| `--Daemon:MqttTranslator`     | For some CAN Bus Clients are translators to translate the CAN Messages into a readable value and publish them via MQTT including the correct topic. Leave empty to publish every CAN frame without any further handling. Implemented translators right now: StiebelEltron |               | No       | `--Daemon:MqttTranslator="StiebelEltron"` |
-| `--Daemon:CanForwardWrite`    | Should CAN frames of type "Write" be forwarded to MQTT?                                                                                                                                                                                                                   | true          | No       | `--Daemon:CanForwardWrite=true`           |
-| `--Daemon:CanForwardRead`     | Should CAN frames of type "Read" be forwarded to MQTT?                                                                                                                                                                                                                    | false         | No       | `--Daemon:CanForwardRead=false`           |
-| `--Daemon:CanForwardResponse` | Should CAN frames of type "Response" be forwarded to MQTT?                                                                                                                                                                                                                | true          | No       | `--Daemon:CanForwardResponse=true`        |
-
-
-## Configure and Register Daemon for can2mqtt and canlogserver
-Execute `sudo nano /etc/systemd/system/canlogserver.service` and paste the following into the file. Replace the slcan0 in case your socket has a different name:
+### Setup socketcand as daemon
+Execute 'sudo nano /etc/systemd/system/socketcand.service', replace the network interface name if it is not eth0, replace the user with a username the daemon will use to run and paste the following:
 ```
 [Unit]
-Description=canlogserver
+Description=socketcand
 After=network.target
 
 [Service]
-ExecStart=/home/pi/can-utils/canlogserver slcan0
-WorkingDirectory=/home/pi/can-utils/canlogserver
+ExecStart=/opt/socketcand/socketcand -i slcan0 -l eth0 -v
+WorkingDirectory=/opt/socketcand/
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
@@ -116,17 +95,39 @@ User=pi
 [Install]
 WantedBy=multi-user.target
 ```
-Run `sudo systemctl start canlogserver.service` to test if the service starts (it should). To see if it runs, execute `sudo systemctl status canlogserver.service`. You should see something similar like this if everything went well in the last line: `Jul 03 19:09:16 raspi-test systemd[1]: Started canlogserver.`
 
-Now we repeat this for the can2mqtt daemon. Execute `sudo nano /etc/systemd/system/can2mqtt.service` and paste the following into the file. Replace the placeholder with your parameters:
+Finally run the following commands:
+```
+sudo systemctl enable socketcand
+sudo systemctl start socketcand
+```
+
+## MQTT Broker
+You need an MQTT Broker, that is handling the MQTT Traffic. You need to define the MQTT Broker IP in the can2mqtt config file later.
+If you don't have any MQTT broker, Mosquitto is a common MQTT Broker.
+
+## can2mqtt
+### Download can2mqtt
+wget <Latest release at https://github.com/Hunv/can2mqtt/releases> -O can2mqtt.zip
+sudo unzip can2mqtt.zip /opt/can2mqtt
+
+### Start can2mqtt: 
+Optional: This is only required to test or if you like to take care of can2mqtt on your own by running can2mqtt interactivly. 
+You can also configure a daemon to do this automatically (see below).
+```
+dotnet /opt/can2mqtt/can2mqtt
+```
+
+### Setup can2mqtt as daemon
+Execute 'sudo nano /etc/systemd/system/can2mqtt.service', replace the network interface name if it is not eth0, replace the user with a username the daemon will use to run and paste the following:
 ```
 [Unit]
 Description=can2mqtt
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/dotnet /home/pi/can2mqtt_core/can2mqtt_core.dll >>>STATE YOUR PARAMETERS HERE<<<
-WorkingDirectory=/home/pi/can2mqtt_core/
+ExecStart=dotnet /opt/can2mqtt/can2mqtt
+WorkingDirectory=/opt/can2mqtt/
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
@@ -135,13 +136,45 @@ User=pi
 [Install]
 WantedBy=multi-user.target
 ```
-An example for the ExecStart line is:
-```ExecStart=/usr/local/bin/dotnet /home/pi/can2mqtt_core/can2mqtt_core.dll --Daemon:MqttServer="127.0.0.1" --Daemon:MqttClientId="Can2Mqtt" --Daemon:MqttTopic="Heating" --Daemon:MqttTranslator="StiebelEltron" --Daemon:CanlogserverPath="/home/pi/can-utils" --Daemon:CanlogserverSocket="slcan0"```
 
-To test if it works, run the following command: `sudo systemctl start can2mqtt.service`. To test if the service is running, execute `sudo systemctl status can2mqtt.service`. You will see the last lines of output. If you do not see any errors after about 10 seconds, everything is fine.
+Finally run the following commands:
+```
+sudo systemctl enable can2mqtt
+sudo systemctl start can2mqtt
+```
 
-Finally if everything is fine and you want to autostart the canlogserver and can2mqtt application, execute this: 
+### Configure config.json:
+First copy the sample config.json file: 'sudo cp /opt/can2mqtt/config-sample.json /opt/can2mqtt/config.json'
+Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2mqtt/config.json'
 ```
-sudo systemctl enable canlogserver.service
-sudo systemctl enable can2mqtt.service
+{
+  "CanServer": "192.168.0.10",		< This is the System where socketcand is running on
+  "CanServerPort": 29536,			< This is the port socketcand is using (29536 is default)
+  "CanForwardWrite": true,			< This defines if can2mqtt will handle CAN bus packages, that have the "write" flag
+  "CanForwardRead": true,			< This defines if can2mqtt will handle CAN bus packages, that have the "read" flag
+  "CanForwardResponse": true,		< This defines if can2mqtt will handle CAN bus packages, that have the "response" flag
+  "CanReceiveBufferSize": 48,		< The buffer size of receiving commands. 48 is default.
+  "CanSenderId":"6A2",				< The ID can2mqtt will use at the CAN bus in case of writing to the CAN bus
+
+  "MqttServer": "192.168.0.10",		< This is the IP of the MQTT Broker
+  "MqttClientId": "Can2Mqtt",		< This is the ID the MQTT Client will use when register at MQTT Broker
+  "MqttTopic": "Heating",			< This is the first path item of the MQTT topic path can2mqtt will use for send/receive information
+  "MqttTranslator": "StiebelEltron",< This is the translator used to translate the CAN bus data to values and send it via MQTT
+  "MqttUser": "",					< This is the user that is required to register at the MQTT broker. Leave empty for none.
+  "MqttPassword": "",				< This is the password that is required to register at the MQTT broker. Leave empty for none.
+  "MqttAcceptSet": false,			< This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
+  
+  "NoUnits": false					< This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
+}
 ```
+
+# MQTT Data format
+can2mqtt sends the data in the topics, that are defined in the config of the translator. In case of the Stiebel Eltron translator it is the 'StiebelEltron.json'. There will be a prefix-topic in case there are other instances of can2mqtt or other MQTT applications. This one is configured in the config.json at the setting 'MqttTopic'.
+An example MQTT message may look like this:
+Topic: heating/outside/temperature/measured
+Value: 21°C
+
+If you like to set data, add a /set at the end of the topic.
+An example MQTT message to can2mqtt to set the desired room temperature of the primary heat cycle to 23°C:
+Topic: heating/room/hc1/temperature/day/set
+Value: 23 (Important: Without the unit!)
