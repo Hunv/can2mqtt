@@ -232,7 +232,7 @@ namespace can2mqtt_tool
                             {
                                 case "StiebelEltron":
                                     var translator = new can2mqtt.Translator.StiebelEltron.StiebelEltron();
-                                    canFrame = translator.Translate(canFrame, false);
+                                    canFrame = translator.Translate(canFrame, false, "en");
                                     break;
                             }
                         }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace can2mqtt.Translator.StiebelEltron
@@ -16,151 +17,36 @@ namespace can2mqtt.Translator.StiebelEltron
             ElsterIndexTable = new List<ElsterIndexItem>();
 
             var jsonString = File.ReadAllText("./translator/stiebel_eltron/StiebelEltron.json");
-            var jsonObject = JsonNode.Parse(jsonString);
-            //Note: Need to check which format above is to uncomment below and handle as array
-
-            foreach (var aLine in jsonObject.AsArray())
-            {
-                var eii = new ElsterIndexItem();
-                eii.Index = Convert.ToInt32(aLine["Index"].ToString(), 16);
-                eii.Sender = string.IsNullOrWhiteSpace(aLine["Sender"].ToString()) ? 0 : Convert.ToInt32(aLine["Sender"].ToString(), 16);
-                eii.DefaultValue = aLine["Default"].ToString();
-                eii.MqttTopic = aLine["MqttTopic"].ToString();
-                eii.ReadOnly = Convert.ToBoolean(aLine["ReadOnly"].ToString());
-                eii.Unit = aLine["Unit"].ToString();
-
-                switch (aLine["Converter"].ToString().ToLower())
-                {
-                    case "binary":
-                        eii.Converter = new ConvertBinary();
-                        break;
-                    case "bool":
-                        eii.Converter = new ConvertBool();
-                        break;
-                    case "byte":
-                        eii.Converter = new ConvertByte();
-                        break;
-                    case "cent":
-                        eii.Converter = new ConvertCent();
-                        break;
-                    case "custom":
-                        eii.Converter = null;
-                        break;
-                    case "datum":
-                        eii.Converter = new ConvertDate();
-                        break;
-                    case "dec":
-                        eii.Converter = new ConvertDec();
-                        break;
-                    case "default":
-                        eii.Converter = new ConvertDefault();
-                        break;
-                    case "double":
-                        eii.Converter = new ConvertDouble();
-                        break;
-                    case "err":
-                        eii.Converter = new ConvertErr();
-                        break;
-                    case "littlebool":
-                        eii.Converter = new ConvertLittleBool();
-                        break;
-                    case "littleendian":
-                        eii.Converter = new ConvertLittleEndian();
-                        break;
-                    case "littleendiandec":
-                        eii.Converter = new ConvertLittleEndianDec();
-                        break;
-                    case "mille":
-                        eii.Converter = new ConvertMille();
-                        break;
-                    case "sprache":
-                        eii.Converter = new ConvertLanguage();
-                        break;
-                    case "time":
-                        eii.Converter = new ConvertTime();
-                        break;
-                    case "timedomain":
-                        eii.Converter = new ConvertTimeDomain();
-                        break;
-                    case "timerange":
-                        eii.Converter = new ConvertTimeRange();
-                        break;
-                    case "timerangelittleendian":
-                        eii.Converter = new ConvertTimeRangeLittleEndian();
-                        break;
-                    case "triple":
-                        eii.Converter = new ConvertTriple();
-                        break;
-                    default:
-                        eii.Converter = new ConvertDefault();
-                        break;
-                }
-
-                //Set default values if it is a numeric based type
-                if (eii.Converter != null &&
-                    (eii.Converter.GetType() == typeof(ConvertBool) || eii.Converter.GetType() == typeof(ConvertByte) || eii.Converter.GetType() == typeof(ConvertCent) ||
-                    eii.Converter.GetType() == typeof(ConvertDec) || eii.Converter.GetType() == typeof(ConvertDouble) ||
-                    eii.Converter.GetType() == typeof(ConvertLittleBool) || eii.Converter.GetType() == typeof(ConvertLittleEndian) || eii.Converter.GetType() == typeof(ConvertLittleEndianDec) ||
-                    eii.Converter.GetType() == typeof(ConvertMille) || eii.Converter.GetType() == typeof(ConvertTriple)))
-                {
-                    try
-                    {
-                        if (!string.IsNullOrWhiteSpace(aLine["MaxValue"].ToString()))
-                            eii.MaxValue = Convert.ToDouble(aLine["MaxValue"].ToString());
-                        if (!string.IsNullOrWhiteSpace(aLine["MinValue"].ToString()))
-                            eii.MinValue = Convert.ToDouble(aLine["MinValue"].ToString());
-                    }
-                    catch(Exception ea)
-                    {
-                        Console.WriteLine(ea.ToString());
-                    }
-                }
-
-                CultureInfo ci = CultureInfo.InstalledUICulture;
-                if (ci.TwoLetterISOLanguageName == "DE")
-                {
-                    eii.Name = aLine["NameDE"].ToString();
-                    eii.Description = aLine["DescriptionDE"].ToString();
-                    eii.ValueList = aLine["ValuesDE"].ToString().Split(",");
-                }
-                else
-                {
-                    eii.Name = aLine["NameEN"].ToString();
-                    eii.Description = aLine["DescriptionEN"].ToString();
-                    eii.ValueList = aLine["ValuesEN"].ToString().Split(",");
-                }
-
-                ElsterIndexTable.Add(eii);
-            }
+            ElsterIndexTable = JsonSerializer.Deserialize<List<ElsterIndexItem>>(jsonString);
         }
 
         public ElsterIndexItem[] ErrorList =
         {
-              new ElsterIndexItem{Index = 0x0002, Name = "Schuetz klebt"},
-              new ElsterIndexItem{Index = 0x0003, Name = "ERR HD-SENSOR"},
-              new ElsterIndexItem{Index = 0x0004, Name = "Hochdruck"},
-              new ElsterIndexItem{Index = 0x0005, Name = "Verdampferfuehler"},
-              new ElsterIndexItem{Index = 0x0006, Name = "Relaistreiber"},
-              new ElsterIndexItem{Index = 0x0007, Name = "Relaispegel"},
-              new ElsterIndexItem{Index = 0x0008, Name = "Hexschalter"},
-              new ElsterIndexItem{Index = 0x0009, Name = "Drehzahl Luefter"},
-              new ElsterIndexItem{Index = 0x000a, Name = "Lueftertreiber"},
-              new ElsterIndexItem{Index = 0x000b, Name = "Reset Baustein"},
-              new ElsterIndexItem{Index = 0x000c, Name = "ND"},
-              new ElsterIndexItem{Index = 0x000d, Name = "ROM"},
-              new ElsterIndexItem{Index = 0x000e, Name = "QUELLEN MINTEMP"},
-              new ElsterIndexItem{Index = 0x0010, Name = "Abtauen"},
-              new ElsterIndexItem{Index = 0x0012, Name = "ERR T-HEI IWS"},
-              new ElsterIndexItem{Index = 0x0017, Name = "ERR T-FRO IWS"},
-              new ElsterIndexItem{Index = 0x001a, Name = "Niederdruck"},
-              new ElsterIndexItem{Index = 0x001b, Name = "ERR ND-DRUCK"},
-              new ElsterIndexItem{Index = 0x001c, Name = "ERR HD-DRUCK"},
-              new ElsterIndexItem{Index = 0x001d, Name = "HD-SENSOR-MAX"},
-              new ElsterIndexItem{Index = 0x001e, Name = "HEISSGAS-MAX"},
-              new ElsterIndexItem{Index = 0x001f, Name = "ERR HD-SENSOR"},
-              new ElsterIndexItem{Index = 0x0020, Name = "Einfrierschutz"},
-              new ElsterIndexItem{Index = 0x0021, Name = "KEINE LEISTUNG"},
-              new ElsterIndexItem{Index = 0x3800, Name = "Fühler im zweiten WW-Speicher (Fehlercode 56)"}
+              new ElsterIndexItem{Index = 0x0002, Name = new Dictionary<string, string>(){{"DE","Schuetz klebt"}}},
+              new ElsterIndexItem{Index = 0x0003, Name = new Dictionary<string, string>(){{"DE","ERR HD-SENSOR"}}},
+              new ElsterIndexItem{Index = 0x0004, Name = new Dictionary<string, string>(){{"DE","Hochdruck"}}},
+              new ElsterIndexItem{Index = 0x0005, Name = new Dictionary<string, string>(){{"DE","Verdampferfuehler"}}},
+              new ElsterIndexItem{Index = 0x0006, Name = new Dictionary<string, string>(){{"DE","Relaistreiber"}}},
+              new ElsterIndexItem{Index = 0x0007, Name = new Dictionary<string, string>(){{"DE","Relaispegel"}}},
+              new ElsterIndexItem{Index = 0x0008, Name = new Dictionary<string, string>(){{"DE","Hexschalter"}}},
+              new ElsterIndexItem{Index = 0x0009, Name = new Dictionary<string, string>(){{"DE","Drehzahl Luefter"}}},
+              new ElsterIndexItem{Index = 0x000a, Name = new Dictionary<string, string>(){{"DE","Lueftertreiber"}}},
+              new ElsterIndexItem{Index = 0x000b, Name = new Dictionary<string, string>(){{"DE","Reset Baustein"}}},
+              new ElsterIndexItem{Index = 0x000c, Name = new Dictionary<string, string>(){{"DE","ND"}}},
+              new ElsterIndexItem{Index = 0x000d, Name = new Dictionary<string, string>(){{"DE","ROM"}}},
+              new ElsterIndexItem{Index = 0x000e, Name = new Dictionary<string, string>(){{"DE","QUELLEN MINTEMP"}}},
+              new ElsterIndexItem{Index = 0x0010, Name = new Dictionary<string, string>(){{"DE","Abtauen"}}},
+              new ElsterIndexItem{Index = 0x0012, Name = new Dictionary<string, string>(){{"DE", "ERR T-HEI IWS"}}},
+              new ElsterIndexItem{Index = 0x0017, Name = new Dictionary<string, string>(){{"DE","ERR T-FRO IWS"}}},
+              new ElsterIndexItem{Index = 0x001a, Name = new Dictionary<string, string>(){{"DE","Niederdruck"}}},
+              new ElsterIndexItem{Index = 0x001b, Name = new Dictionary<string, string>(){{"DE","ERR ND-DRUCK"}}},
+              new ElsterIndexItem{Index = 0x001c, Name = new Dictionary<string, string>(){{"DE","ERR HD-DRUCK"}}},
+              new ElsterIndexItem{Index = 0x001d, Name = new Dictionary<string, string>(){{"DE","HD-SENSOR-MAX"}}},
+              new ElsterIndexItem{Index = 0x001e, Name = new Dictionary<string, string>(){{"DE","HEISSGAS-MAX"}}},
+              new ElsterIndexItem{Index = 0x001f, Name = new Dictionary<string, string>(){{"DE","ERR HD-SENSOR"}}},
+              new ElsterIndexItem{Index = 0x0020, Name = new Dictionary<string, string>(){{"DE","Einfrierschutz"}}},
+              new ElsterIndexItem{Index = 0x0021, Name = new Dictionary<string, string>(){{"DE","KEINE LEISTUNG"}}},
+              new ElsterIndexItem{Index = 0x3800, Name = new Dictionary<string, string>(){{"DE","Fühler im zweiten WW-Speicher (Fehlercode 56)"}}}
             };
     }
 
@@ -3810,22 +3696,96 @@ namespace can2mqtt.Translator.StiebelEltron
         /// <summary>
         /// The Index as decimal number
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
         public int Index { get; set; }
+
+        /// <summary>
+        /// The Index as decimal number represented by a string
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("Index")]
+        public string IndexString {
+            get { return Index.ToString("X4"); }
+            set { Index = Convert.ToInt32(value, 16); } 
+        }
 
         /// <summary>
         /// The name of the Index
         /// </summary>
-        public string Name { get; set; }
+        public Dictionary<string,string> Name { get; set; }
 
         /// <summary>
         /// The CAN Device ID where this Index/MQTT Topic is valid. If 0 it is for all
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
         public int Sender { get; set; }
+
+        /// <summary>
+        /// The Index as decimal number represented by a string
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("Sender")]
+        public string SenderString
+        {
+            get { return Sender.ToString("X3"); }
+            set { Sender = Convert.ToInt32(value, 16); }
+        }
 
         /// <summary>
         /// The Converter to convert the raw value to a processable value
         /// </summary>
-        public IValueConverter Converter { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public IValueConverter Converter { get {
+                switch (ConverterString.ToLower())
+                {
+                    case "binary":
+                        return new ConvertBinary();                        
+                    case "bool":
+                        return new ConvertBool();                        
+                    case "byte":
+                        return new ConvertByte();                        
+                    case "cent":
+                        return new ConvertCent();                        
+                    case "custom":
+                        return null; //Not implemented                        
+                    case "datum":
+                        return new ConvertDate();                        
+                    case "dec":
+                        return new ConvertDec();                        
+                    case "default":
+                        return new ConvertDefault();                        
+                    case "double":
+                        return new ConvertDouble();                        
+                    case "err":
+                        return new ConvertErr();                        
+                    case "littlebool":
+                        return new ConvertLittleBool();                        
+                    case "littleendian":
+                        return new ConvertLittleEndian();                        
+                    case "littleendiandec":
+                        return new ConvertLittleEndianDec();                        
+                    case "mille":
+                        return new ConvertMille();                        
+                    case "sprache":
+                        return new ConvertLanguage();                        
+                    case "time":
+                        return new ConvertTime();                        
+                    case "timedomain":
+                        return new ConvertTimeDomain();                        
+                    case "timerange":
+                        return new ConvertTimeRange();                        
+                    case "timerangelittleendian":
+                        return new ConvertTimeRangeLittleEndian();                        
+                    case "triple":
+                        return new ConvertTriple();                        
+                    default:
+                        return new ConvertDefault();                        
+                }
+            } }
+
+        /// <summary>
+        /// The representation of the the Converter as a string from the config file.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("Converter")]
+        public string ConverterString { get; set; }
 
         /// <summary>
         /// The MQTT Topic
@@ -3840,27 +3800,29 @@ namespace can2mqtt.Translator.StiebelEltron
         /// <summary>
         /// A description
         /// </summary>
-        public string Description { get; set; }
+        public Dictionary<string, string> Description { get; set; }
 
         /// <summary>
         /// The default value set by StiebelEltron
         /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("Default")]
         public string DefaultValue { get; set; }
 
         /// <summary>
         /// If value is a number, the max number
         /// </summary>
-        public double MaxValue { get; set; }
+        public string MaxValue { get; set; }
 
         /// <summary>
         /// If value is a number, the min number
         /// </summary>
-        public double MinValue { get; set; }
+        public string MinValue { get; set; }
 
         /// <summary>
         /// Values that are valid for this dataset. Used if converter is null.
         /// </summary>
-        public string[] ValueList { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("Values")]
+        public Dictionary<string, Dictionary<string,string>> ValueList { get; set; }
 
         /// <summary>
         /// If the value can just be read but not set

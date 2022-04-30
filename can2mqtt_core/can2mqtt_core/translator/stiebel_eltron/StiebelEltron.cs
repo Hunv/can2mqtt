@@ -17,7 +17,7 @@ namespace can2mqtt.Translator.StiebelEltron
     /// </summary>
     public class StiebelEltron : ITranslator
     {
-        public CanFrame Translate(CanFrame rawData, bool noUnit)
+        public CanFrame Translate(CanFrame rawData, bool noUnit, string language)
         {
             //Check if format is correct
             if (string.IsNullOrEmpty(rawData.PayloadFull) || rawData.PayloadFull.Length != 14)
@@ -56,7 +56,15 @@ namespace can2mqtt.Translator.StiebelEltron
             if (indexData.Converter == null) //custom converter
             {
                 //0000=Aus,0001=Schließer-Aus,0002=Öffner-Aus,0003=Schließer
-                rawData.MqttValue = indexData.ValueList.FirstOrDefault(x => x.StartsWith(payloadData)).Substring(5);
+                try
+                {
+                    rawData.MqttValue = indexData.ValueList[language][payloadData];
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("No value for payloaddata {0} and language {1} found.", payloadData, language);
+                    rawData.MqttValue = "Unknown Data";
+                }
             }
             else if (!noUnit)
                 rawData.MqttValue = indexData.Converter.ConvertValue(payloadData) + indexData.Unit;

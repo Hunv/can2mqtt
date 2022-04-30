@@ -15,5 +15,6 @@
   "MqttPassword": "",
   "MqttAcceptSet": false,
 
-  "NoUnits": false
+  "NoUnits": false,
+  "Language": "en"
 }

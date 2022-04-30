@@ -38,6 +38,7 @@ namespace can2mqtt
         private NetworkStream TcpCanStream;
         private TcpClient ScdClient = null;
         private Translator.StiebelEltron.StiebelEltron Translator = null;
+        private string Language = "EN";
 
 
         public Can2Mqtt(ILogger<Can2Mqtt> logger)
@@ -90,6 +91,7 @@ namespace can2mqtt
             CanServerPort = Convert.ToInt32(config["CanServerPort"].ToString());
             MqttAcceptSet = Convert.ToBoolean(config["MqttAcceptSet"].ToString());
             CanSenderId = Convert.ToString(config["CanSenderId"]);
+            Language = Convert.ToString(config["Language"]).ToUpper();
         }
         
         /// <summary>
@@ -394,7 +396,7 @@ namespace can2mqtt
                     {
                         case "StiebelEltron":
                             Translator = new Translator.StiebelEltron.StiebelEltron();
-                            canMsg = Translator.Translate(canMsg, NoUnit);
+                            canMsg = Translator.Translate(canMsg, NoUnit, Language);
                             break;
                     }
                 }
