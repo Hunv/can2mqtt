@@ -8,7 +8,6 @@ namespace can2mqtt
     public class CanFrame
     {
         //Example socketcand frame: "< frame 6A0 1630437901.513376 3100FA000E0000 >"
-        //Example canlogserver frame: "(1561746016.537099) slcan0 180#D03CFA01120B00"
 
         private string _RawFrame = "";
         public string RawFrame {
@@ -91,22 +90,43 @@ namespace can2mqtt
             }
         }
 
+        /// <summary>
+        /// Returns the frametype (0=write, 1=read, 2=response, 3=ack, 4=write ack, 5=write respond, 6=system, 7=system respond)
+        /// </summary>
         public string CanFrameType { get { return PayloadFull.Substring(1, 1); } }
 
         /// <summary>
-        /// Gets the IndexTable Index. Usually this is FA but FD was also discovered in the past
+        /// Gets the IndexTable Index. When FA then it is an extended value index
         /// </summary>
         public string IndexTableIndex { get { return PayloadFull.Substring(4,2); } }
 
         /// <summary>
         /// The Index the value belongs to
         /// </summary>
-        public string ValueIndex { get { return PayloadFull.Substring(6, 4); } }
+        public string ValueIndex
+        {
+            get
+            {
+                if (IndexTableIndex == "FA")
+                    return PayloadFull.Substring(6, 4);
+                else
+                    return "00" + PayloadFull.Substring(4, 2);
+            }
+        }
 
         /// <summary>
         /// The Value that is transmitted by this CAN frame
         /// </summary>
-        public string Value { get { return PayloadFull.Substring(10, 4); } }
+        public string Value
+        {
+            get
+            {
+                if (IndexTableIndex == "FA")
+                    return PayloadFull.Substring(10, 4);
+                else
+                    return PayloadFull.Substring(6, 4);
+            }
+        }
 
         /// <summary>
         /// In case a translator was used, the topic may become more specified

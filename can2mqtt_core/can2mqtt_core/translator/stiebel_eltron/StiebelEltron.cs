@@ -37,8 +37,8 @@ namespace can2mqtt.Translator.StiebelEltron
             //7 - system respond
             //20/21 (hex.) - write/read large telegram
 
-            var payloadIndex = Convert.ToInt32(rawData.PayloadFull.Substring(6, 4), 16);
-            var payloadData = rawData.PayloadFull.Substring(10);
+            var payloadIndex = Convert.ToInt32(rawData.ValueIndex, 16);
+            var payloadData = rawData.Value;
 
             //Get IndexData
             var elsterTable = new ElsterIndex();

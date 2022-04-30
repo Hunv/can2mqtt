@@ -17,22 +17,9 @@ namespace can2mqtt.Translator.StiebelEltron
     {
         public string ConvertValue(string hexData)
         {
-            //This is a signed value and used i.e. for temperatures. 
-            //That means if from the binary view of this hex value the first value is a 1, it is a negative value. 
-            //A leading 1 would mean that the values are higher than 32768 (here: 3276.8, because of division by 10).
-            //6553 = -1°C
-            //6553,5 exists (-0,5°C), after that 0°C
-            var result = (double)Convert.ToInt32(hexData, 16) / 10;
+            var result = (double)Convert.ToInt16(hexData, 16) / 10;
 
-            if (result > 2277)
-            {
-                //it is negative
-                return Math.Round(result - 6553.6, 1).ToString();
-            }
-            else
-            {
-                return result.ToString();
-            }
+            return result.ToString();
         }
 
         public string ConvertValueBack(string value)
