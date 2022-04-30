@@ -21,12 +21,6 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="translator\stiebel_eltron\StiebelEltronIndexTable.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 	<PropertyGroup>
 		<ServerGarbageCollection>true</ServerGarbageCollection>
 	</PropertyGroup>

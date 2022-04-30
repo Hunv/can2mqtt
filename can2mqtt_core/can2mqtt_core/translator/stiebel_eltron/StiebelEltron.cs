@@ -55,15 +55,22 @@ namespace can2mqtt.Translator.StiebelEltron
 
             if (indexData.Converter == null) //custom converter
             {
-                //0000=Aus,0001=Schließer-Aus,0002=Öffner-Aus,0003=Schließer
                 try
                 {
                     rawData.MqttValue = indexData.ValueList[language][payloadData];
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("No value for payloaddata {0} and language {1} found.", payloadData, language);
-                    rawData.MqttValue = "Unknown Data";
+                    Console.WriteLine("No value for payloaddata {0} and language {1} found. Trying english values...", payloadData, language);
+                    try
+                    {
+                        rawData.MqttValue = indexData.ValueList["EN"][payloadData];
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No value for payloaddata {0} and language EN found. This is an unknown value.", payloadData);
+                        rawData.MqttValue = "Unknown Data";
+                    }
                 }
             }
             else if (!noUnit)
