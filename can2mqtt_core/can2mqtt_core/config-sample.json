@@ -2,7 +2,7 @@
   "CanServer": "192.168.0.10",
   "CanServerPort": 29536,
   "CanForwardWrite": true,
-  "CanForwardRead": true,
+  "CanForwardRead": false,
   "CanForwardResponse": true,
   "CanReceiveBufferSize": 48,
   "CanSenderId": "69F",

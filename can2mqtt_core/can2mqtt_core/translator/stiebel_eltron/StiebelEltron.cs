@@ -66,14 +66,14 @@ namespace can2mqtt.Translator.StiebelEltron
             return rawData;
         }
 
-        public string TranslateBack(string topic, string value, string senderId)
+        public string TranslateBack(string topic, string value, string senderId, bool noUnit)
         {
             //remove the /set
             if (topic.EndsWith("/set"))
                 topic = topic.Substring(0, topic.Length - 4);
 
             //remove the first topic because it is the custom one from the config file and not in the ElsterTable config file            
-            topic = topic.Substring(topic.IndexOf('/')+1);
+            topic = topic.Substring(topic.IndexOf('/'));
 
             //check the sender length. Fail in case of unexpected length
             if (senderId.Length != 3)
@@ -82,10 +82,13 @@ namespace can2mqtt.Translator.StiebelEltron
                 return "";
             }
 
-
             // Get the Elster Index by the topic
             var elsterTable = new ElsterIndex();
             var elsterItem = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
+
+            //Remove the Unit from the value
+            if (!noUnit && value.EndsWith(elsterItem.Unit))
+                value = value.Substring(0, value.Length-elsterItem.Unit.Length);
 
             //Index not available
             if (elsterItem == null)
@@ -148,10 +151,11 @@ namespace can2mqtt.Translator.StiebelEltron
             // followed by the elster Index ID
             // followed by the value
             var canFrameString = string.Format("{0}#{1}0{2}FA{3}{4}", senderId, receiverId[0], receiverId[1], elsterItem.Index.ToString("X4"), hexPayload);
-            
+
+            Console.WriteLine("CAN Frame is: {0}", canFrameString);
 
             //Verify Format of the translated back data
-            if (string.IsNullOrEmpty(canFrameString) || canFrameString.Length != 14)
+            if (string.IsNullOrEmpty(canFrameString) || canFrameString.Length != 18)
             {
                 Console.WriteLine("Data is not lenght of 14: {0}", canFrameString);
                 return "";

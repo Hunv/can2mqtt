@@ -28,7 +28,7 @@ namespace can2mqtt
         private bool CanForwardResponse = true;
         private int CanReceiveBufferSize = 48;
         private string CanSenderId;
-        private bool NoUnits = false;
+        private bool NoUnit = false;
         private string MqttTopic = "";
         private string MqttUser;
         private string MqttPassword;
@@ -80,7 +80,7 @@ namespace can2mqtt
             CanForwardWrite = bool.Parse(config["CanForwardWrite"].ToString());
             CanForwardRead = bool.Parse(config["CanForwardRead"].ToString());
             CanForwardResponse = Convert.ToBoolean(config["CanForwardResponse"].ToString());
-            NoUnits = Convert.ToBoolean(config["NoUnits"].ToString());
+            NoUnit = Convert.ToBoolean(config["NoUnits"].ToString());
             CanReceiveBufferSize = Convert.ToInt32(config["CanReceiveBufferSize"].ToString());
             MqttUser = Convert.ToString(config["MqttUser"]);
             MqttPassword = Convert.ToString(config["MqttPassword"]);
@@ -179,17 +179,50 @@ namespace can2mqtt
 
         private async Task SendCan(string topic, byte[] payload, string canServer, int canPort)
         {
-            await ConnectTcpCanBus(canServer, canPort);
+            try
+            {
+                await ConnectTcpCanBus(canServer, canPort);
 
-            //Get the data
-            var data = Encoding.UTF8.GetString(payload);
+                //Get the data
+                var data = Encoding.UTF8.GetString(payload);
 
-            //Convert the data to the required format
-            var canFrame = Translator.TranslateBack(topic, data, CanSenderId);
+                //Convert the data to the required format
+                var canFrame = Translator.TranslateBack(topic, data, CanSenderId, NoUnit);
 
-            // < send can_id can_datalength [data]* >
-            Console.WriteLine("Sending CAN Frame: {0}", canFrame);
-            //TcpCanStream.Write(Encoding.Default.GetBytes(string.Format("< send {0} {1} {2} >", CanSenderId, canFrame.Length, canFrame)));
+                //Convert data part of the can Frame to socketcand required format
+                var canFrameDataPart = canFrame.Split("#")[1];
+                var canFrameSdData = "";
+
+                for (int i = 0; i < canFrameDataPart.Length; i +=2)
+                {
+                    canFrameSdData += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
+                }
+                canFrameSdData = canFrameSdData.Trim();
+
+                // < send can_id can_datalength [data]* >
+                var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
+                Console.WriteLine("Sending CAN Frame: {0}", canFrameSdCommand);
+                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
+
+                // read the send data
+                var canFrameSdDataVerify = "";
+
+                for (int i = 0; i < canFrameDataPart.Length; i += 2)
+                {
+                    if (i != 0)
+                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
+                    else
+                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 1) + "1", 16).ToString("X1") + " ";
+                }
+                canFrameSdDataVerify = canFrameSdDataVerify.Trim();
+                var canFrameSdCommandVerify = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdDataVerify);
+                Console.WriteLine("Sending CAN Verify Frame: {0}", canFrameSdCommandVerify);
+                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommandVerify));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to set value via CAN bus. Error: " + ex.ToString());
+            }
         }
 
 
@@ -361,7 +394,7 @@ namespace can2mqtt
                     {
                         case "StiebelEltron":
                             Translator = new Translator.StiebelEltron.StiebelEltron();
-                            canMsg = Translator.Translate(canMsg, NoUnits);
+                            canMsg = Translator.Translate(canMsg, NoUnit);
                             break;
                     }
                 }
