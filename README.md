@@ -39,7 +39,8 @@ Check the setup by run "dotnet --info". It should return the installed version a
 ### Install can-utils
 ```
 sudo apt-get install git
-cd ~
+sudo mkdir /opt
+cd /opt
 git clone https://github.com/linux-can/can-utils.git
 cd can-utils
 make
@@ -54,7 +55,7 @@ sudo ifconfig slcan0 up
 ```
 
 To add this to autostart and setup the adapter on every reboot, run 'sudo nano /etc/rc.local'
-Paste three lines above at the end before the "EXIT 0".
+Paste the three lines above at the end before the "EXIT 0".
 
 ## socketcand installation and setup
 ### Install socketcand
@@ -71,7 +72,7 @@ sudo mv ~/socketcand /opt
 ```
 
 ### Start socketcand
-This is only required to test or if you like to take care of socketcand on your own.
+This is only required to test and debug or if you like to take care of socketcand on your own.
 You need to replace eth0 if your network interface is called different than eth0.
 ```
  /opt/socketcand/socketcand -i slcan0 -l eth0 -v
@@ -103,16 +104,19 @@ sudo systemctl start socketcand
 ```
 
 ## MQTT Broker
-You need an MQTT Broker, that is handling the MQTT Traffic. You need to define the MQTT Broker IP in the can2mqtt config file later.
+You need an MQTT Broker, that is handling the MQTT traffic. You need to define the MQTT Broker IP in the can2mqtt config file later.
 If you don't have any MQTT broker, Mosquitto is a common MQTT Broker.
 
 ## can2mqtt
 ### Download can2mqtt
-wget <Latest release at https://github.com/Hunv/can2mqtt/releases> -O can2mqtt.zip
+```
+cd ~
+wget https://github.com/Hunv/can2mqtt/releases/download/v4/can2mqtt_v4.zip.zip -O can2mqtt.zip
 sudo unzip can2mqtt.zip /opt/can2mqtt
+```
 
 ### Start can2mqtt: 
-Optional: This is only required to test or if you like to take care of can2mqtt on your own by running can2mqtt interactivly. 
+Optional: This is only required to test and debug or if you like to take care of can2mqtt on your own by running can2mqtt interactivly. 
 You can also configure a daemon to do this automatically (see below).
 ```
 dotnet /opt/can2mqtt/can2mqtt
@@ -149,22 +153,23 @@ Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2
 ```
 {
   "CanServer": "192.168.0.10",		< This is the System where socketcand is running on
-  "CanServerPort": 29536,			< This is the port socketcand is using (29536 is default)
-  "CanForwardWrite": true,			< This defines if can2mqtt will handle CAN bus packages, that have the "write" flag
-  "CanForwardRead": true,			< This defines if can2mqtt will handle CAN bus packages, that have the "read" flag
-  "CanForwardResponse": true,		< This defines if can2mqtt will handle CAN bus packages, that have the "response" flag
-  "CanReceiveBufferSize": 48,		< The buffer size of receiving commands. 48 is default.
-  "CanSenderId":"6A2",				< The ID can2mqtt will use at the CAN bus in case of writing to the CAN bus
+  "CanServerPort": 29536,			    < This is the port socketcand is using (29536 is default)
+  "CanForwardWrite": true,			  < This defines if can2mqtt will handle CAN bus packages, that have the "write" flag
+  "CanForwardRead": true,			    < This defines if can2mqtt will handle CAN bus packages, that have the "read" flag
+  "CanForwardResponse": true,		  < This defines if can2mqtt will handle CAN bus packages, that have the "response" flag
+  "CanReceiveBufferSize": 48,		  < The buffer size of receiving commands. 48 is default.
+  "CanSenderId":"6A2",				    < The ID can2mqtt will use at the CAN bus in case of writing to the CAN bus
 
   "MqttServer": "192.168.0.10",		< This is the IP of the MQTT Broker
-  "MqttClientId": "Can2Mqtt",		< This is the ID the MQTT Client will use when register at MQTT Broker
-  "MqttTopic": "Heating",			< This is the first path item of the MQTT topic path can2mqtt will use for send/receive information
+  "MqttClientId": "Can2Mqtt",		  < This is the ID the MQTT Client will use when register at MQTT Broker
+  "MqttTopic": "Heating",			    < This is the first path item of the MQTT topic path can2mqtt will use for send/receive information
   "MqttTranslator": "StiebelEltron",< This is the translator used to translate the CAN bus data to values and send it via MQTT
-  "MqttUser": "",					< This is the user that is required to register at the MQTT broker. Leave empty for none.
-  "MqttPassword": "",				< This is the password that is required to register at the MQTT broker. Leave empty for none.
-  "MqttAcceptSet": false,			< This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
+  "MqttUser": "",					        < This is the user that is required to register at the MQTT broker. Leave empty for none.
+  "MqttPassword": "",				      < This is the password that is required to register at the MQTT broker. Leave empty for none.
+  "MqttAcceptSet": false,			    < This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
   
-  "NoUnits": false					< This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
+  "NoUnits": false,					      < This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25Â°C" or just "25")  
+  "Language": "en"                < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
 }
 ```
 
@@ -172,9 +177,9 @@ Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2
 can2mqtt sends the data in the topics, that are defined in the config of the translator. In case of the Stiebel Eltron translator it is the 'StiebelEltron.json'. There will be a prefix-topic in case there are other instances of can2mqtt or other MQTT applications. This one is configured in the config.json at the setting 'MqttTopic'.
 An example MQTT message may look like this:
 Topic: heating/outside/temperature/measured
-Value: 21°C
+Value: 21Â°C
 
 If you like to set data, add a /set at the end of the topic.
-An example MQTT message to can2mqtt to set the desired room temperature of the primary heat cycle to 23°C:
+An example MQTT message to can2mqtt to set the desired room temperature of the primary heat cycle to 23ï¿½C:
 Topic: heating/room/hc1/temperature/day/set
 Value: 23 (Important: Without the unit!)
