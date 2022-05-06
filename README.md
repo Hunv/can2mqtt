@@ -112,25 +112,25 @@ If you don't have any MQTT broker, Mosquitto is a common MQTT Broker.
 ```
 cd ~
 wget https://github.com/Hunv/can2mqtt/releases/download/v4/can2mqtt_v4.zip.zip -O can2mqtt.zip
-sudo unzip can2mqtt.zip /opt/can2mqtt
+sudo unzip can2mqtt.zip -d /opt/can2mqtt
 ```
 
 ### Start can2mqtt: 
 Optional: This is only required to test and debug or if you like to take care of can2mqtt on your own by running can2mqtt interactivly. 
 You can also configure a daemon to do this automatically (see below).
 ```
-dotnet /opt/can2mqtt/can2mqtt
+dotnet /opt/can2mqtt/can2mqtt.dll
 ```
 
 ### Setup can2mqtt as daemon
-Execute 'sudo nano /etc/systemd/system/can2mqtt.service', replace the network interface name if it is not eth0, replace the user with a username the daemon will use to run and paste the following:
+Execute 'sudo nano /etc/systemd/system/can2mqtt.service', replace the user with a username the daemon will use to run and paste the following:
 ```
 [Unit]
 Description=can2mqtt
 After=network.target
 
 [Service]
-ExecStart=dotnet /opt/can2mqtt/can2mqtt
+ExecStart=dotnet /opt/can2mqtt/can2mqtt.dll
 WorkingDirectory=/opt/can2mqtt/
 StandardOutput=inherit
 StandardError=inherit
@@ -139,12 +139,6 @@ User=pi
 
 [Install]
 WantedBy=multi-user.target
-```
-
-Finally run the following commands:
-```
-sudo systemctl enable can2mqtt
-sudo systemctl start can2mqtt
 ```
 
 ### Configure config.json:
@@ -168,9 +162,15 @@ Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2
   "MqttPassword": "",				      < This is the password that is required to register at the MQTT broker. Leave empty for none.
   "MqttAcceptSet": false,			    < This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
   
-  "NoUnits": false,					      < This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
+  "NoUnits": true,					      < This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
   "Language": "en"                < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
 }
+```
+
+Finally run the following commands to start the daemon:
+```
+sudo systemctl enable can2mqtt
+sudo systemctl start can2mqtt
 ```
 
 # MQTT Data format
@@ -180,6 +180,6 @@ Topic: heating/outside/temperature/measured
 Value: 21°C
 
 If you like to set data, add a /set at the end of the topic.
-An example MQTT message to can2mqtt to set the desired room temperature of the primary heat cycle to 23�C:
+An example MQTT message to can2mqtt to set the desired room temperature of the primary heat cycle to 23°C:
 Topic: heating/room/hc1/temperature/day/set
 Value: 23 (Important: Without the unit!)
