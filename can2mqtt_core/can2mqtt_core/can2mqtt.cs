@@ -161,16 +161,30 @@ namespace can2mqtt
                     // Check if it is a set topic and handle only if so.
                     if (e.ApplicationMessage.Topic.EndsWith("/set"))
                     {
-                        Console.Write("Received MQTT Message; Topic = {0}", e.ApplicationMessage.Topic);
+                        Console.Write("Received MQTT SET Message; Topic = {0}", e.ApplicationMessage.Topic);
                         if (e.ApplicationMessage.Payload != null)
                         {
                             Console.WriteLine($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
                             await SendCan(e.ApplicationMessage.Topic, e.ApplicationMessage.Payload, CanServer, CanServerPort);
                         }
                         else
+                        {
                             Console.WriteLine(" WITH NO PAYLOAD");
-                        //Console.WriteLine($"+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}");
-                        //Console.WriteLine($"+ Retain = {e.ApplicationMessage.Retain}");
+                        }
+                    }
+                    // Chec if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
+                    else if (e.ApplicationMessage.Topic.EndsWith("/read"))
+                    {
+                        Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
+                        if (e.ApplicationMessage.Payload != null)
+                        {
+                            Console.WriteLine($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                            await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
+                        }
+                        else
+                        {
+                            Console.WriteLine(" WITH NO PAYLOAD");
+                        }
                     }
                 });
             }
@@ -179,6 +193,14 @@ namespace can2mqtt
             await TcpCanBusListener(CanServer, CanServerPort);
         }
 
+        /// <summary>
+        /// Sends a payload to the CAN bus
+        /// </summary>
+        /// <param name="topic">The MQTT Topic</param>
+        /// <param name="payload">The Payload for the CAN bus</param>
+        /// <param name="canServer">The CAN Server (where socketcand runs)</param>
+        /// <param name="canPort">The CAN Server Port</param>
+        /// <returns></returns>
         private async Task SendCan(string topic, byte[] payload, string canServer, int canPort)
         {
             try
@@ -189,7 +211,7 @@ namespace can2mqtt
                 var data = Encoding.UTF8.GetString(payload);
 
                 //Convert the data to the required format
-                var canFrame = Translator.TranslateBack(topic, data, CanSenderId, NoUnit);
+                var canFrame = Translator.TranslateBack(topic, data, CanSenderId, NoUnit, "0");
 
                 //Convert data part of the can Frame to socketcand required format
                 var canFrameDataPart = canFrame.Split("#")[1];
@@ -227,7 +249,64 @@ namespace can2mqtt
             }
         }
 
+        /// <summary>
+        /// Sends a read command to the CAN bus to request the send of the requested value from the bus
+        /// </summary>
+        /// <param name="topic">The MQTT Topic</param>
+        /// <param name="canServer">The CAN Server (where socketcand runs)</param>
+        /// <param name="canPort">The CAN Server Port</param>
+        /// <returns></returns>
+        private async Task ReadCan(string topic, string canServer, int canPort)
+        {
+            try
+            {
+                await ConnectTcpCanBus(canServer, canPort);
 
+                //Convert the data to the required format
+                var canFrame = Translator.TranslateBack(topic, null, CanSenderId, NoUnit, "1");
+
+                //Convert data part of the can Frame to socketcand required format
+                var canFrameDataPart = canFrame.Split("#")[1];
+                var canFrameSdData = "";
+
+                for (int i = 0; i < canFrameDataPart.Length; i += 2)
+                {
+                    canFrameSdData += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
+                }
+                canFrameSdData = canFrameSdData.Trim();
+
+                // < send can_id can_datalength [data]* >
+                var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
+                Console.WriteLine("Sending CAN Frame: {0}", canFrameSdCommand);
+                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
+
+                // read the send data
+                var canFrameSdDataVerify = "";
+
+                for (int i = 0; i < canFrameDataPart.Length; i += 2)
+                {
+                    if (i != 0)
+                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
+                    else
+                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 1) + "1", 16).ToString("X1") + " ";
+                }
+                canFrameSdDataVerify = canFrameSdDataVerify.Trim();
+                var canFrameSdCommandVerify = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdDataVerify);
+                Console.WriteLine("Sending CAN Verify Frame: {0}", canFrameSdCommandVerify);
+                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommandVerify));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to send a read via CAN bus. Error: " + ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Connect or verify connection to socketcand
+        /// </summary>
+        /// <param name="canServer">socketcand server address</param>
+        /// <param name="canPort">socketcand server port</param>
+        /// <returns></returns>
         public async Task ConnectTcpCanBus(string canServer, int canPort)
         {
             if (ScdClient != null && ScdClient.Connected)
@@ -281,8 +360,8 @@ namespace can2mqtt
         /// <summary>
         /// Listen to the CAN Bus (via TCP) and generate MQTT Message if there is an update
         /// </summary>
-        /// <param name="canServer"></param>
-        /// <param name="canPort"></param>
+        /// <param name="canServer">socketcand server address</param>
+        /// <param name="canPort">socketcand server port</param>
         /// <returns></returns>
         public async Task TcpCanBusListener(string canServer, int canPort)
         {

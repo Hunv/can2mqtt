@@ -81,11 +81,21 @@ namespace can2mqtt.Translator.StiebelEltron
             return rawData;
         }
 
-        public string TranslateBack(string topic, string value, string senderId, bool noUnit)
-        {
-            //remove the /set
-            if (topic.EndsWith("/set"))
-                topic = topic.Substring(0, topic.Length - 4);
+        /// <summary>
+        /// Converts MQTT data to a CAN frame
+        /// </summary>
+        /// <param name="topic">The MQTT topic</param>
+        /// <param name="value">The value of the corresponding MQTT topic</param>
+        /// <param name="senderId">The sender ID in the CAN bus</param>
+        /// <param name="noUnit">Include/Exclude Units at conversion</param>
+        /// <param name="canOperation">The operating of the CAN bus (write = 0, read = 1)</param>
+        /// <returns></returns>
+        public string TranslateBack(string topic, string value, string senderId, bool noUnit, string canOperation = "0")
+        {            
+            if (topic.EndsWith("/set")) //remove the /set from topic
+                topic = topic.Substring(0, topic.Length - 4);            
+            else if (topic.EndsWith("/read")) //remove the /read from topic
+                topic = topic.Substring(0, topic.Length - 5);
 
             //remove the first topic because it is the custom one from the config file and not in the ElsterTable config file            
             topic = topic.Substring(topic.IndexOf('/'));
@@ -93,7 +103,7 @@ namespace can2mqtt.Translator.StiebelEltron
             //check the sender length. Fail in case of unexpected length
             if (senderId.Length != 3)
             {
-                Console.WriteLine("The senderID is not exatly 3.");
+                Console.WriteLine("The senderID has not the length of 3.");
                 return "";
             }
 
@@ -101,16 +111,16 @@ namespace can2mqtt.Translator.StiebelEltron
             var elsterTable = new ElsterIndex();
             var elsterItem = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
 
-            //Remove the Unit from the value
-            if (!noUnit && value.EndsWith(elsterItem.Unit))
-                value = value.Substring(0, value.Length-elsterItem.Unit.Length);
-
             //Index not available
             if (elsterItem == null)
             {
                 Console.WriteLine("Cannot find a Elster item that has the MQTT topic {0}", topic);
                 return "";
             }
+
+            //Remove the Unit from the value
+            if (!noUnit && value.EndsWith(elsterItem.Unit) && value != null)
+                value = value.Substring(0, value.Length - elsterItem.Unit.Length);
 
             // Result data must look like 3000FA056C0002
             // It will start with 3000FA (Receiver is 180, it is a write and Elster Index is used)
@@ -154,18 +164,23 @@ namespace can2mqtt.Translator.StiebelEltron
                 receiverId[1] = elsterItem.Sender.ToString("X2");
             }
 
-            var conv = elsterItem.Converter;
-            var hexPayload = conv.ConvertValueBack(value);
+            // Convert the payload value to hex value
+            var hexPayload = "0000";
+            if (value != null)
+            {
+                var conv = elsterItem.Converter;
+                hexPayload = conv.ConvertValueBack(value);
+            }
 
             // The first 3 characters are the sender Id
             // followed by #
             // followed by Receiver Index ID  (i.e. 3 for 180 or higher)
-            // followed by 0 (which means it is a write to the Canbus)
+            // followed by canOperation read or write from/to the CAN bus (0 = write, 1 = read)
             // followed by 00 which is the offset of the receiver ID.
             // followed by FA to indicate the usage of the Elster Indexes
             // followed by the elster Index ID
             // followed by the value
-            var canFrameString = string.Format("{0}#{1}0{2}FA{3}{4}", senderId, receiverId[0], receiverId[1], elsterItem.Index.ToString("X4"), hexPayload);
+            var canFrameString = string.Format("{0}#{1}{2}{3}FA{4}{5}", senderId, receiverId[0], canOperation, receiverId[1], elsterItem.Index.ToString("X4"), hexPayload);
 
             Console.WriteLine("CAN Frame is: {0}", canFrameString);
 
