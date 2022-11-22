@@ -119,7 +119,7 @@ namespace can2mqtt.Translator.StiebelEltron
             }
 
             //Remove the Unit from the value
-            if (!noUnit && value.EndsWith(elsterItem.Unit) && value != null)
+            if (!noUnit  && value != null && value.EndsWith(elsterItem.Unit))
                 value = value.Substring(0, value.Length - elsterItem.Unit.Length);
 
             // Result data must look like 3000FA056C0002
