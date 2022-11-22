@@ -11,3 +11,5 @@ can2mqtt_core/can2mqtt_ttytool/bin/
 can2mqtt_core/can2mqtt_tests/bin/
 can2mqtt_core/can2mqtt_tests/obj/can2mqtt,tests.csproj.nuget.dgspec.json
 can2mqtt_core/can2mqtt_tests/obj/
+can2mqtt_core/can2mqtt_core/config.json
+can2mqtt_core/can2mqtt_core/.vscode/

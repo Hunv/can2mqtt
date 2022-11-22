@@ -58,12 +58,12 @@ namespace can2mqtt
         /// <summary>
         /// Loads the config.json to the local variables.
         /// </summary>
-        private void LoadConfig()
+        private bool LoadConfig()
         {
             if (!File.Exists("./config.json"))
             {
                 Console.WriteLine("Cannot find config.json. Copy and rename the config-sample.json and adjust your settings in that config file.");
-                return;
+                return false;
             }
 
             var jsonString = File.ReadAllText("config.json");
@@ -72,7 +72,7 @@ namespace can2mqtt
             if (config == null)
             {
                 Console.WriteLine("Unable to read config file.");
-                return;
+                return false;
             }
 
             // Read the config file
@@ -92,6 +92,8 @@ namespace can2mqtt
             MqttAcceptSet = Convert.ToBoolean(config["MqttAcceptSet"].ToString());
             CanSenderId = Convert.ToString(config["CanSenderId"]);
             Language = Convert.ToString(config["Language"]).ToUpper();
+
+            return true;
         }
         
         /// <summary>
@@ -102,7 +104,10 @@ namespace can2mqtt
         public override async Task StartAsync(CancellationToken stoppingToken)
         {
             // Load the config from the config file
-            LoadConfig();
+            if (LoadConfig() == false) {
+                Console.WriteLine("Unable to load config successfully.");
+                return;
+            }
             
             // Create a new MQTT client.
             var mqttFactory = new MqttFactory();
@@ -128,15 +133,18 @@ namespace can2mqtt
 
             //Handle reconnect on loosing connection to MQTT Server
             MqttClient.UseDisconnectedHandler(async e =>
-            {
-                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0}", MqttServer);
+            {                
+                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, e.Reason);
                 while (!MqttClient.IsConnected)
                 {
                     try
                     {
                         // Connect the MQTT Client
                         await MqttClient.ConnectAsync(MqttClientOptions);
-                        Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
+                        if (MqttClient.IsConnected)
+                            Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
+                        else
+                            Console.WriteLine("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
                     }
                     catch
                     {
@@ -149,7 +157,7 @@ namespace can2mqtt
             // Connect the MQTT Client to the MQTT Broker
             await MqttClient.ConnectAsync(MqttClientOptions);
             if (MqttClient.IsConnected)
-                Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
+                Console.WriteLine("CONNECTION TO MQTT BROKER {0} established using ClientId {1}", MqttServer, MqttClientId);
 
             // Only accept set commands, if they are enabled.
             if (MqttAcceptSet)
@@ -172,18 +180,18 @@ namespace can2mqtt
                             Console.WriteLine(" WITH NO PAYLOAD");
                         }
                     }
-                    // Chec if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
+                    // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
                     else if (e.ApplicationMessage.Topic.EndsWith("/read"))
                     {
                         Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
-                        if (e.ApplicationMessage.Payload != null)
+                        if (e.ApplicationMessage.Topic != null)
                         {
-                            Console.WriteLine($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                            Console.WriteLine("");
                             await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
                         }
                         else
                         {
-                            Console.WriteLine(" WITH NO PAYLOAD");
+                            Console.WriteLine(" WITH NO TOPIC");
                         }
                     }
                 });

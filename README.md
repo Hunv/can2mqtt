@@ -187,3 +187,8 @@ Value: 23 (Important: Without the unit!)
 If you need to request a send from the CAN bus, you can add a /read at the end of the topic.
 An example MQTT message to can2mqtt to request the value of the desired room temperature of the primary heat cycle:
 Topic: heating/room/hc1/temperature/day/read
+
+
+# Troubleshooting
+## Issue: The connection is reconnecting over and over again multiple times within seconds until the application crashes
+Reason: Do you have a second MQTT client registered on the MQTT Broker with the same client ID?
