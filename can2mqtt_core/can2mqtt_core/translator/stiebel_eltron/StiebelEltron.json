@@ -1131,11 +1131,11 @@
     "Index": "0929",
     "Sender": "180",
     "Receiver": "6A0",
-    "Unit": "KWh",
+    "Unit": "MWh",
     "Converter": "Default",
     "Name": {
-      "EN": "Heat Meter Boost Heating Day",
-      "DE": "Wärmemenge Notheizung Heizen Tag"
+      "EN": "Heat Meter Boost Heating Total",
+      "DE": "Wärmemenge Notheizung Heizen Summe"
     },
     "Description": {
       "EN": "",
@@ -1145,7 +1145,7 @@
       "EN": {},
       "DE": {}
     },
-    "MqttTopic": "/meter/boost/heat/day/KWh",
+    "MqttTopic": "/meter/boost/heat/total/MWh",
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
@@ -1153,30 +1153,6 @@
   },
   {
     "Index": "0928",
-    "Sender": "180",
-    "Receiver": "6A0",
-    "Unit": "Wh",
-    "Converter": "Default",
-    "Name": {
-      "EN": "Heat Meter Boost Heating Day",
-      "DE": "Wärmemenge Notheizung Heizen Tag"
-    },
-    "Description": {
-      "EN": "",
-      "DE": ""
-    },
-    "Values": {
-      "EN": {},
-      "DE": {}
-    },
-    "MqttTopic": "/meter/boost/heat/day/Wh",
-    "Default": "",
-    "MinValue": null,
-    "MaxValue": null,
-    "ReadOnly": false
-  },
-  {
-    "Index": "0924",
     "Sender": "180",
     "Receiver": "6A0",
     "Unit": "KWh",
@@ -1200,14 +1176,14 @@
     "ReadOnly": false
   },
   {
-    "Index": "0925",
+    "Index": "0924",
     "Sender": "180",
     "Receiver": "6A0",
-    "Unit": "MWh",
+    "Unit": "KWh",
     "Converter": "Default",
     "Name": {
-      "EN": "Heat Meter Boost Heating Total",
-      "DE": "Wärmemenge Notheizung Heizen Summe"
+      "EN": "Heat Meter Boost DWH Total",
+      "DE": "Wärmemenge Notheizung Warmwasser Summe"
     },
     "Description": {
       "EN": "",
@@ -1217,7 +1193,31 @@
       "EN": {},
       "DE": {}
     },
-    "MqttTopic": "/meter/boost/heat/total/MWh",
+    "MqttTopic": "/meter/boost/dwh/total/KWh",
+    "Default": "",
+    "MinValue": null,
+    "MaxValue": null,
+    "ReadOnly": false
+  },
+  {
+    "Index": "0925",
+    "Sender": "180",
+    "Receiver": "6A0",
+    "Unit": "MWh",
+    "Converter": "Default",
+    "Name": {
+      "EN": "Heat Meter Boost DWH Total",
+      "DE": "Wärmemenge Notheizung Warmwasser Summe"
+    },
+    "Description": {
+      "EN": "",
+      "DE": ""
+    },
+    "Values": {
+      "EN": {},
+      "DE": {}
+    },
+    "MqttTopic": "/meter/boost/dwh/total/MWh",
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
@@ -1272,7 +1272,7 @@
     "ReadOnly": false
   },
   {
-    "Index": "03B1",
+    "Index": "03B0",
     "Sender": "180",
     "Receiver": "6A0",
     "Unit": "KWh",
@@ -1296,7 +1296,7 @@
     "ReadOnly": false
   },
   {
-    "Index": "03B0",
+    "Index": "03B1",
     "Sender": "180",
     "Receiver": "6A0",
     "Unit": "MWh",
@@ -6365,7 +6365,7 @@
       "DE": {
         "0000": "Volumenstrom",
         "0001": "Differenzdruck"
-      } 
+      }
     },
     "MqttTopic": "/fan/control",
     "Default": "",
@@ -7107,7 +7107,7 @@
         "0000": "Aus",
         "0001": "Schließer-Aus",
         "0002": "Öffner-Aus",
-        "0003": "Schließer-Überwach.", 
+        "0003": "Schließer-Überwach.",
         "0004": "Öffner-Überwach."
       }
     },
@@ -7517,13 +7517,13 @@
     },
     "Values": {
       "EN": {
-        "0000": "Areacooling", 
+        "0000": "Areacooling",
         "0001": "Blowercolling"
       },
       "DE": {
-        "0000": "Flächenkühlung", 
+        "0000": "Flächenkühlung",
         "0001": "Gebläsekühlung"
-      } 
+      }
     },
     "MqttTopic": "/cooling/hc1/system",
     "Default": "0",
@@ -7986,7 +7986,7 @@
     "Values": {
       "EN": {
         "0000": "Solar",
-        "0001": "Cooling", 
+        "0001": "Cooling",
         "0002": "Cooling time"
       },
       "DE": {
@@ -8487,7 +8487,7 @@
         "0800": "August",
         "0900": "September",
         "0A00": "October",
-        "0B00": "November", 
+        "0B00": "November",
         "0C00": "December"
       },
       "DE": {
@@ -8503,7 +8503,7 @@
         "0A00": "Oktober",
         "0B00": "November",
         "0C00": "Dezember"
-      } 
+      }
     },
     "MqttTopic": "/time/summertime/beginmonth",
     "Default": "3",
@@ -8656,16 +8656,16 @@
         "0400": "Friday",
         "0500": "Saturday",
         "0600": "Sunday"
-      }, 
+      },
       "DE": {
         "0000": "Montag",
         "0100": "Dienstag",
         "0200": "Mittwoch",
         "0300": "Donnerstag",
         "0400": "Freitag",
-        "0500": "Samstag", 
+        "0500": "Samstag",
         "0600": "Sonntag"
-      } 
+      }
     },
     "MqttTopic": "/time/dayofweek",
     "Default": "",
