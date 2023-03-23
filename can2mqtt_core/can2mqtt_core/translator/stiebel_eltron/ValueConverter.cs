@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace can2mqtt.Translator.StiebelEltron
@@ -331,11 +332,11 @@ namespace can2mqtt.Translator.StiebelEltron
     {
         public string ConvertValue(string hexData)
         {
-            return ((double)(Convert.ToInt32(hexData, 16) / 100)).ToString();
+            return ((double)(Convert.ToInt32(hexData, 16) / (double)100)).ToString(CultureInfo.GetCultureInfo("EN-US"));
         }
         public string ConvertValueBack(string value)
         {
-            var valNum = (int)Math.Round(Convert.ToDouble(value) * 100);
+            var valNum = (int)Math.Round(Convert.ToDouble(value, CultureInfo.GetCultureInfo("EN-US")) * 100);
             return valNum.ToString("X4");
         }
     }

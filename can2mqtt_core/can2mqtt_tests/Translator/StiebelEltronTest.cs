@@ -670,34 +670,37 @@ namespace can2mqtt.Tests.Translator
             Assert.Equal("0", result);
 
             result = converter.ConvertValue("0001");
-            Assert.Equal("0,01", result);
+            Assert.Equal("0.01", result);
 
             result = converter.ConvertValue("0005");
-            Assert.Equal("0,05", result);
+            Assert.Equal("0.05", result);
 
             result = converter.ConvertValue("000F");
-            Assert.Equal("0,15", result);
+            Assert.Equal("0.15", result);
 
             result = converter.ConvertValue("00FF");
-            Assert.Equal("2,55", result);
+            Assert.Equal("2.55", result);
 
             result = converter.ConvertValue("00A5");
-            Assert.Equal("1,65", result);
+            Assert.Equal("1.65", result);
 
             result = converter.ConvertValue("001A");
-            Assert.Equal("0,26", result);
+            Assert.Equal("0.26", result);
 
             result = converter.ConvertValue("0A1A");
-            Assert.Equal("25,86", result);
+            Assert.Equal("25.86", result);
 
             result = converter.ConvertValue("F01A");
-            Assert.Equal("614,66", result);
+            Assert.Equal("614.66", result);
 
             result = converter.ConvertValue("FFFF");
-            Assert.Equal("655,35", result);
+            Assert.Equal("655.35", result);
 
             result = converter.ConvertValue("7E1A");
-            Assert.Equal("322,82", result);
+            Assert.Equal("322.82", result);
+
+            result = converter.ConvertValue("0030");
+            Assert.Equal("0.48", result);
         }
         [Fact]
         public void ConvertCent_ConvertValueBack()

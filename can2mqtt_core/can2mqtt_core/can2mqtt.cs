@@ -123,6 +123,7 @@ namespace can2mqtt
             // If authentication at the MQTT broker is enabled, create the options with credentials
             if (!string.IsNullOrEmpty(MqttUser) && MqttPassword != null)
             {
+                Console.WriteLine("Connecting to MQTT broker using Credentials...");
                 MqttClientOptions = new MqttClientOptionsBuilder()
                    .WithClientId(MqttClientId)
                    .WithTcpServer(MqttServer)
@@ -131,7 +132,7 @@ namespace can2mqtt
                    .Build();
             }
 
-            //Handle reconnect on loosing connection to MQTT Server
+            //Handle reconnect on lost connection to MQTT Server
             MqttClient.UseDisconnectedHandler(async e =>
             {                
                 Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, e.Reason);
@@ -146,9 +147,9 @@ namespace can2mqtt
                         else
                             Console.WriteLine("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
                     }
-                    catch
+                    catch (Exception ex) 
                     {
-                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED", MqttServer);
+                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED. Exception: {1}", MqttServer, ex.ToString());
                         Thread.Sleep(10000); //Wait 10 seconds
                     }
                 }
