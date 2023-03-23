@@ -28,6 +28,7 @@ namespace can2mqtt
         private bool CanForwardResponse = true;
         private int CanReceiveBufferSize = 48;
         private string CanSenderId;
+        private string CanInterfaceName = "slcan0";
         private bool NoUnit = false;
         private string MqttTopic = "";
         private string MqttUser;
@@ -91,6 +92,7 @@ namespace can2mqtt
             CanServerPort = Convert.ToInt32(config["CanServerPort"].ToString());
             MqttAcceptSet = Convert.ToBoolean(config["MqttAcceptSet"].ToString());
             CanSenderId = Convert.ToString(config["CanSenderId"]);
+            CanInterfaceName = Convert.ToString(config["CanInterfaceName"]);
             Language = Convert.ToString(config["Language"]).ToUpper();
 
             return true;
@@ -349,7 +351,7 @@ namespace can2mqtt
             if (Encoding.Default.GetString(data, 0, bytes) == "< hi >")
             {
                 Console.WriteLine("Handshake successful. Opening CAN interface...");
-                TcpCanStream.Write(Encoding.Default.GetBytes("< open slcan0 >"));
+                TcpCanStream.Write(Encoding.Default.GetBytes("< open " + CanInterfaceName + " >"));
 
                 bytes = TcpCanStream.Read(data, 0, data.Length);
                 if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")

@@ -6,6 +6,7 @@
   "CanForwardResponse": true,
   "CanReceiveBufferSize": 48,
   "CanSenderId": "69F",
+  "CanInterfaceName": "slcan0",
 
   "MqttServer": "192.168.0.10",
   "MqttClientId": "Can2Mqtt",
