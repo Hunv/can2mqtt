@@ -196,7 +196,7 @@
     "Sender": "180",
     "Receiver": "6A0",
     "Unit": "l/min",
-    "Converter": "Default",
+    "Converter": "Dec",
     "Name": {
       "EN": "Flow Rate",
       "DE": "Volumenstrom"
