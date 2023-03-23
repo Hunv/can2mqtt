@@ -6955,7 +6955,7 @@
       "EN": {},
       "DE": {}
     },
-    "MqttTopic": "/fan/humidtiy/hysteresis",
+    "MqttTopic": "/fan/humidity/hysteresis",
     "Default": "5",
     "MinValue": "2",
     "MaxValue": "10",
@@ -7027,7 +7027,7 @@
       "EN": {},
       "DE": {}
     },
-    "MqttTopic": "/fan/humidtiy/outputreduction",
+    "MqttTopic": "/fan/humidity/outputreduction",
     "Default": "0",
     "MinValue": "50",
     "MaxValue": "0",
