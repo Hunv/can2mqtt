@@ -146,24 +146,24 @@ First copy the sample config.json file: 'sudo cp /opt/can2mqtt/config-sample.jso
 Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2mqtt/config.json'
 ```
 {
-  "CanServer": "192.168.0.10",		< This is the System where socketcand is running on
-  "CanServerPort": 29536,			< This is the port socketcand is using (29536 is default)
-  "CanForwardWrite": true,			< This defines if can2mqtt will handle CAN bus packages, that have the "write" flag
-  "CanForwardRead": true,			< This defines if can2mqtt will handle CAN bus packages, that have the "read" flag
-  "CanForwardResponse": true,		< This defines if can2mqtt will handle CAN bus packages, that have the "response" flag
-  "CanReceiveBufferSize": 48,		< The buffer size of receiving commands. 48 is default.
-  "CanSenderId":"6A2",				< The ID can2mqtt will use at the CAN bus in case of writing to the CAN bus
+  "CanServer": "192.168.0.10",      < This is the System where socketcand is running on
+  "CanServerPort": 29536,           < This is the port socketcand is using (29536 is default)
+  "CanForwardWrite": true,          < This defines if can2mqtt will handle CAN bus packages, that have the "write" flag
+  "CanForwardRead": true,           < This defines if can2mqtt will handle CAN bus packages, that have the "read" flag
+  "CanForwardResponse": true,       < This defines if can2mqtt will handle CAN bus packages, that have the "response" flag
+  "CanReceiveBufferSize": 48,       < The buffer size of receiving commands. 48 is default.
+  "CanSenderId":"6A2",              < The ID can2mqtt will use at the CAN bus in case of writing to the CAN bus
   "CanInterfaceName":"slcan0",      < The Interface name to use for the CAN bus connection
 
-  "MqttServer": "192.168.0.10",		< This is the IP of the MQTT Broker
-  "MqttClientId": "Can2Mqtt",		< This is the ID the MQTT Client will use when register at MQTT Broker
-  "MqttTopic": "Heating",			< This is the first path item of the MQTT topic path can2mqtt will use for send/receive information
+  "MqttServer": "192.168.0.10",     < This is the IP of the MQTT Broker
+  "MqttClientId": "Can2Mqtt",       < This is the ID the MQTT Client will use when register at MQTT Broker
+  "MqttTopic": "Heating",           < This is the first path item of the MQTT topic path can2mqtt will use for send/receive information
   "MqttTranslator": "StiebelEltron",< This is the translator used to translate the CAN bus data to values and send it via MQTT
-  "MqttUser": "",					< This is the user that is required to register at the MQTT broker. Leave empty for none.
-  "MqttPassword": "",				< This is the password that is required to register at the MQTT broker. Leave empty for none.
-  "MqttAcceptSet": false,			< This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
+  "MqttUser": "",                   < This is the user that is required to register at the MQTT broker. Leave empty for none.
+  "MqttPassword": "",               < This is the password that is required to register at the MQTT broker. Leave empty for none.
+  "MqttAcceptSet": false,           < This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
   
-  "NoUnits": true,					< This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
+  "NoUnits": true,                  < This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
   "Language": "en"                  < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
 }
 ```
