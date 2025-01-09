@@ -511,6 +511,10 @@ namespace can2mqtt
                     }
                 }
 
+                if (string.IsNullOrEmpty(canMsg.MqttTopicExtention)) {
+                    return;
+                }
+
                 //Logoutput with or without translated MQTT message
                 if (string.IsNullOrEmpty(canMsg.MqttValue))
                     Console.WriteLine("Sending MQTT Message: {0} and Topic {1}", canMsg.PayloadFull.Trim(), MqttTopic);
