@@ -162,9 +162,11 @@ Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2
   "MqttUser": "",                   < This is the user that is required to register at the MQTT broker. Leave empty for none.
   "MqttPassword": "",               < This is the password that is required to register at the MQTT broker. Leave empty for none.
   "MqttAcceptSet": false,           < This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
-  
+
   "NoUnits": true,                  < This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
-  "Language": "en"                  < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
+  "Language": "en",                 < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
+
+  "ConvertUnknown": false           < This defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
 }
 ```
 
