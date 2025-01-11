@@ -166,7 +166,7 @@ Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2
   "NoUnits": true,                  < This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
   "Language": "en",                 < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
 
-  "ConvertUnknown": false           < This defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
+  "ConvertUnknown": false           < New in Release 5.0; This defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
 }
 ```
 
