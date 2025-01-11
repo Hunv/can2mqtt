@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using can2mqtt.Translator.StiebelEltron;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
@@ -40,7 +41,7 @@ namespace can2mqtt
         private TcpClient ScdClient = null;
         private Translator.StiebelEltron.StiebelEltron Translator = null;
         private string Language = "EN";
-
+        private bool ConvertUnknown = false;
 
         public Can2Mqtt(ILogger<Can2Mqtt> logger)
         {
@@ -94,6 +95,7 @@ namespace can2mqtt
             CanSenderId = Convert.ToString(config["CanSenderId"]);
             CanInterfaceName = Convert.ToString(config["CanInterfaceName"]);
             Language = Convert.ToString(config["Language"]).ToUpper();
+            ConvertUnknown = bool.Parse(config["ConvertUnknown"].ToString());
 
             return true;
         }
@@ -485,8 +487,10 @@ namespace can2mqtt
                     switch (CanTranslator)
                     {
                         case "StiebelEltron":
-                            Translator = new Translator.StiebelEltron.StiebelEltron();
-                            canMsg = Translator.Translate(canMsg, NoUnit, Language);
+                            if (Translator == null) {
+                                Translator = new Translator.StiebelEltron.StiebelEltron();
+                            }
+                            canMsg = Translator.Translate(canMsg, NoUnit, Language, ConvertUnknown);
                             break;
                     }
                 }

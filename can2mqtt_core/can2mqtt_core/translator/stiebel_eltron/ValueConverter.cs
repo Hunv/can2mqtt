@@ -550,4 +550,51 @@ namespace can2mqtt.Translator.StiebelEltron
             }
         }
     }
+
+    class FallbackValueConverter : IValueConverter
+    {
+        private struct Converter {
+            public string Name {get; init; }
+            public IValueConverter ValueConverter {get; init;}
+        }
+
+        private static readonly Converter[] Converters = [
+            new Converter { Name = "binary", ValueConverter = new ConvertBinary() },
+            new Converter { Name = "bool", ValueConverter = new ConvertBool() },
+            new Converter { Name = "byte", ValueConverter = new ConvertByte() },
+            new Converter { Name = "cent", ValueConverter = new ConvertCent() },
+            new Converter { Name = "datum", ValueConverter = new ConvertDate() },
+            new Converter { Name = "dec", ValueConverter = new ConvertDec() },
+            new Converter { Name = "default", ValueConverter = new ConvertDefault() },
+            new Converter { Name = "double", ValueConverter = new ConvertDouble() },
+            new Converter { Name = "err", ValueConverter = new ConvertErr() },
+            new Converter { Name = "littlebool", ValueConverter = new ConvertLittleBool() },
+            new Converter { Name = "littleendian", ValueConverter = new ConvertLittleEndian() },
+            new Converter { Name = "littleendiandec", ValueConverter = new ConvertLittleEndianDec() },
+            new Converter { Name = "mille", ValueConverter = new ConvertMille() },
+            new Converter { Name = "sprache", ValueConverter = new ConvertLanguage() },
+            new Converter { Name = "time", ValueConverter = new ConvertTime() },
+            new Converter { Name = "timedomain", ValueConverter = new ConvertTimeDomain() },
+            new Converter { Name = "timerange", ValueConverter = new ConvertTimeRange() },
+            new Converter { Name = "timerangelittleendian", ValueConverter = new ConvertTimeRangeLittleEndian() },
+            new Converter { Name = "triple", ValueConverter = new ConvertTriple() },
+            new Converter { Name = "Default", ValueConverter = new ConvertDefault() },
+        ];
+
+        public string ConvertValue(string hexData)
+        {
+            var sb = new StringBuilder();
+            foreach(var converter in Converters) {
+                try {
+                    sb.AppendLine($"{converter.Name}: {converter.ValueConverter.ConvertValue(hexData)}");
+                } catch(Exception) {}
+            }
+            return sb.ToString();
+        }
+
+        public string ConvertValueBack(string value)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

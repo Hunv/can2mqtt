@@ -10,6 +10,7 @@ using System.Text;
 
 namespace can2mqtt.Translator.StiebelEltron
 {
+
     /// <summary>
     /// This Translator class translates the CAN Bus data to values
     /// Validated with:
@@ -17,7 +18,9 @@ namespace can2mqtt.Translator.StiebelEltron
     /// </summary>
     public class StiebelEltron : ITranslator
     {
-        public CanFrame Translate(CanFrame rawData, bool noUnit, string language)
+        private readonly FallbackValueConverter fallbackValueConverter = new();
+
+        public CanFrame Translate(CanFrame rawData, bool noUnit, string language, bool convertUnknown)
         {
             //Check if format is correct
             if (string.IsNullOrEmpty(rawData.PayloadFull) || rawData.PayloadFull.Length != 14)
@@ -48,8 +51,12 @@ namespace can2mqtt.Translator.StiebelEltron
             
 
             //Index not available
-            if (indexData == null)
+            if (indexData == null) {
+                if (convertUnknown) {
+                    Console.WriteLine($"Fallback convertion: {fallbackValueConverter.ConvertValue(payloadData)}");
+                }
                 return rawData;
+            }
 
             rawData.MqttTopicExtention = indexData.MqttTopic;
 
