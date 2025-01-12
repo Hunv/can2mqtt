@@ -3,6 +3,21 @@ A Linux or Windows service to forward CAN frames to MQTT messages
 This description describes the current release version. Possibly there are changes, if you build from code.
 
 # Latest Updates
+
+## V5.0
+
+Breaking changes:
+ - Running on .NET 8.0 instead of .NET 6.0
+
+New features:
+ - Added option `ConvertUnknown`, this defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
+ - Added fallback value converter for unknown indexes in StiebelEltron.json for easier debugging.
+
+Fixes:
+ - Do not publish unknown values to MQTT broker
+ - Load StiebelEltron.json only once during runtime
+
+## V4.4
 This software was just updated. The main and breaking changes are:
 - Running on .NET 6.0 instead of Dotnet Core 2.2
 - Using SOCKETCAND instead of CANLOGSERVER
