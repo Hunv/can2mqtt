@@ -116,8 +116,7 @@ namespace can2mqtt.Translator.StiebelEltron
             }
 
             // Get the Elster Index by the topic
-            var elsterTable = new ElsterIndex();
-            var elsterItem = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
+            var elsterItem = ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
 
             //Index not available
             if (elsterItem == null)
