@@ -1,6 +1,6 @@
 # can2mqtt
 A Linux or Windows service to forward CAN frames to MQTT messages
-This description describes the current release version. Possibly there are changes, if you build from code.
+The precompiled version you can find in the releases section may not be the latest version described below. Check the version number for differences. To get the very latest version, build from code.
 
 # Latest Updates
 
