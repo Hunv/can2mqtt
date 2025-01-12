@@ -19,6 +19,8 @@ namespace can2mqtt.Translator.StiebelEltron
     public class StiebelEltron : ITranslator
     {
         private readonly FallbackValueConverter fallbackValueConverter = new();
+        // initialize elster index once
+        private static readonly ElsterIndex ElsterIndex = new();
 
         public CanFrame Translate(CanFrame rawData, bool noUnit, string language, bool convertUnknown)
         {
@@ -44,10 +46,9 @@ namespace can2mqtt.Translator.StiebelEltron
             var payloadData = rawData.Value;
 
             //Get IndexData
-            var elsterTable = new ElsterIndex();
-            var indexData = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex && x.Sender.ToString("X2") == rawData.PayloadSenderCanId );
+            var indexData = ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex && x.Sender.ToString("X2") == rawData.PayloadSenderCanId );
             if (indexData == null)
-                indexData = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex);
+                indexData = ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex);
             
 
             //Index not available
@@ -115,8 +116,7 @@ namespace can2mqtt.Translator.StiebelEltron
             }
 
             // Get the Elster Index by the topic
-            var elsterTable = new ElsterIndex();
-            var elsterItem = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
+            var elsterItem = ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
 
             //Index not available
             if (elsterItem == null)
