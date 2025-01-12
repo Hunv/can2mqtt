@@ -43,6 +43,10 @@ namespace can2mqtt
         private string Language = "EN";
         private bool ConvertUnknown = false;
 
+        private bool AutoPolling = false;
+        private int AutoPollingInterval = 120; // in seconds
+        private Task AutoPollingTask = null;
+
         public Can2Mqtt(ILogger<Can2Mqtt> logger)
         {
             Logger = logger;
@@ -96,6 +100,16 @@ namespace can2mqtt
             CanInterfaceName = Convert.ToString(config["CanInterfaceName"]);
             Language = Convert.ToString(config["Language"]).ToUpper();
             ConvertUnknown = bool.Parse(config["ConvertUnknown"].ToString());
+            AutoPolling = bool.Parse(config["AutoPolling"].ToString());
+            AutoPollingInterval = Convert.ToInt32(config["AutoPollingInterval"].ToString());
+
+            //choose the translator to use and translate the message if translator exists
+            switch (CanTranslator)
+            {
+                case "StiebelEltron":
+                    Translator = new StiebelEltron();
+                    break;
+            }
 
             return true;
         }
@@ -202,8 +216,32 @@ namespace can2mqtt
                 });
             }
 
+            if (AutoPolling) {
+                AutoPollingTask = Task.Run(async () => {
+                    if (Translator == null) {
+                        Console.WriteLine("Nothing to poll - no translator selected.");
+                        return;
+                    }
+
+                    if (!Translator.MqttTopicsToPoll.Any()) {
+                        Console.WriteLine("Nothing to poll - no MQTT topics to poll specified (or all are ignored).");
+                        return;
+                    }
+
+                    var delay = TimeSpan.FromSeconds(AutoPollingInterval);
+                    while (!stoppingToken.IsCancellationRequested) {
+                        await Task.Delay(delay, stoppingToken);
+
+                        foreach(var mqttTopic in Translator.MqttTopicsToPoll) {
+                            await ReadCan(mqttTopic + "/read", CanServer, CanServerPort);
+                        }
+                    }
+                });
+            }
+
             //Start listening on socketcand port
             await TcpCanBusListener(CanServer, CanServerPort);
+            AutoPollingTask.Wait();
         }
 
         /// <summary>
@@ -271,6 +309,8 @@ namespace can2mqtt
         /// <returns></returns>
         private async Task ReadCan(string topic, string canServer, int canPort)
         {
+            Console.WriteLine("Sending read request for topic {0}", topic);
+            
             try
             {
                 await ConnectTcpCanBus(canServer, canPort);
@@ -481,18 +521,9 @@ namespace can2mqtt
                     return;
 
                 //Use Translator (if selected)
-                if (!string.IsNullOrEmpty(CanTranslator))
+                if (Translator != null)
                 {
-                    //choose the translator to use and translate the message if translator exists
-                    switch (CanTranslator)
-                    {
-                        case "StiebelEltron":
-                            if (Translator == null) {
-                                Translator = new Translator.StiebelEltron.StiebelEltron();
-                            }
-                            canMsg = Translator.Translate(canMsg, NoUnit, Language, ConvertUnknown);
-                            break;
-                    }
+                    canMsg = Translator.Translate(canMsg, NoUnit, Language, ConvertUnknown);
                 }
 
                 //Verify connection to MQTT Broker is established

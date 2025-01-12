@@ -3828,5 +3828,10 @@ namespace can2mqtt.Translator.StiebelEltron
         /// If the value can just be read but not set
         /// </summary>
         public bool ReadOnly { get; set; }
+
+        /// <summary>
+        /// Define if the index shall not be automatically polled.
+        /// </summary>
+        public bool IgnorePolling { get; set; }
     }
 }

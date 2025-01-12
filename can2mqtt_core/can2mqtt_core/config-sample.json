@@ -18,5 +18,8 @@
 
   "NoUnits": false,
   "Language": "en",
-  "ConvertUnknown": false
+  "ConvertUnknown": false,
+
+  "AutoPolling": false,
+  "AutoPollingInterval": 120
 }

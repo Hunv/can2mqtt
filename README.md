@@ -12,6 +12,7 @@ Breaking changes:
 New features:
  - Added option `ConvertUnknown`, this defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
  - Added fallback value converter for unknown indexes in StiebelEltron.json for easier debugging.
+ - Added automatic polling feature. It can be enabled using config option `AutoPolling`. The polling interval **in seconds** can be defined with `AutoPollingInterval`. If a value shall not be polled, add `"IgnorePolling": true` to `StiebelEltron.json`.
 
 Fixes:
  - Do not publish unknown values to MQTT broker
