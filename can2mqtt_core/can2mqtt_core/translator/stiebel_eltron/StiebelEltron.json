@@ -21,7 +21,8 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": true
+    "ReadOnly": true,
+    "IgnorePolling": false
   },
   {
     "Index": "000F",

@@ -21,6 +21,13 @@ namespace can2mqtt.Translator.StiebelEltron
         private readonly FallbackValueConverter fallbackValueConverter = new();
         // initialize elster index once
         private static readonly ElsterIndex ElsterIndex = new();
+        private static Lazy<IEnumerable<string>> MqttTopicsToPollList = new(() => ElsterIndex.ElsterIndexTable.Where(x => !x.IgnorePolling).Select(x => x.MqttTopic).ToList());
+
+        public IEnumerable<string> MqttTopicsToPoll {
+            get {
+                return MqttTopicsToPollList.Value;
+            }
+        }
 
         public CanFrame Translate(CanFrame rawData, bool noUnit, string language, bool convertUnknown)
         {
@@ -106,7 +113,10 @@ namespace can2mqtt.Translator.StiebelEltron
                 topic = topic.Substring(0, topic.Length - 5);
 
             //remove the first topic because it is the custom one from the config file and not in the ElsterTable config file            
-            topic = topic.Substring(topic.IndexOf('/'));
+            var firstTopicStartIndex = topic.IndexOf('/');
+            if (firstTopicStartIndex != -1) {
+                topic = topic.Substring(firstTopicStartIndex);
+            }
 
             //check the sender length. Fail in case of unexpected length
             if (senderId.Length != 3)
