@@ -254,45 +254,17 @@ namespace can2mqtt
         /// <returns></returns>
         private async Task SendCan(string topic, byte[] payload, string canServer, int canPort)
         {
+            Console.WriteLine("Sending write request for topic {0}", topic);
+
             try
             {
-                await ConnectTcpCanBus(canServer, canPort);
-
                 //Get the data
                 var data = Encoding.UTF8.GetString(payload);
 
                 //Convert the data to the required format
                 var canFrame = Translator.TranslateBack(topic, data, CanSenderId, NoUnit, "0");
 
-                //Convert data part of the can Frame to socketcand required format
-                var canFrameDataPart = canFrame.Split("#")[1];
-                var canFrameSdData = "";
-
-                for (int i = 0; i < canFrameDataPart.Length; i +=2)
-                {
-                    canFrameSdData += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
-                }
-                canFrameSdData = canFrameSdData.Trim();
-
-                // < send can_id can_datalength [data]* >
-                var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
-                Console.WriteLine("Sending CAN Frame: {0}", canFrameSdCommand);
-                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
-
-                // read the send data
-                var canFrameSdDataVerify = "";
-
-                for (int i = 0; i < canFrameDataPart.Length; i += 2)
-                {
-                    if (i != 0)
-                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
-                    else
-                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 1) + "1", 16).ToString("X1") + " ";
-                }
-                canFrameSdDataVerify = canFrameSdDataVerify.Trim();
-                var canFrameSdCommandVerify = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdDataVerify);
-                Console.WriteLine("Sending CAN Verify Frame: {0}", canFrameSdCommandVerify);
-                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommandVerify));
+                await SendCanFrame(canServer, canPort, canFrame);
             }
             catch (Exception ex)
             {
@@ -313,45 +285,41 @@ namespace can2mqtt
             
             try
             {
-                await ConnectTcpCanBus(canServer, canPort);
-
                 //Convert the data to the required format
                 var canFrame = Translator.TranslateBack(topic, null, CanSenderId, NoUnit, "1");
 
-                //Convert data part of the can Frame to socketcand required format
-                var canFrameDataPart = canFrame.Split("#")[1];
-                var canFrameSdData = "";
-
-                for (int i = 0; i < canFrameDataPart.Length; i += 2)
-                {
-                    canFrameSdData += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
-                }
-                canFrameSdData = canFrameSdData.Trim();
-
-                // < send can_id can_datalength [data]* >
-                var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
-                Console.WriteLine("Sending CAN Frame: {0}", canFrameSdCommand);
-                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
-
-                // read the send data
-                var canFrameSdDataVerify = "";
-
-                for (int i = 0; i < canFrameDataPart.Length; i += 2)
-                {
-                    if (i != 0)
-                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
-                    else
-                        canFrameSdDataVerify += Convert.ToInt32(canFrameDataPart.Substring(i, 1) + "1", 16).ToString("X1") + " ";
-                }
-                canFrameSdDataVerify = canFrameSdDataVerify.Trim();
-                var canFrameSdCommandVerify = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdDataVerify);
-                Console.WriteLine("Sending CAN Verify Frame: {0}", canFrameSdCommandVerify);
-                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommandVerify));
+                await SendCanFrame(canServer, canPort, canFrame);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Failed to send a read via CAN bus. Error: " + ex.ToString());
             }
+        }
+
+        /// <summary>
+        /// Sends a CAN frame to the CAN bus
+        /// </summary>
+        /// <param name="canServer">The CAN Server (where socketcand runs)</param>
+        /// <param name="canPort">The CAN Server Port</param>
+        /// <param name="canFrame">The actual frame to send</param>
+        /// <returns></returns>
+        private async Task SendCanFrame(string canServer, int canPort, string canFrame) {
+            await ConnectTcpCanBus(canServer, canPort);
+
+            //Convert data part of the can Frame to socketcand required format
+            var canFrameDataPart = canFrame.Split("#")[1];
+            var canFrameSdData = "";
+
+            for (int i = 0; i < canFrameDataPart.Length; i += 2)
+            {
+                canFrameSdData += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
+            }
+            canFrameSdData = canFrameSdData.Trim();
+
+            // < send can_id can_datalength [data]* >
+            var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
+            Console.WriteLine("Sending CAN Frame: {0}", canFrameSdCommand);
+            TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
         }
 
         /// <summary>
