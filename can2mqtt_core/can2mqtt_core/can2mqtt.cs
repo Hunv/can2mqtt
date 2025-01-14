@@ -66,52 +66,59 @@ namespace can2mqtt
         /// </summary>
         private bool LoadConfig()
         {
-            if (!File.Exists("./config.json"))
+            try
             {
-                Console.WriteLine("Cannot find config.json. Copy and rename the config-sample.json and adjust your settings in that config file.");
+                if (!File.Exists("./config.json"))
+                {
+                    Console.WriteLine("Cannot find config.json. Copy and rename the config-sample.json and adjust your settings in that config file.");
+                    return false;
+                }
+
+                var jsonString = File.ReadAllText("config.json");
+                var config = JsonNode.Parse(jsonString);
+                if (config == null)
+                {
+                    Console.WriteLine("Unable to read config file.");
+                    return false;
+                }
+
+                // Read the config file
+                MqttTopic = Convert.ToString(config["MqttTopic"]);
+                CanTranslator = Convert.ToString(config["MqttTranslator"]);
+                CanForwardWrite = bool.Parse(config["CanForwardWrite"].ToString());
+                CanForwardRead = bool.Parse(config["CanForwardRead"].ToString());
+                CanForwardResponse = Convert.ToBoolean(config["CanForwardResponse"].ToString());
+                NoUnit = Convert.ToBoolean(config["NoUnits"].ToString());
+                CanReceiveBufferSize = Convert.ToInt32(config["CanReceiveBufferSize"].ToString());
+                MqttUser = Convert.ToString(config["MqttUser"]);
+                MqttPassword = Convert.ToString(config["MqttPassword"]);
+                MqttClientId = Convert.ToString(config["MqttClientId"]);
+                MqttServer = Convert.ToString(config["MqttServer"]);
+                CanServer = Convert.ToString(config["CanServer"]);
+                CanServerPort = Convert.ToInt32(config["CanServerPort"].ToString());
+                MqttAcceptSet = Convert.ToBoolean(config["MqttAcceptSet"].ToString());
+                CanSenderId = Convert.ToString(config["CanSenderId"]);
+                CanInterfaceName = Convert.ToString(config["CanInterfaceName"]);
+                Language = Convert.ToString(config["Language"]).ToUpper();
+                ConvertUnknown = bool.Parse(config["ConvertUnknown"].ToString());
+                AutoPolling = bool.Parse(config["AutoPolling"].ToString());
+                AutoPollingInterval = Convert.ToInt32(config["AutoPollingInterval"].ToString());
+
+                //choose the translator to use and translate the message if translator exists
+                switch (CanTranslator)
+                {
+                    case "StiebelEltron":
+                        Translator = new StiebelEltron();
+                        break;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unable to read config file, error: {0}", ex.Message);
                 return false;
             }
-
-            var jsonString = File.ReadAllText("config.json");
-            var config = JsonNode.Parse(jsonString);
-
-            if (config == null)
-            {
-                Console.WriteLine("Unable to read config file.");
-                return false;
-            }
-
-            // Read the config file
-            MqttTopic = Convert.ToString(config["MqttTopic"]);
-            CanTranslator = Convert.ToString(config["MqttTranslator"]);
-            CanForwardWrite = bool.Parse(config["CanForwardWrite"].ToString());
-            CanForwardRead = bool.Parse(config["CanForwardRead"].ToString());
-            CanForwardResponse = Convert.ToBoolean(config["CanForwardResponse"].ToString());
-            NoUnit = Convert.ToBoolean(config["NoUnits"].ToString());
-            CanReceiveBufferSize = Convert.ToInt32(config["CanReceiveBufferSize"].ToString());
-            MqttUser = Convert.ToString(config["MqttUser"]);
-            MqttPassword = Convert.ToString(config["MqttPassword"]);
-            MqttClientId = Convert.ToString(config["MqttClientId"]);
-            MqttServer = Convert.ToString(config["MqttServer"]);
-            CanServer = Convert.ToString(config["CanServer"]);
-            CanServerPort = Convert.ToInt32(config["CanServerPort"].ToString());
-            MqttAcceptSet = Convert.ToBoolean(config["MqttAcceptSet"].ToString());
-            CanSenderId = Convert.ToString(config["CanSenderId"]);
-            CanInterfaceName = Convert.ToString(config["CanInterfaceName"]);
-            Language = Convert.ToString(config["Language"]).ToUpper();
-            ConvertUnknown = bool.Parse(config["ConvertUnknown"].ToString());
-            AutoPolling = bool.Parse(config["AutoPolling"].ToString());
-            AutoPollingInterval = Convert.ToInt32(config["AutoPollingInterval"].ToString());
-
-            //choose the translator to use and translate the message if translator exists
-            switch (CanTranslator)
-            {
-                case "StiebelEltron":
-                    Translator = new StiebelEltron();
-                    break;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -122,7 +129,7 @@ namespace can2mqtt
         public override async Task StartAsync(CancellationToken stoppingToken)
         {
             // Load the config from the config file
-            if (LoadConfig() == false)
+            if (!LoadConfig())
             {
                 Console.WriteLine("Unable to load config successfully.");
                 return;
