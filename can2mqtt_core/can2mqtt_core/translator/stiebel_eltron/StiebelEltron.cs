@@ -2,12 +2,6 @@
 // http://juerg5524.ch/list_data.php
 // https://wiki.c3re.de/index.php/Projekt_23_Smarthome_/_Zugriff_Heizung
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace can2mqtt.Translator.StiebelEltron
 {
 
@@ -18,10 +12,16 @@ namespace can2mqtt.Translator.StiebelEltron
     /// </summary>
     public class StiebelEltron : ITranslator
     {
+        private readonly ILogger Logger;
+
         private readonly FallbackValueConverter fallbackValueConverter = new();
         // initialize elster index once
         private static readonly ElsterIndex ElsterIndex = new();
         private static Lazy<IEnumerable<string>> MqttTopicsToPollList = new(() => ElsterIndex.ElsterIndexTable.Where(x => !x.IgnorePolling).Select(x => x.MqttTopic).ToList());
+
+        public StiebelEltron(ILoggerFactory loggerFactory) {
+            Logger = loggerFactory.CreateLogger("StiebelEltronTranslator");
+        }
 
         public IEnumerable<string> MqttTopicsToPoll {
             get {
@@ -34,7 +34,7 @@ namespace can2mqtt.Translator.StiebelEltron
             //Check if format is correct
             if (string.IsNullOrEmpty(rawData.PayloadFull) || rawData.PayloadFull.Length != 14)
             {
-                Console.WriteLine("Data is not lenght of 14: {0}", rawData.PayloadFull);
+                Logger.LogInformation("Data is not lenght of 14: {0}", rawData.PayloadFull);
                 return rawData;
             }
 
@@ -61,7 +61,7 @@ namespace can2mqtt.Translator.StiebelEltron
             //Index not available
             if (indexData == null) {
                 if (convertUnknown) {
-                    Console.WriteLine($"Fallback convertion: {fallbackValueConverter.ConvertValue(payloadData)}");
+                    Logger.LogInformation($"Fallback convertion: {fallbackValueConverter.ConvertValue(payloadData)}");
                 }
                 return rawData;
             }
@@ -76,14 +76,14 @@ namespace can2mqtt.Translator.StiebelEltron
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("No value for payloaddata {0} and language {1} found. Trying english values...", payloadData, language);
+                    Logger.LogInformation("No value for payloaddata {0} and language {1} found. Trying english values...", payloadData, language);
                     try
                     {
                         rawData.MqttValue = indexData.ValueList["EN"][payloadData];
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine("No value for payloaddata {0} and language EN found. This is an unknown value.", payloadData);
+                        Logger.LogInformation("No value for payloaddata {0} and language EN found. This is an unknown value.", payloadData);
                         rawData.MqttValue = "Unknown Data";
                     }
                 }
@@ -121,7 +121,7 @@ namespace can2mqtt.Translator.StiebelEltron
             //check the sender length. Fail in case of unexpected length
             if (senderId.Length != 3)
             {
-                Console.WriteLine("The senderID has not the length of 3.");
+                Logger.LogError("The senderID has not the length of 3.");
                 return "";
             }
 
@@ -131,7 +131,7 @@ namespace can2mqtt.Translator.StiebelEltron
             //Index not available
             if (elsterItem == null)
             {
-                Console.WriteLine("Cannot find a Elster item that has the MQTT topic {0}", topic);
+                Logger.LogError("Cannot find a Elster item that has the MQTT topic {0}", topic);
                 return "";
             }
 
@@ -199,12 +199,12 @@ namespace can2mqtt.Translator.StiebelEltron
             // followed by the value
             var canFrameString = string.Format("{0}#{1}{2}{3}FA{4}{5}", senderId, receiverId[0], canOperation, receiverId[1], elsterItem.Index.ToString("X4"), hexPayload);
 
-            Console.WriteLine("CAN Frame is: {0}", canFrameString);
+            Logger.LogInformation("CAN Frame is: {0}", canFrameString);
 
             //Verify Format of the translated back data
             if (string.IsNullOrEmpty(canFrameString) || canFrameString.Length != 18)
             {
-                Console.WriteLine("Data is not lenght of 14: {0}", canFrameString);
+                Logger.LogError("Data is not lenght of 14: {0}", canFrameString);
                 return "";
             }
 

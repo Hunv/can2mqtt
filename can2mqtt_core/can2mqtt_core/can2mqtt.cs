@@ -1,24 +1,17 @@
 ﻿using can2mqtt.Translator.StiebelEltron;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using MQTTnet.Server;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json.Nodes;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace can2mqtt
 {
     public class Can2Mqtt : BackgroundService
     {
-        private readonly ILogger<Can2Mqtt> Logger;
+        private readonly ILogger Logger;
         private IMqttClient MqttClient;
         private IMqttClientOptions MqttClientOptions;
         private string CanTranslator;
@@ -47,9 +40,12 @@ namespace can2mqtt
         private int AutoPollingInterval = 120; // in seconds
         private Task AutoPollingTask = null;
 
-        public Can2Mqtt(ILogger<Can2Mqtt> logger)
+        private readonly ILoggerFactory LoggerFactory;
+
+        public Can2Mqtt(ILoggerFactory loggerFactory)
         {
-            Logger = logger;
+            LoggerFactory = loggerFactory;
+            Logger = loggerFactory.CreateLogger("can2mqtt");
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -70,7 +66,7 @@ namespace can2mqtt
             {
                 if (!File.Exists("./config.json"))
                 {
-                    Console.WriteLine("Cannot find config.json. Copy and rename the config-sample.json and adjust your settings in that config file.");
+                    Logger.LogError("Cannot find config.json. Copy and rename the config-sample.json and adjust your settings in that config file.");
                     return false;
                 }
 
@@ -78,7 +74,7 @@ namespace can2mqtt
                 var config = JsonNode.Parse(jsonString);
                 if (config == null)
                 {
-                    Console.WriteLine("Unable to read config file.");
+                    Logger.LogError("Unable to read config file.");
                     return false;
                 }
 
@@ -108,7 +104,7 @@ namespace can2mqtt
                 switch (CanTranslator)
                 {
                     case "StiebelEltron":
-                        Translator = new StiebelEltron();
+                        Translator = new StiebelEltron(LoggerFactory);
                         break;
                 }
 
@@ -116,7 +112,7 @@ namespace can2mqtt
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Unable to read config file, error: {0}", ex.Message);
+                Logger.LogCritical(ex, "Unable to read config file.");
                 return false;
             }
         }
@@ -131,7 +127,7 @@ namespace can2mqtt
             // Load the config from the config file
             if (!LoadConfig())
             {
-                Console.WriteLine("Unable to load config successfully.");
+                Logger.LogCritical("Unable to load config successfully.");
                 return;
             }
 
@@ -153,7 +149,7 @@ namespace can2mqtt
         /// <returns></returns>
         private async Task SendCan(string topic, byte[] payload, string canServer, int canPort)
         {
-            Console.WriteLine("Sending write request for topic {0}", topic);
+            Logger.LogDebug("Sending write request for topic {0}", topic);
 
             try
             {
@@ -167,7 +163,7 @@ namespace can2mqtt
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to set value via CAN bus. Error: " + ex.ToString());
+                Logger.LogError(ex, "Failed to set value via CAN bus.");
             }
         }
 
@@ -180,7 +176,7 @@ namespace can2mqtt
         /// <returns></returns>
         private async Task ReadCan(string topic, string canServer, int canPort)
         {
-            Console.WriteLine("Sending read request for topic {0}", topic);
+            Logger.LogDebug("Sending read request for topic {0}", topic);
 
             try
             {
@@ -191,7 +187,7 @@ namespace can2mqtt
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to send a read via CAN bus. Error: " + ex.ToString());
+                Logger.LogError(ex, "Failed to send a read via CAN bus.");
             }
         }
 
@@ -218,7 +214,7 @@ namespace can2mqtt
 
             // < send can_id can_datalength [data]* >
             var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
-            Console.WriteLine("Sending CAN Frame: {0}", canFrameSdCommand);
+            Logger.LogInformation("Sending CAN Frame: {0}", canFrameSdCommand);
             TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
         }
 
@@ -232,7 +228,7 @@ namespace can2mqtt
         {
             if (ScdClient != null && ScdClient.Connected)
             {
-                Console.WriteLine("Already connected to SocketCanD.");
+                Logger.LogTrace("Already connected to SocketCanD.");
                 return;
             }
 
@@ -243,14 +239,14 @@ namespace can2mqtt
                 {
                     ScdClient = new TcpClient(canServer, canPort);
                 }
-                catch (Exception ea)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("FAILED TO CONNECT TO SOCKETCAND {1}. {0}. Retry...", ea.Message, canServer);
+                    Logger.LogError(ex, "FAILED TO CONNECT TO SOCKETCAND {1}. Retry...", canServer);
                 }
                 await Task.Delay(TimeSpan.FromSeconds(5));
             }
 
-            Console.WriteLine("CONNECTED TO SOCKETCAND {0} ON PORT {1}", canServer, canPort);
+            Logger.LogInformation("CONNECTED TO SOCKETCAND {0} ON PORT {1}", canServer, canPort);
 
             //Create TCP Stream to read the CAN Bus Data
             byte[] data = new byte[CanReceiveBufferSize];
@@ -260,19 +256,19 @@ namespace can2mqtt
 
             if (Encoding.Default.GetString(data, 0, bytes) == "< hi >")
             {
-                Console.WriteLine("Handshake successful. Opening CAN interface...");
+                Logger.LogInformation("Handshake successful. Opening CAN interface...");
                 TcpCanStream.Write(Encoding.Default.GetBytes("< open " + CanInterfaceName + " >"));
 
                 bytes = TcpCanStream.Read(data, 0, data.Length);
                 if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
                 {
-                    Console.WriteLine("Opening connection to slcan0 successful. Changing socketcand mode to raw...");
+                    Logger.LogInformation("Opening connection to slcan0 successful. Changing socketcand mode to raw...");
                     TcpCanStream.Write(Encoding.Default.GetBytes("< rawmode >"));
 
                     bytes = TcpCanStream.Read(data, 0, data.Length);
                     if (Encoding.Default.GetString(data, 0, bytes) == "< ok >")
                     {
-                        Console.WriteLine("Change to rawmode successful");
+                        Logger.LogInformation("Change to rawmode successful");
                     }
                 }
             }
@@ -308,7 +304,7 @@ namespace can2mqtt
                         if (responseData.Contains("< frame "))
                         {
                             //just take everything starting at "< frame "
-                            Console.WriteLine("Dropping \"{0}\" because it is not expected at the beginning of a frame.", responseData.Substring(0, responseData.IndexOf("< frame ")));
+                            Logger.LogWarning("Dropping \"{0}\" because it is not expected at the beginning of a frame.", responseData.Substring(0, responseData.IndexOf("< frame ")));
                             responseData = responseData.Substring(responseData.IndexOf("< frame "));
                         }
                         else
@@ -321,7 +317,7 @@ namespace can2mqtt
                     //Check if the responData has a closing " >". If not, save data and go on reading.
                     if (responseData != "" && !responseData.Contains(" >"))
                     {
-                        Console.WriteLine("No closing tag found. Save data and get next bytes.");
+                        Logger.LogWarning("No closing tag found. Save data and get next bytes.");
                         previousData = responseData;
                         continue;
                     }
@@ -337,7 +333,7 @@ namespace can2mqtt
                             RawFrame = frame
                         };
 
-                        Console.WriteLine("Received CAN Frame: {0}", canFrame.RawFrame);
+                        Logger.LogInformation("Received CAN Frame: {0}", canFrame.RawFrame);
                         responseData = responseData.Substring(responseData.IndexOf(" >") + 2);
 
                         //If forwarding is disabled for this type of frame, ignore it. Otherwise send the Frame
@@ -362,11 +358,11 @@ namespace can2mqtt
                 //Close the TCP Stream
                 ScdClient.Close();
 
-                Console.WriteLine("Disconnected from canServer {0} Port {1}", canServer, canPort);
+                Logger.LogInformation("Disconnected from canServer {0} Port {1}", canServer, canPort);
             }
-            catch (Exception ea)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error while reading CanBus Server. {0}", ea);
+                Logger.LogError(ex, "Error while reading CanBus Server.");
             }
             finally
             {
@@ -397,7 +393,7 @@ namespace can2mqtt
                 //Verify connection to MQTT Broker is established
                 while (!MqttClient.IsConnected)
                 {
-                    Console.WriteLine("UNHANDLED DISCONNECT FROM MQTT BROKER");
+                    Logger.LogInformation("UNHANDLED DISCONNECT FROM MQTT BROKER");
                     while (!MqttClient.IsConnected)
                     {
                         await Task.Delay(TimeSpan.FromSeconds(5));
@@ -405,11 +401,11 @@ namespace can2mqtt
                         try
                         {
                             await MqttClient.ConnectAsync(MqttClientOptions);
-                            Console.WriteLine("CONNECTED TO MQTT BROKER");
+                            Logger.LogInformation("CONNECTED TO MQTT BROKER");
                         }
                         catch
                         {
-                            Console.WriteLine("RECONNECTING TO MQTT BROKER FAILED. Retrying...");
+                            Logger.LogInformation("RECONNECTING TO MQTT BROKER FAILED. Retrying...");
                         }
                     }
                 }
@@ -421,9 +417,9 @@ namespace can2mqtt
 
                 //Logoutput with or without translated MQTT message
                 if (string.IsNullOrEmpty(canMsg.MqttValue))
-                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}", canMsg.PayloadFull.Trim(), MqttTopic);
+                    Logger.LogInformation("Sending MQTT Message: {0} and Topic {1}", canMsg.PayloadFull.Trim(), MqttTopic);
                 else
-                    Console.WriteLine("Sending MQTT Message: {0} and Topic {1}{2}", canMsg.MqttValue, MqttTopic, canMsg.MqttTopicExtention);
+                    Logger.LogInformation("Sending MQTT Message: {0} and Topic {1}{2}", canMsg.MqttValue, MqttTopic, canMsg.MqttTopicExtention);
 
                 //Create MQTT Message
                 var message = new MqttApplicationMessageBuilder()
@@ -436,9 +432,9 @@ namespace can2mqtt
                 //Publish MQTT Message
                 await MqttClient.PublishAsync(message);
             }
-            catch (Exception ea)
+            catch (Exception ex)
             {
-                Console.WriteLine("ERROR while sending MQTT message. {0}", ea.ToString());
+                Logger.LogError(ex, "ERROR while sending MQTT message.");
             }
         }
 
@@ -458,7 +454,7 @@ namespace can2mqtt
             // If authentication at the MQTT broker is enabled, create the options with credentials
             if (!string.IsNullOrEmpty(MqttUser) && MqttPassword != null)
             {
-                Console.WriteLine("Connecting to MQTT broker using Credentials...");
+                Logger.LogInformation("Connecting to MQTT broker using Credentials...");
                 MqttClientOptions = new MqttClientOptionsBuilder()
                    .WithClientId(MqttClientId)
                    .WithTcpServer(MqttServer)
@@ -470,7 +466,7 @@ namespace can2mqtt
             //Handle reconnect on lost connection to MQTT Server
             MqttClient.UseDisconnectedHandler(async e =>
             {
-                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, e.Reason);
+                Logger.LogWarning("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, e.Reason);
                 while (!MqttClient.IsConnected)
                 {
                     try
@@ -478,13 +474,13 @@ namespace can2mqtt
                         // Connect the MQTT Client
                         await MqttClient.ConnectAsync(MqttClientOptions);
                         if (MqttClient.IsConnected)
-                            Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
+                            Logger.LogInformation("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
                         else
-                            Console.WriteLine("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
+                            Logger.LogInformation("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED. Exception: {1}", MqttServer, ex.ToString());
+                        Logger.LogInformation("RECONNECTING TO MQTT BROKER {0} FAILED. Exception: {1}", MqttServer, ex.ToString());
                         Thread.Sleep(10000); //Wait 10 seconds
                     }
                 }
@@ -493,7 +489,7 @@ namespace can2mqtt
             // Connect the MQTT Client to the MQTT Broker
             await MqttClient.ConnectAsync(MqttClientOptions);
             if (MqttClient.IsConnected)
-                Console.WriteLine("CONNECTION TO MQTT BROKER {0} established using ClientId {1}", MqttServer, MqttClientId);
+                Logger.LogInformation("CONNECTION TO MQTT BROKER {0} established using ClientId {1}", MqttServer, MqttClientId);
 
             // Only accept set commands, if they are enabled.
             if (MqttAcceptSet)
@@ -508,12 +504,12 @@ namespace can2mqtt
                         Console.Write("Received MQTT SET Message; Topic = {0}", e.ApplicationMessage.Topic);
                         if (e.ApplicationMessage.Payload != null)
                         {
-                            Console.WriteLine($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                            Logger.LogInformation($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
                             await SendCan(e.ApplicationMessage.Topic, e.ApplicationMessage.Payload, CanServer, CanServerPort);
                         }
                         else
                         {
-                            Console.WriteLine(" WITH NO PAYLOAD");
+                            Logger.LogInformation(" WITH NO PAYLOAD");
                         }
                     }
                     // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
@@ -522,12 +518,12 @@ namespace can2mqtt
                         Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
                         if (e.ApplicationMessage.Topic != null)
                         {
-                            Console.WriteLine("");
+                            Logger.LogInformation("");
                             await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
                         }
                         else
                         {
-                            Console.WriteLine(" WITH NO TOPIC");
+                            Logger.LogInformation(" WITH NO TOPIC");
                         }
                     }
                 });
@@ -545,13 +541,13 @@ namespace can2mqtt
             {
                 if (Translator == null)
                 {
-                    Console.WriteLine("Nothing to poll - no translator selected.");
+                    Logger.LogWarning("Nothing to poll - no translator selected.");
                     return;
                 }
 
                 if (!Translator.MqttTopicsToPoll.Any())
                 {
-                    Console.WriteLine("Nothing to poll - no MQTT topics to poll specified (or all are ignored).");
+                    Logger.LogWarning("Nothing to poll - no MQTT topics to poll specified (or all are ignored).");
                     return;
                 }
 
