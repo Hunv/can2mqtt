@@ -61,7 +61,7 @@ namespace can2mqtt.Translator.StiebelEltron
             //Index not available
             if (indexData == null) {
                 if (convertUnknown) {
-                    Logger.LogInformation($"Fallback convertion: {fallbackValueConverter.ConvertValue(payloadData)}");
+                    Logger.LogInformation($"Fallback convertion:{Environment.NewLine}{fallbackValueConverter.ConvertValue(payloadData)}");
                 }
                 return rawData;
             }
