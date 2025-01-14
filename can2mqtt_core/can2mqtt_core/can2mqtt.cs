@@ -113,7 +113,7 @@ namespace can2mqtt
 
             return true;
         }
-        
+
         /// <summary>
         /// Start the Can2Mqtt service.
         /// </summary>
@@ -122,122 +122,14 @@ namespace can2mqtt
         public override async Task StartAsync(CancellationToken stoppingToken)
         {
             // Load the config from the config file
-            if (LoadConfig() == false) {
+            if (LoadConfig() == false)
+            {
                 Console.WriteLine("Unable to load config successfully.");
                 return;
             }
-            
-            // Create a new MQTT client.
-            var mqttFactory = new MqttFactory();
-            MqttClient = mqttFactory.CreateMqttClient();
 
-            // Create TCP based options using the builder.
-            MqttClientOptions = new MqttClientOptionsBuilder()
-                .WithClientId(MqttClientId)
-                .WithTcpServer(MqttServer)
-                .WithCleanSession()
-                .Build();
-
-            // If authentication at the MQTT broker is enabled, create the options with credentials
-            if (!string.IsNullOrEmpty(MqttUser) && MqttPassword != null)
-            {
-                Console.WriteLine("Connecting to MQTT broker using Credentials...");
-                MqttClientOptions = new MqttClientOptionsBuilder()
-                   .WithClientId(MqttClientId)
-                   .WithTcpServer(MqttServer)
-                   .WithCredentials(MqttUser, MqttPassword)
-                   .WithCleanSession()
-                   .Build();
-            }
-
-            //Handle reconnect on lost connection to MQTT Server
-            MqttClient.UseDisconnectedHandler(async e =>
-            {                
-                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, e.Reason);
-                while (!MqttClient.IsConnected)
-                {
-                    try
-                    {
-                        // Connect the MQTT Client
-                        await MqttClient.ConnectAsync(MqttClientOptions);
-                        if (MqttClient.IsConnected)
-                            Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
-                        else
-                            Console.WriteLine("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
-                    }
-                    catch (Exception ex) 
-                    {
-                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED. Exception: {1}", MqttServer, ex.ToString());
-                        Thread.Sleep(10000); //Wait 10 seconds
-                    }
-                }
-            });
-
-            // Connect the MQTT Client to the MQTT Broker
-            await MqttClient.ConnectAsync(MqttClientOptions);
-            if (MqttClient.IsConnected)
-                Console.WriteLine("CONNECTION TO MQTT BROKER {0} established using ClientId {1}", MqttServer, MqttClientId);
-
-            // Only accept set commands, if they are enabled.
-            if (MqttAcceptSet)
-            {
-                //Create listener on MQTT Broker to accept all messages with the MqttTopic from the config.
-                await MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter(MqttTopic + "/#").Build());
-                MqttClient.UseApplicationMessageReceivedHandler(async e =>
-                {
-                    // Check if it is a set topic and handle only if so.
-                    if (e.ApplicationMessage.Topic.EndsWith("/set"))
-                    {
-                        Console.Write("Received MQTT SET Message; Topic = {0}", e.ApplicationMessage.Topic);
-                        if (e.ApplicationMessage.Payload != null)
-                        {
-                            Console.WriteLine($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
-                            await SendCan(e.ApplicationMessage.Topic, e.ApplicationMessage.Payload, CanServer, CanServerPort);
-                        }
-                        else
-                        {
-                            Console.WriteLine(" WITH NO PAYLOAD");
-                        }
-                    }
-                    // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
-                    else if (e.ApplicationMessage.Topic.EndsWith("/read"))
-                    {
-                        Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
-                        if (e.ApplicationMessage.Topic != null)
-                        {
-                            Console.WriteLine("");
-                            await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
-                        }
-                        else
-                        {
-                            Console.WriteLine(" WITH NO TOPIC");
-                        }
-                    }
-                });
-            }
-
-            if (AutoPolling) {
-                AutoPollingTask = Task.Run(async () => {
-                    if (Translator == null) {
-                        Console.WriteLine("Nothing to poll - no translator selected.");
-                        return;
-                    }
-
-                    if (!Translator.MqttTopicsToPoll.Any()) {
-                        Console.WriteLine("Nothing to poll - no MQTT topics to poll specified (or all are ignored).");
-                        return;
-                    }
-
-                    var delay = TimeSpan.FromSeconds(AutoPollingInterval);
-                    while (!stoppingToken.IsCancellationRequested) {
-                        await Task.Delay(delay, stoppingToken);
-
-                        foreach(var mqttTopic in Translator.MqttTopicsToPoll) {
-                            await ReadCan(mqttTopic + "/read", CanServer, CanServerPort);
-                        }
-                    }
-                });
-            }
+            await SetupMqtt();
+            SetupAutoPolling(stoppingToken);
 
             //Start listening on socketcand port
             await TcpCanBusListener(CanServer, CanServerPort);
@@ -282,7 +174,7 @@ namespace can2mqtt
         private async Task ReadCan(string topic, string canServer, int canPort)
         {
             Console.WriteLine("Sending read request for topic {0}", topic);
-            
+
             try
             {
                 //Convert the data to the required format
@@ -303,7 +195,8 @@ namespace can2mqtt
         /// <param name="canPort">The CAN Server Port</param>
         /// <param name="canFrame">The actual frame to send</param>
         /// <returns></returns>
-        private async Task SendCanFrame(string canServer, int canPort, string canFrame) {
+        private async Task SendCanFrame(string canServer, int canPort, string canFrame)
+        {
             await ConnectTcpCanBus(canServer, canPort);
 
             //Convert data part of the can Frame to socketcand required format
@@ -464,7 +357,7 @@ namespace can2mqtt
 
                 Console.WriteLine("Disconnected from canServer {0} Port {1}", canServer, canPort);
             }
-            catch(Exception ea)
+            catch (Exception ea)
             {
                 Console.WriteLine("Error while reading CanBus Server. {0}", ea);
             }
@@ -514,7 +407,8 @@ namespace can2mqtt
                     }
                 }
 
-                if (string.IsNullOrEmpty(canMsg.MqttTopicExtention)) {
+                if (string.IsNullOrEmpty(canMsg.MqttTopicExtention))
+                {
                     return;
                 }
 
@@ -541,5 +435,130 @@ namespace can2mqtt
             }
         }
 
+        private async Task SetupMqtt()
+        {
+            // Create a new MQTT client.
+            var mqttFactory = new MqttFactory();
+            MqttClient = mqttFactory.CreateMqttClient();
+
+            // Create TCP based options using the builder.
+            MqttClientOptions = new MqttClientOptionsBuilder()
+                .WithClientId(MqttClientId)
+                .WithTcpServer(MqttServer)
+                .WithCleanSession()
+                .Build();
+
+            // If authentication at the MQTT broker is enabled, create the options with credentials
+            if (!string.IsNullOrEmpty(MqttUser) && MqttPassword != null)
+            {
+                Console.WriteLine("Connecting to MQTT broker using Credentials...");
+                MqttClientOptions = new MqttClientOptionsBuilder()
+                   .WithClientId(MqttClientId)
+                   .WithTcpServer(MqttServer)
+                   .WithCredentials(MqttUser, MqttPassword)
+                   .WithCleanSession()
+                   .Build();
+            }
+
+            //Handle reconnect on lost connection to MQTT Server
+            MqttClient.UseDisconnectedHandler(async e =>
+            {
+                Console.WriteLine("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, e.Reason);
+                while (!MqttClient.IsConnected)
+                {
+                    try
+                    {
+                        // Connect the MQTT Client
+                        await MqttClient.ConnectAsync(MqttClientOptions);
+                        if (MqttClient.IsConnected)
+                            Console.WriteLine("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
+                        else
+                            Console.WriteLine("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("RECONNECTING TO MQTT BROKER {0} FAILED. Exception: {1}", MqttServer, ex.ToString());
+                        Thread.Sleep(10000); //Wait 10 seconds
+                    }
+                }
+            });
+
+            // Connect the MQTT Client to the MQTT Broker
+            await MqttClient.ConnectAsync(MqttClientOptions);
+            if (MqttClient.IsConnected)
+                Console.WriteLine("CONNECTION TO MQTT BROKER {0} established using ClientId {1}", MqttServer, MqttClientId);
+
+            // Only accept set commands, if they are enabled.
+            if (MqttAcceptSet)
+            {
+                //Create listener on MQTT Broker to accept all messages with the MqttTopic from the config.
+                await MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter(MqttTopic + "/#").Build());
+                MqttClient.UseApplicationMessageReceivedHandler(async e =>
+                {
+                    // Check if it is a set topic and handle only if so.
+                    if (e.ApplicationMessage.Topic.EndsWith("/set"))
+                    {
+                        Console.Write("Received MQTT SET Message; Topic = {0}", e.ApplicationMessage.Topic);
+                        if (e.ApplicationMessage.Payload != null)
+                        {
+                            Console.WriteLine($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                            await SendCan(e.ApplicationMessage.Topic, e.ApplicationMessage.Payload, CanServer, CanServerPort);
+                        }
+                        else
+                        {
+                            Console.WriteLine(" WITH NO PAYLOAD");
+                        }
+                    }
+                    // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
+                    else if (e.ApplicationMessage.Topic.EndsWith("/read"))
+                    {
+                        Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
+                        if (e.ApplicationMessage.Topic != null)
+                        {
+                            Console.WriteLine("");
+                            await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
+                        }
+                        else
+                        {
+                            Console.WriteLine(" WITH NO TOPIC");
+                        }
+                    }
+                });
+            }
+        }
+
+        void SetupAutoPolling(CancellationToken stoppingToken)
+        {
+            if (!AutoPolling)
+            {
+                return;
+            }
+
+            AutoPollingTask = Task.Run(async () =>
+            {
+                if (Translator == null)
+                {
+                    Console.WriteLine("Nothing to poll - no translator selected.");
+                    return;
+                }
+
+                if (!Translator.MqttTopicsToPoll.Any())
+                {
+                    Console.WriteLine("Nothing to poll - no MQTT topics to poll specified (or all are ignored).");
+                    return;
+                }
+
+                var delay = TimeSpan.FromSeconds(AutoPollingInterval);
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    await Task.Delay(delay, stoppingToken);
+
+                    foreach (var mqttTopic in Translator.MqttTopicsToPoll)
+                    {
+                        await ReadCan(mqttTopic + "/read", CanServer, CanServerPort);
+                    }
+                }
+            });
+        }
     }
 }
