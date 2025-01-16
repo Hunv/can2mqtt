@@ -38,6 +38,7 @@ namespace can2mqtt
 
         private bool AutoPolling = false;
         private int AutoPollingInterval = 120; // in seconds
+        private int AutoPollingThrottle = 150; // in milliseconds
         private Task AutoPollingTask = null;
 
         private readonly ILoggerFactory LoggerFactory;
@@ -99,6 +100,7 @@ namespace can2mqtt
                 ConvertUnknown = bool.Parse(config["ConvertUnknown"].ToString());
                 AutoPolling = bool.Parse(config["AutoPolling"].ToString());
                 AutoPollingInterval = Convert.ToInt32(config["AutoPollingInterval"].ToString());
+                AutoPollingThrottle = Convert.ToInt32(config["AutoPollingThrottle"].ToString());
 
                 //choose the translator to use and translate the message if translator exists
                 switch (CanTranslator)
@@ -559,6 +561,8 @@ namespace can2mqtt
                     foreach (var mqttTopic in Translator.MqttTopicsToPoll)
                     {
                         await ReadCan(mqttTopic + "/read", CanServer, CanServerPort);
+                        // delay next read to avoid overloading socketcand
+                        await Task.Delay(AutoPollingThrottle, stoppingToken);
                     }
                 }
             });
