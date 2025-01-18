@@ -21,5 +21,6 @@
   "ConvertUnknown": false,
 
   "AutoPolling": false,
-  "AutoPollingInterval": 120
+  "AutoPollingInterval": 120,
+  "AutoPollingThrottle": 150
 }

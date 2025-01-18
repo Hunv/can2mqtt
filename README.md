@@ -12,8 +12,9 @@ Breaking changes:
 New features:
  - Added option `ConvertUnknown`, this defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
  - Added fallback value converter for unknown indexes in StiebelEltron.json for easier debugging.
- - Added automatic polling feature. It can be enabled using config option `AutoPolling`. The polling interval **in seconds** can be defined with `AutoPollingInterval`. If a value shall not be polled, add `"IgnorePolling": true` to `StiebelEltron.json`.
+ - Added automatic polling feature. It can be enabled using config option `AutoPolling`. The polling interval **in seconds** can be defined with `AutoPollingInterval`. To avoid connection loss to socketcand `AutoPollingThrottle` needs to be specified **in milliseconds**. This delay will be introduced between each sent read. If a value shall not be polled, add `"IgnorePolling": true` to `StiebelEltron.json`.
  - Added combined values feature that allows combining two elster indices together. See documentation below.
+
 
 Fixes:
  - Do not publish unknown values to MQTT broker
@@ -185,6 +186,9 @@ Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2
   "Language": "en",                 < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
 
   "ConvertUnknown": false           < New in Release 5.0; This defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
+  "AutoPolling": false,             < New in Release 5.0: This defines if values shall be polled automatically.
+  "AutoPollingInterval": 30         < New in Release 5.0: If AutoPolling is enabled, this value defines the interval in which values are polled in seconds. e.g. 30s.
+  "AutoPollingThrottle": 150        < New in Release 5.0: Throttle time between each sent read request in milliseconds. Adapt in case connection to socketcand is lost when auto polling is enabled.
 }
 ```
 
@@ -212,6 +216,9 @@ Topic: heating/room/hc1/temperature/day/read
 # Stiebel Eltron Elster Table
 
 The following section describes the format of `can2mqtt_core/can2mqtt_core/translator/stiebel_eltron/StiebelEltron.json`.
+
+## Ignore from auto polling
+If a value shall not be polled, add `"IgnorePolling": true` entry.
 
 ## Combined Values
 In case you want to combine the following two entries (the example was stripped and only relevant fields are kept):
@@ -265,6 +272,7 @@ Assume the following values for the given examples: `Index` = 19 and `CombineInd
 |-----------|-------------------------------------|-----------------------------|
 | `Default` | `Index`* 1000 + `CombineIndex`      | 19 * 1000 + 234 = 19234     |
 | `Dec`     | `Index` + (`CombineIndex` / 1000)   | 19 + 234 / 1000 = 19,234    |
+
 
 # Troubleshooting
 ## Issue: The connection is reconnecting over and over again multiple times within seconds until the application crashes
