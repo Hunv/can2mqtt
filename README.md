@@ -13,6 +13,7 @@ New features:
  - Added option `ConvertUnknown`, this defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
  - Added fallback value converter for unknown indexes in StiebelEltron.json for easier debugging.
  - Added automatic polling feature. It can be enabled using config option `AutoPolling`. The polling interval **in seconds** can be defined with `AutoPollingInterval`. If a value shall not be polled, add `"IgnorePolling": true` to `StiebelEltron.json`.
+ - Added combined values feature that allows combining two elster indices together. See documentation below.
 
 Fixes:
  - Do not publish unknown values to MQTT broker
@@ -208,6 +209,62 @@ If you need to request a send from the CAN bus, you can add a /read at the end o
 An example MQTT message to can2mqtt to request the value of the desired room temperature of the primary heat cycle:
 Topic: heating/room/hc1/temperature/day/read
 
+# Stiebel Eltron Elster Table
+
+The following section describes the format of `can2mqtt_core/can2mqtt_core/translator/stiebel_eltron/StiebelEltron.json`.
+
+## Combined Values
+In case you want to combine the following two entries (the example was stripped and only relevant fields are kept):
+```json
+  {
+    "Index": "092E",
+    "Sender": "180",
+    "Unit": "Wh",
+    "Converter": "Default",
+    "Name": {
+      "EN": "Heat Meter Heating Day",
+      "DE": "Wärmemenge Heizen Tag"
+    },
+    "MqttTopic": "/meter/heating/day/Wh",
+  },
+  {
+    "Index": "092F",
+    "Sender": "180",
+    "Unit": "KWh",
+    "Converter": "Default",
+    "Name": {
+      "EN": "Heat Meter Heating Day",
+      "DE": "Wärmemenge Heizen Tag"
+    },
+    "MqttTopic": "/meter/heating/day/KWh",
+  },
+```
+
+You can do it by removing one of the entries and adapt the other like this:
+
+```json
+  {
+    "Index": "092F",
+    "CombineIndex": "092E",
+    "Sender": "180",
+    "Unit": "KWh",
+    "Converter": "Default",
+    "Name": {
+      "EN": "Heat Meter Heating Day",
+      "DE": "Wärmemenge Heizen Tag"
+    },
+    "MqttTopic": "/meter/heating/day/KWh",
+  },
+```
+
+Possible converters:
+
+Assume the following values for the given examples: `Index` = 19 and `CombineIndex`= 234
+
+| Converter | Formula                             | Example                     |
+|-----------|-------------------------------------|-----------------------------|
+| `Default` | `Index`* 1000 + `CombineIndex`      | 19 * 1000 + 234 = 19234     |
+| `Dec`     | `Index` + (`CombineIndex` / 1000)   | 19 + 234 / 1000 = 19,234    |
 
 # Troubleshooting
 ## Issue: The connection is reconnecting over and over again multiple times within seconds until the application crashes
