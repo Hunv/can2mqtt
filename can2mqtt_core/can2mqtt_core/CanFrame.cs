@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
+﻿using System.Globalization;
 
 namespace can2mqtt
 {
@@ -137,5 +134,11 @@ namespace can2mqtt
         /// In case a translator was used, the value was extracted from the payload
         /// </summary>
         public string MqttValue { get; set; } = "";
+
+        /// <summary>
+        /// Returns if the can frame is complete or if additional information is required
+        /// (e.g., for combined values this can be false as long as not all parts are received)
+        /// </summary>
+        public bool IsComplete { get; set; } = false;
     }
 }

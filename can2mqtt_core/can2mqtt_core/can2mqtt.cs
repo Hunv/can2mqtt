@@ -32,7 +32,7 @@ namespace can2mqtt
         private bool MqttAcceptSet = false;
         private NetworkStream TcpCanStream;
         private TcpClient ScdClient = null;
-        private Translator.StiebelEltron.StiebelEltron Translator = null;
+        private StiebelEltron Translator = null;
         private string Language = "EN";
         private bool ConvertUnknown = false;
 
@@ -159,9 +159,8 @@ namespace can2mqtt
                 var data = Encoding.UTF8.GetString(payload);
 
                 //Convert the data to the required format
-                var canFrame = Translator.TranslateBack(topic, data, CanSenderId, NoUnit, "0");
-
-                await SendCanFrame(canServer, canPort, canFrame);
+                var canFrames = Translator.TranslateBack(topic, data, CanSenderId, NoUnit, "0");
+                await SendCanFrame(canServer, canPort, canFrames);
             }
             catch (Exception ex)
             {
@@ -183,9 +182,8 @@ namespace can2mqtt
             try
             {
                 //Convert the data to the required format
-                var canFrame = Translator.TranslateBack(topic, null, CanSenderId, NoUnit, "1");
-
-                await SendCanFrame(canServer, canPort, canFrame);
+                var canFrames = Translator.TranslateBack(topic, null, CanSenderId, NoUnit, "1");
+                await SendCanFrame(canServer, canPort, canFrames);
             }
             catch (Exception ex)
             {
@@ -200,24 +198,27 @@ namespace can2mqtt
         /// <param name="canPort">The CAN Server Port</param>
         /// <param name="canFrame">The actual frame to send</param>
         /// <returns></returns>
-        private async Task SendCanFrame(string canServer, int canPort, string canFrame)
+        private async Task SendCanFrame(string canServer, int canPort, IEnumerable<string> canFrames)
         {
             await ConnectTcpCanBus(canServer, canPort);
 
-            //Convert data part of the can Frame to socketcand required format
-            var canFrameDataPart = canFrame.Split("#")[1];
-            var canFrameSdData = "";
-
-            for (int i = 0; i < canFrameDataPart.Length; i += 2)
+            foreach (var canFrame in canFrames)
             {
-                canFrameSdData += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
-            }
-            canFrameSdData = canFrameSdData.Trim();
+                //Convert data part of the can Frame to socketcand required format
+                var canFrameDataPart = canFrame.Split("#")[1];
+                var canFrameSdData = "";
 
-            // < send can_id can_datalength [data]* >
-            var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
-            Logger.LogInformation("Sending CAN Frame: {0}", canFrameSdCommand);
-            TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
+                for (int i = 0; i < canFrameDataPart.Length; i += 2)
+                {
+                    canFrameSdData += Convert.ToInt32(canFrameDataPart.Substring(i, 2), 16).ToString("X1") + " ";
+                }
+                canFrameSdData = canFrameSdData.Trim();
+
+                // < send can_id can_datalength [data]* >
+                var canFrameSdCommand = string.Format("< send {0} {1} {2} >", CanSenderId, canFrameDataPart.Length / 2, canFrameSdData);
+                Logger.LogInformation("Sending CAN Frame: {0}", canFrameSdCommand);
+                TcpCanStream.Write(Encoding.Default.GetBytes(canFrameSdCommand));
+            }
         }
 
         /// <summary>
@@ -390,6 +391,10 @@ namespace can2mqtt
                 if (Translator != null)
                 {
                     canMsg = Translator.Translate(canMsg, NoUnit, Language, ConvertUnknown);
+                    if (!canMsg.IsComplete) {
+                        Logger.LogDebug("Waiting for additional data for MQTT topic {0}", canMsg.MqttTopicExtention);
+                        return;
+                    }
                 }
 
                 //Verify connection to MQTT Broker is established
