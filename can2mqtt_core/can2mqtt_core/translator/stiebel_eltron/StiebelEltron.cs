@@ -2,14 +2,9 @@
 // http://juerg5524.ch/list_data.php
 // https://wiki.c3re.de/index.php/Projekt_23_Smarthome_/_Zugriff_Heizung
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace can2mqtt.Translator.StiebelEltron
 {
+
     /// <summary>
     /// This Translator class translates the CAN Bus data to values
     /// Validated with:
@@ -17,12 +12,31 @@ namespace can2mqtt.Translator.StiebelEltron
     /// </summary>
     public class StiebelEltron : ITranslator
     {
-        public CanFrame Translate(CanFrame rawData, bool noUnit, string language)
+        private readonly ILogger Logger;
+
+        private readonly FallbackValueConverter fallbackValueConverter = new();
+        // initialize elster index once
+        private static readonly ElsterIndex ElsterIndex = new();
+        private static Lazy<IEnumerable<string>> MqttTopicsToPollList = new(() => ElsterIndex.ElsterIndexTable.Where(x => !x.IgnorePolling).Select(x => x.MqttTopic).ToList());
+
+        private readonly IDictionary<int, string> partialCombinedValues = new Dictionary<int, string>();
+
+        public StiebelEltron(ILoggerFactory loggerFactory) {
+            Logger = loggerFactory.CreateLogger("StiebelEltronTranslator");
+        }
+
+        public IEnumerable<string> MqttTopicsToPoll {
+            get {
+                return MqttTopicsToPollList.Value;
+            }
+        }
+
+        public CanFrame Translate(CanFrame rawData, bool noUnit, string language, bool convertUnknown)
         {
             //Check if format is correct
             if (string.IsNullOrEmpty(rawData.PayloadFull) || rawData.PayloadFull.Length != 14)
             {
-                Console.WriteLine("Data is not length of 14: {0}", rawData.PayloadFull);
+                Logger.LogInformation("Data is not lenght of 14: {0}", rawData.PayloadFull);
                 return rawData;
             }
 
@@ -36,23 +50,40 @@ namespace can2mqtt.Translator.StiebelEltron
             //6 - system
             //7 - system respond
             //20/21 (hex.) - write/read large telegram
-
+    
             var payloadIndex = Convert.ToInt32(rawData.ValueIndex, 16);
             var payloadData = rawData.Value;
 
             //Get IndexData
-            var elsterTable = new ElsterIndex();
-            var indexData = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex && x.Sender.ToString("X2") == rawData.PayloadSenderCanId );
-            if (indexData == null)
-                indexData = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex);
-            
+            var indexData = ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex && x.Sender.ToString("X2") == rawData.PayloadSenderCanId );
+            indexData ??= ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.Index == payloadIndex);
+            indexData ??= ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.CombineIndex == payloadIndex);
 
             //Index not available
-            if (indexData == null)
+            if (indexData == null) {
+                if (convertUnknown) {
+                    Logger.LogInformation($"Fallback convertion:{Environment.NewLine}{fallbackValueConverter.ConvertValue(payloadData)}");
+                }
                 return rawData;
+            }
 
             rawData.MqttTopicExtention = indexData.MqttTopic;
 
+            if (indexData.CombineIndex.HasValue) { // combined index value handling
+                var convertedValue = indexData.CombinedConverter.ConvertValue(payloadIndex, payloadData);
+                if (!partialCombinedValues.TryGetValue(indexData.Index, out var payloadFragment)) {
+                    partialCombinedValues.Add(indexData.Index, convertedValue);
+                    rawData.IsComplete = false;
+                    return rawData;
+                }
+
+                rawData.MqttValue = $"{indexData.CombinedConverter.CombineValues(payloadFragment, convertedValue)}{(!noUnit ? indexData.Unit : string.Empty)}";
+                partialCombinedValues.Remove(indexData.Index);
+                rawData.IsComplete = true;
+                return rawData;
+            }
+
+            rawData.IsComplete = true;
             if (indexData.Converter == null) //custom converter
             {
                 try
@@ -61,22 +92,20 @@ namespace can2mqtt.Translator.StiebelEltron
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("No value for payloaddata {0} and language {1} found. Trying english values...", payloadData, language);
+                    Logger.LogInformation("No value for payloaddata {0} and language {1} found. Trying english values...", payloadData, language);
                     try
                     {
                         rawData.MqttValue = indexData.ValueList["EN"][payloadData];
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine("No value for payloaddata {0} and language EN found. This is an unknown value.", payloadData);
+                        Logger.LogInformation("No value for payloaddata {0} and language EN found. This is an unknown value.", payloadData);
                         rawData.MqttValue = "Unknown Data";
                     }
                 }
             }
-            else if (!noUnit)
-                rawData.MqttValue = indexData.Converter.ConvertValue(payloadData) + indexData.Unit;
             else
-                rawData.MqttValue = indexData.Converter.ConvertValue(payloadData);
+                rawData.MqttValue = $"{indexData.Converter.ConvertValue(payloadData)}{(!noUnit ? indexData.Unit : string.Empty)}";
 
             return rawData;
         }
@@ -89,37 +118,46 @@ namespace can2mqtt.Translator.StiebelEltron
         /// <param name="senderId">The sender ID in the CAN bus</param>
         /// <param name="noUnit">Include/Exclude Units at conversion</param>
         /// <param name="canOperation">The operating of the CAN bus (write = 0, read = 1)</param>
-        /// <returns></returns>
-        public string TranslateBack(string topic, string value, string senderId, bool noUnit, string canOperation = "0")
-        {            
+        /// <returns>List of can frames to send.</returns>
+        public IEnumerable<string> TranslateBack(string topic, string value, string senderId, bool noUnit, string canOperation = "0")
+        {
             if (topic.EndsWith("/set")) //remove the /set from topic
-                topic = topic.Substring(0, topic.Length - 4);            
+                topic = topic.Substring(0, topic.Length - 4);
             else if (topic.EndsWith("/read")) //remove the /read from topic
                 topic = topic.Substring(0, topic.Length - 5);
 
             //remove the first topic because it is the custom one from the config file and not in the ElsterTable config file            
-            topic = topic.Substring(topic.IndexOf('/'));
+            var firstTopicStartIndex = topic.IndexOf('/');
+            if (firstTopicStartIndex != -1)
+            {
+                topic = topic.Substring(firstTopicStartIndex);
+            }
 
             //check the sender length. Fail in case of unexpected length
             if (senderId.Length != 3)
             {
-                Console.WriteLine("The senderID has not the length of 3.");
-                return "";
+                Logger.LogError("The senderID has not the length of 3.");
+                return [];
             }
 
             // Get the Elster Index by the topic
-            var elsterTable = new ElsterIndex();
-            var elsterItem = elsterTable.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
+            var elsterItem = ElsterIndex.ElsterIndexTable.FirstOrDefault(x => x.MqttTopic == topic);
 
             //Index not available
             if (elsterItem == null)
             {
-                Console.WriteLine("Cannot find a Elster item that has the MQTT topic {0}", topic);
-                return "";
+                Logger.LogError("Cannot find a Elster item that has the MQTT topic {0}", topic);
+                return [];
+            }
+
+            if (elsterItem.CombineIndex.HasValue && canOperation == "0")
+            {
+                Logger.LogError("Cannot write to a combined index. Please use the single indexes.");
+                return [];
             }
 
             //Remove the Unit from the value
-            if (!noUnit  && value != null && value.EndsWith(elsterItem.Unit))
+            if (!noUnit && value != null && value.EndsWith(elsterItem.Unit))
                 value = value.Substring(0, value.Length - elsterItem.Unit.Length);
 
             // Result data must look like 3000FA056C0002
@@ -168,8 +206,7 @@ namespace can2mqtt.Translator.StiebelEltron
             var hexPayload = "0000";
             if (value != null)
             {
-                var conv = elsterItem.Converter;
-                hexPayload = conv.ConvertValueBack(value);
+                hexPayload = elsterItem.Converter.ConvertValueBack(value);
             }
 
             // The first 3 characters are the sender Id
@@ -180,15 +217,26 @@ namespace can2mqtt.Translator.StiebelEltron
             // followed by FA to indicate the usage of the Elster Indexes
             // followed by the elster Index ID
             // followed by the value
-            var canFrameString = string.Format("{0}#{1}{2}{3}FA{4}{5}", senderId, receiverId[0], canOperation, receiverId[1], elsterItem.Index.ToString("X4"), hexPayload);
+            List<string> result = [CreateCanFrame(senderId, canOperation, elsterItem.Index, receiverId, hexPayload)];
 
-            Console.WriteLine("CAN Frame is: {0}", canFrameString);
-
-            //Verify Format of the translated back data
-            if (string.IsNullOrEmpty(canFrameString) || canFrameString.Length != 18)
+            if (elsterItem.CombineIndex.HasValue)
             {
-                Console.WriteLine("Data is not lenght of 14: {0}", canFrameString);
-                return "";
+                result.Add(CreateCanFrame(senderId, canOperation, elsterItem.CombineIndex.Value, receiverId, hexPayload));
+            }
+
+            return result;
+        }
+
+        private string CreateCanFrame(string senderId, string canOperation, int index, string[] receiverId, string hexPayload)
+        {
+            var canFrameString = string.Format("{0}#{1}{2}{3}FA{4}{5}", senderId, receiverId[0], canOperation, receiverId[1], index.ToString("X4"), hexPayload);
+
+            Logger.LogInformation("CAN Frame is: {0}", canFrameString);
+            //Verify Format of the translated back data
+            if (canFrameString.Length != 18)
+            {
+                Logger.LogError("Data is not lenght of 14: {0}", canFrameString);
+                return string.Empty;
             }
 
             return canFrameString;

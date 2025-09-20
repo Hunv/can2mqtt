@@ -1,7 +1,26 @@
 # can2mqtt
 A Linux or Windows service to forward CAN frames to MQTT messages
+The precompiled version you can find in the releases section may not be the latest version described below. Check the version number for differences. To get the very latest version, build from code.
 
 # Latest Updates
+
+## V5.0
+
+Breaking changes:
+ - Running on .NET 8.0 instead of .NET 6.0
+
+New features:
+ - Added option `ConvertUnknown`, this defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
+ - Added fallback value converter for unknown indexes in StiebelEltron.json for easier debugging.
+ - Added automatic polling feature. It can be enabled using config option `AutoPolling`. The polling interval **in seconds** can be defined with `AutoPollingInterval`. To avoid connection loss to socketcand `AutoPollingThrottle` needs to be specified **in milliseconds**. This delay will be introduced between each sent read. If a value shall not be polled, add `"IgnorePolling": true` to `StiebelEltron.json`.
+ - Added combined values feature that allows combining two elster indices together. See documentation below.
+
+
+Fixes:
+ - Do not publish unknown values to MQTT broker
+ - Load StiebelEltron.json only once during runtime
+
+## V4.4
 This software was just updated. The main and breaking changes are:
 - Running on .NET 6.0 instead of Dotnet Core 2.2
 - Using SOCKETCAND instead of CANLOGSERVER
@@ -166,9 +185,14 @@ Edit the config.json with your favorite editor (i.e. nano): 'sudo nano /opt/can2
   "MqttUser": "",                   < This is the user that is required to register at the MQTT broker. Leave empty for none.
   "MqttPassword": "",               < This is the password that is required to register at the MQTT broker. Leave empty for none.
   "MqttAcceptSet": false,           < This is a setting, that defines if can2mqtt will send write-commands to the CAN bus. For safety reasons the default setting is set to false.  
-  
+
   "NoUnits": true,                  < This defines if sending MQTT messages will contain the unit defined in the translator config or not (i.e. "25°C" or just "25")  
-  "Language": "en"                  < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
+  "Language": "en",                 < This defines the language, that will be used. Currently available languages are "en" (English) and "de" (German).
+
+  "ConvertUnknown": false           < New in Release 5.0; This defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
+  "AutoPolling": false,             < New in Release 5.0: This defines if values shall be polled automatically.
+  "AutoPollingInterval": 30         < New in Release 5.0: If AutoPolling is enabled, this value defines the interval in which values are polled in seconds. e.g. 30s.
+  "AutoPollingThrottle": 150        < New in Release 5.0: Throttle time between each sent read request in milliseconds. Adapt in case connection to socketcand is lost when auto polling is enabled.
 }
 ```
 
@@ -192,6 +216,66 @@ Value: 23 (Important: Without the unit!)
 If you need to request a send from the CAN bus, you can add a /read at the end of the topic.
 An example MQTT message to can2mqtt to request the value of the desired room temperature of the primary heat cycle:
 Topic: heating/room/hc1/temperature/day/read
+
+# Stiebel Eltron Elster Table
+
+The following section describes the format of `can2mqtt_core/can2mqtt_core/translator/stiebel_eltron/StiebelEltron.json`.
+
+## Ignore from auto polling
+If a value shall not be polled, add `"IgnorePolling": true` entry.
+
+## Combined Values
+In case you want to combine the following two entries (the example was stripped and only relevant fields are kept):
+```json
+  {
+    "Index": "092E",
+    "Sender": "180",
+    "Unit": "Wh",
+    "Converter": "Default",
+    "Name": {
+      "EN": "Heat Meter Heating Day",
+      "DE": "Wärmemenge Heizen Tag"
+    },
+    "MqttTopic": "/meter/heating/day/Wh",
+  },
+  {
+    "Index": "092F",
+    "Sender": "180",
+    "Unit": "KWh",
+    "Converter": "Default",
+    "Name": {
+      "EN": "Heat Meter Heating Day",
+      "DE": "Wärmemenge Heizen Tag"
+    },
+    "MqttTopic": "/meter/heating/day/KWh",
+  },
+```
+
+You can do it by removing one of the entries and adapt the other like this:
+
+```json
+  {
+    "Index": "092F",
+    "CombineIndex": "092E",
+    "Sender": "180",
+    "Unit": "KWh",
+    "Converter": "Default",
+    "Name": {
+      "EN": "Heat Meter Heating Day",
+      "DE": "Wärmemenge Heizen Tag"
+    },
+    "MqttTopic": "/meter/heating/day/KWh",
+  },
+```
+
+Possible converters:
+
+Assume the following values for the given examples: `Index` = 19 and `CombineIndex`= 234
+
+| Converter | Formula                             | Example                     |
+|-----------|-------------------------------------|-----------------------------|
+| `Default` | `Index`* 1000 + `CombineIndex`      | 19 * 1000 + 234 = 19234     |
+| `Dec`     | `Index` + (`CombineIndex` / 1000)   | 19 + 234 / 1000 = 19,234    |
 
 
 # Troubleshooting

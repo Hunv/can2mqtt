@@ -17,5 +17,10 @@
   "MqttAcceptSet": false,
 
   "NoUnits": false,
-  "Language": "en"
+  "Language": "en",
+  "ConvertUnknown": false,
+
+  "AutoPolling": false,
+  "AutoPollingInterval": 120,
+  "AutoPollingThrottle": 150
 }

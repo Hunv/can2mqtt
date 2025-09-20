@@ -1,10 +1,4 @@
-﻿using can2mqtt.Translator.StiebelEltron;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json;
 
 namespace can2mqtt.Translator.StiebelEltron
 {
@@ -50,7 +44,8 @@ namespace can2mqtt.Translator.StiebelEltron
             };
     }
 
-        //Source: http://juerg5524.ch/data/ElsterTable.inc
+#region Default ElsterIndicesv Source: http://juerg5524.ch/data/ElsterTable.inc
+
         //The Indexes are not completly verified!
         //public static ElsterIndexItem[] ElsterTable = new ElsterIndexItem[]
         //{
@@ -3689,7 +3684,7 @@ namespace can2mqtt.Translator.StiebelEltron
         //      new ElsterIndexItem{Name = "INFOBLOCK_5"                                     , Index = 0xfe06, Type = "0"},
         //      new ElsterIndexItem{Name = "INFOBLOCK_6"                                     , Index = 0xfe07, Type = "0"}
         //    };
-
+#endregion
 
     public class ElsterIndexItem
     {
@@ -3700,18 +3695,35 @@ namespace can2mqtt.Translator.StiebelEltron
         public int Index { get; set; }
 
         /// <summary>
-        /// The Index as decimal number represented by a string
+        /// The Index as decimal number represented by a string (as hex)
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("Index")]
-        public string IndexString {
+        public string IndexString
+        {
             get { return Index.ToString("X4"); }
-            set { Index = Convert.ToInt32(value, 16); } 
+            set { Index = Convert.ToInt32(value, 16); }
+        }
+
+        /// <summary>
+        /// The CombineIndex as decimal number
+        /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        public int? CombineIndex { get; set; }
+
+        /// <summary>
+        /// The CombineIndex as decimal number represented by a string (as hex)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("CombineIndex")]
+        public string CombineIndexString
+        {
+            get { return CombineIndex?.ToString("X4"); }
+            set { CombineIndex = Convert.ToInt32(value, 16); }
         }
 
         /// <summary>
         /// The name of the Index
         /// </summary>
-        public Dictionary<string,string> Name { get; set; }
+        public Dictionary<string, string> Name { get; set; }
 
         /// <summary>
         /// The CAN Device ID where this Index/MQTT Topic is valid. If 0 it is for all
@@ -3733,53 +3745,78 @@ namespace can2mqtt.Translator.StiebelEltron
         /// The Converter to convert the raw value to a processable value
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        public IValueConverter Converter { get {
+        public IValueConverter Converter
+        {
+            get
+            {
                 switch (ConverterString.ToLower())
                 {
                     case "binary":
-                        return new ConvertBinary();                        
+                        return new ConvertBinary();
                     case "bool":
-                        return new ConvertBool();                        
+                        return new ConvertBool();
                     case "byte":
-                        return new ConvertByte();                        
+                        return new ConvertByte();
                     case "cent":
-                        return new ConvertCent();                        
+                        return new ConvertCent();
                     case "custom":
                         return null; //Not implemented                        
                     case "datum":
-                        return new ConvertDate();                        
+                        return new ConvertDate();
                     case "dec":
-                        return new ConvertDec();                        
+                        return new ConvertDec();
                     case "default":
-                        return new ConvertDefault();                        
+                        return new ConvertDefault();
                     case "double":
-                        return new ConvertDouble();                        
+                        return new ConvertDouble();
                     case "err":
-                        return new ConvertErr();                        
+                        return new ConvertErr();
                     case "littlebool":
-                        return new ConvertLittleBool();                        
+                        return new ConvertLittleBool();
                     case "littleendian":
-                        return new ConvertLittleEndian();                        
+                        return new ConvertLittleEndian();
                     case "littleendiandec":
-                        return new ConvertLittleEndianDec();                        
+                        return new ConvertLittleEndianDec();
                     case "mille":
-                        return new ConvertMille();                        
+                        return new ConvertMille();
                     case "sprache":
-                        return new ConvertLanguage();                        
+                        return new ConvertLanguage();
                     case "time":
-                        return new ConvertTime();                        
+                        return new ConvertTime();
                     case "timedomain":
-                        return new ConvertTimeDomain();                        
+                        return new ConvertTimeDomain();
                     case "timerange":
-                        return new ConvertTimeRange();                        
+                        return new ConvertTimeRange();
                     case "timerangelittleendian":
-                        return new ConvertTimeRangeLittleEndian();                        
+                        return new ConvertTimeRangeLittleEndian();
                     case "triple":
                         return new ConvertTriple();
                     default:
-                        return new ConvertDefault();                        
+                        return new ConvertDefault();
                 }
-            } }
+            }
+        }
+
+        /// <summary>
+        /// The Combined Value Converter to convert the combination of values to a processable value
+        /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        public ICombinedValueConverter CombinedConverter
+        {
+            get
+            {
+                if (!CombineIndex.HasValue)
+                {
+                    return null;
+                }
+
+                return ConverterString.ToLower() switch
+                {
+                    "dec" => new CombinedValueDecConverter(CombineIndex.Value),
+                    _ => new CombinedValueDefaultConverter(Index),
+                };
+            }
+        }
 
         /// <summary>
         /// The representation of the the Converter as a string from the config file.
@@ -3822,11 +3859,16 @@ namespace can2mqtt.Translator.StiebelEltron
         /// Values that are valid for this dataset. Used if converter is null.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("Values")]
-        public Dictionary<string, Dictionary<string,string>> ValueList { get; set; }
+        public Dictionary<string, Dictionary<string, string>> ValueList { get; set; }
 
         /// <summary>
         /// If the value can just be read but not set
         /// </summary>
         public bool ReadOnly { get; set; }
+
+        /// <summary>
+        /// Define if the index shall not be automatically polled.
+        /// </summary>
+        public bool IgnorePolling { get; set; }
     }
 }
