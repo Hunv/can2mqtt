@@ -101,9 +101,7 @@ namespace can2mqtt_tool
                             var p = new can2mqtt.Translator.StiebelEltron.ConvertTime();
                             Console.WriteLine("Time:\t\t{0}", p.ConvertValue(calculate));
                             var q = new can2mqtt.Translator.StiebelEltron.ConvertBinary();
-                            Console.WriteLine("Binary:\t{0}", q.ConvertValue(calculate));
-                            var s = new can2mqtt.Translator.StiebelEltron.ConvertBool();
-                            Console.WriteLine("Bool:\t{0}", s.ConvertValue(calculate));
+                            Console.WriteLine("Binary:\t\t{0}", q.ConvertValue(calculate));
                             
                             //var i = new can2mqtt.Translator.StiebelEltron.ConvertErr();
                             //Console.WriteLine("Err:\t{0}", i.ConvertValue(calculate));

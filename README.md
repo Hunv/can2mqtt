@@ -10,6 +10,10 @@ This software was just updated. The main and breaking changes are:
 - Supporting authentication on MQTT broker
 - Moved config to json file instead of parameters
 
+# Tested/verified Models by creator and community:
+Stiebel Eltron LWZ 504 / LWZ 8 CS Premium
+Stiebel Eltron WPF 10E
+
 # HowTo
 Note: This whole readme assumes the following environment:
 - You are running and Ubuntu based Linux distribution on a Raspberry Pi (Tested with Raspberry Pi OS and openHABian)

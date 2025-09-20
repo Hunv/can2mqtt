@@ -10220,8 +10220,8 @@
       "DE": "Programmschalter"
     },
     "Description": {
-      "EN": "",
-      "DE": ""
+      "EN": "1. Bit: Switching Program Enabled, 2. Bit: Compressor active, 3. Bit: Heating Circle Pump, 4. Bit: DHW Heating, 5. Bit: Warm Water Buffer Pump, 6. Bit: DHC2 Active, 7. Bit: DHC1 Active, 8. Bit: No Power, 9. Bit: , 10 Bit: ???, 11. Bit: Heat Circuit Pump active",
+      "DE": "1. Bit: Schaltprogramm aktiv, 2. Bit: Verdichter aktiv, 3. Bit: Heizkreispumpe, 4. Bit: Warmwasserspeicher erhitzen, 5. Bit: Warmwasser Pufferpumpe, 6. Bit: Heizkreis 1 aktiv, 7. Bit: Heizkreis 2 aktiv, 8. Bit: EVU Sperre, 9. Bit: Filterwechsel oben und unten , 10 Bit: ???, 11. Bit: Heizkreispumpe aktiv"
     },
     "Values": {
       "EN": {},

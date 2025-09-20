@@ -162,15 +162,15 @@ namespace can2mqtt
             if (MqttClient.IsConnected)
                 Console.WriteLine("CONNECTION TO MQTT BROKER {0} established using ClientId {1}", MqttServer, MqttClientId);
 
-            // Only accept set commands, if they are enabled.
-            if (MqttAcceptSet)
+            //Create listener on MQTT Broker to accept all messages with the MqttTopic from the config.
+            await MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter(MqttTopic + "/#").Build());
+            MqttClient.UseApplicationMessageReceivedHandler(async e =>
             {
-                //Create listener on MQTT Broker to accept all messages with the MqttTopic from the config.
-                await MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter(MqttTopic + "/#").Build());
-                MqttClient.UseApplicationMessageReceivedHandler(async e =>
+                // Check if it is a set topic and handle only if so.
+                if (e.ApplicationMessage.Topic.EndsWith("/set"))
                 {
-                    // Check if it is a set topic and handle only if so.
-                    if (e.ApplicationMessage.Topic.EndsWith("/set"))
+                    // Only accept set commands, if they are enabled.
+                    if (MqttAcceptSet)
                     {
                         Console.Write("Received MQTT SET Message; Topic = {0}", e.ApplicationMessage.Topic);
                         if (e.ApplicationMessage.Payload != null)
@@ -183,22 +183,27 @@ namespace can2mqtt
                             Console.WriteLine(" WITH NO PAYLOAD");
                         }
                     }
-                    // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
-                    else if (e.ApplicationMessage.Topic.EndsWith("/read"))
+                    else
                     {
-                        Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
-                        if (e.ApplicationMessage.Topic != null)
-                        {
-                            Console.WriteLine("");
-                            await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
-                        }
-                        else
-                        {
-                            Console.WriteLine(" WITH NO TOPIC");
-                        }
+                        Console.WriteLine("Write Messages currently not allowed. Set 'MqttAcceptSet' setting to 'true' in the config if this is not intended.");
                     }
-                });
-            }
+                }
+                // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
+                else if (e.ApplicationMessage.Topic.EndsWith("/read"))
+                {
+                    Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
+                    if (e.ApplicationMessage.Topic != null)
+                    {
+                        Console.WriteLine("");
+                        await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
+                    }
+                    else
+                    {
+                        Console.WriteLine(" WITH NO TOPIC");
+                    }
+                }
+            });
+            
 
             //Start listening on socketcand port
             await TcpCanBusListener(CanServer, CanServerPort);
@@ -222,6 +227,7 @@ namespace can2mqtt
                 var data = Encoding.UTF8.GetString(payload);
 
                 //Convert the data to the required format
+                SetTranslator();
                 var canFrame = Translator.TranslateBack(topic, data, CanSenderId, NoUnit, "0");
 
                 //Convert data part of the can Frame to socketcand required format
@@ -273,6 +279,12 @@ namespace can2mqtt
             {
                 await ConnectTcpCanBus(canServer, canPort);
 
+                //Use Translator (if selected) and not already set
+                if (!string.IsNullOrEmpty(CanTranslator) && Translator == null)
+                {
+                    SetTranslator();
+                }
+
                 //Convert the data to the required format
                 var canFrame = Translator.TranslateBack(topic, null, CanSenderId, NoUnit, "1");
 
@@ -309,6 +321,17 @@ namespace can2mqtt
             catch (Exception ex)
             {
                 Console.WriteLine("Failed to send a read via CAN bus. Error: " + ex.ToString());
+            }
+        }
+
+        private void SetTranslator()
+        {
+            //choose the translator to use and translate the message if translator exists
+            switch (CanTranslator)
+            {
+                case "StiebelEltron":
+                    Translator = new Translator.StiebelEltron.StiebelEltron();
+                    break;
             }
         }
 
@@ -408,7 +431,7 @@ namespace can2mqtt
                         }
                     }
 
-                    //Check if the responData has a closing " >". If not, save data and go on reading.
+                    //Check if the responseData has a closing " >". If not, save data and go on reading.
                     if (responseData != "" && !responseData.Contains(" >"))
                     {
                         Console.WriteLine("No closing tag found. Save data and get next bytes.");
@@ -481,14 +504,8 @@ namespace can2mqtt
                 //Use Translator (if selected)
                 if (!string.IsNullOrEmpty(CanTranslator))
                 {
-                    //choose the translator to use and translate the message if translator exists
-                    switch (CanTranslator)
-                    {
-                        case "StiebelEltron":
-                            Translator = new Translator.StiebelEltron.StiebelEltron();
-                            canMsg = Translator.Translate(canMsg, NoUnit, Language);
-                            break;
-                    }
+                    SetTranslator();
+                    canMsg = Translator.Translate(canMsg, NoUnit, Language);
                 }
 
                 //Verify connection to MQTT Broker is established

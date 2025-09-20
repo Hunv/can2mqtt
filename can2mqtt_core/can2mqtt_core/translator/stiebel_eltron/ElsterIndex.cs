@@ -3775,7 +3775,7 @@ namespace can2mqtt.Translator.StiebelEltron
                     case "timerangelittleendian":
                         return new ConvertTimeRangeLittleEndian();                        
                     case "triple":
-                        return new ConvertTriple();                        
+                        return new ConvertTriple();
                     default:
                         return new ConvertDefault();                        
                 }

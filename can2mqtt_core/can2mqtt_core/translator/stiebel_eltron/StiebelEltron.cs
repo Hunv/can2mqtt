@@ -22,7 +22,7 @@ namespace can2mqtt.Translator.StiebelEltron
             //Check if format is correct
             if (string.IsNullOrEmpty(rawData.PayloadFull) || rawData.PayloadFull.Length != 14)
             {
-                Console.WriteLine("Data is not lenght of 14: {0}", rawData.PayloadFull);
+                Console.WriteLine("Data is not length of 14: {0}", rawData.PayloadFull);
                 return rawData;
             }
 

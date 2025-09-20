@@ -94,14 +94,14 @@ namespace can2mqtt.Translator.StiebelEltron
 
         public string ConvertValueBack(string value)
         {
-            var number = (int)(Convert.ToDouble(value)*10);
-            var part1 = ((number /10) % 256).ToString("X2");
+            var number = (int)(Convert.ToDouble(value) * 10);
+            var part1 = (number / 10 % 256).ToString("X2");
             var part2 = "00";
 
             //second pair of bytes is used
             if (number > 255)
             {
-                part2 = (number /10/ 256).ToString("X2");
+                part2 = (number / 10 / 256).ToString("X2");
             }
 
             return part1 + part2;
@@ -137,9 +137,9 @@ namespace can2mqtt.Translator.StiebelEltron
             var minutes = value.Substring(3, 2);
 
             var hourQuarters = Convert.ToInt32(hour) * 4;
-            var minuteQuarters = (int)(Math.Floor(Convert.ToDouble(minutes) / 15));
+            var minuteQuarters = (int)Math.Floor(Convert.ToDouble(minutes) / 15);
 
-            return "00"+(hourQuarters + minuteQuarters).ToString("X2");
+            return "00" + (hourQuarters + minuteQuarters).ToString("X2");
         }
     }
 
@@ -151,16 +151,16 @@ namespace can2mqtt.Translator.StiebelEltron
     {
         public string ConvertValue(string hexData)
         {
-            var result1 = Convert.ToInt32(hexData.Substring(0,2), 16);
-            var result2 = Convert.ToInt32(hexData.Substring(2,2), 16);
+            var result1 = Convert.ToInt32(hexData.Substring(0, 2), 16);
+            var result2 = Convert.ToInt32(hexData.Substring(2, 2), 16);
 
             var time1 = "---";
             var time2 = "---";
             if (result1 != 128)
-                time1 = (new TimeSpan(0, result1 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result1 * 15, 0)).Minutes.ToString("D2");
+                time1 = new TimeSpan(0, result1 * 15, 0).Hours.ToString("D2") + ":" + new TimeSpan(0, result1 * 15, 0).Minutes.ToString("D2");
 
             if (result2 != 128)
-                time2 = (new TimeSpan(0, result2 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result2 * 15, 0)).Minutes.ToString("D2");
+                time2 = new TimeSpan(0, result2 * 15, 0).Hours.ToString("D2") + ":" + new TimeSpan(0, result2 * 15, 0).Minutes.ToString("D2");
 
             return time2 + " - " + time1;
         }
@@ -203,10 +203,10 @@ namespace can2mqtt.Translator.StiebelEltron
             var time1 = "---";
             var time2 = "---";
             if (result1 != 128)
-                time1 = (new TimeSpan(0, result1 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result1 * 15, 0)).Minutes.ToString("D2");
+                time1 = new TimeSpan(0, result1 * 15, 0).Hours.ToString("D2") + ":" + new TimeSpan(0, result1 * 15, 0).Minutes.ToString("D2");
 
             if (result2 != 128)
-                time2 = (new TimeSpan(0, result2 * 15, 0)).Hours.ToString("D2") + ":" + (new TimeSpan(0, result2 * 15, 0)).Minutes.ToString("D2");
+                time2 = new TimeSpan(0, result2 * 15, 0).Hours.ToString("D2") + ":" + new TimeSpan(0, result2 * 15, 0).Minutes.ToString("D2");
 
             return time1 + " - " + time2;
         }
@@ -247,7 +247,7 @@ namespace can2mqtt.Translator.StiebelEltron
             var day = Convert.ToInt32(hexData.Substring(0, 2), 16);
 
             //Untested
-            return (day.ToString("D2") + "." + month.ToString("D2") + ".");
+            return day.ToString("D2") + "." + month.ToString("D2") + ".";
         }
 
         public string ConvertValueBack(string value)
@@ -271,9 +271,9 @@ namespace can2mqtt.Translator.StiebelEltron
             }
             if (hexData != "0000")
                 //C++ handling: sprintf(Val, "%d", (signed char)Value);
-                return Convert.ToByte(int.Parse(hexData, System.Globalization.NumberStyles.HexNumber)).ToString();
+                return Convert.ToByte(int.Parse(hexData, NumberStyles.HexNumber)).ToString();
             else
-                return "0";            
+                return "0";
         }
 
         public string ConvertValueBack(string value)
@@ -281,7 +281,7 @@ namespace can2mqtt.Translator.StiebelEltron
             // Input: 75
             // Output: 4B
 
-            return (Convert.ToInt32(value).ToString("X4"));
+            return Convert.ToInt32(value).ToString("X4");
         }
     }
 
@@ -295,7 +295,7 @@ namespace can2mqtt.Translator.StiebelEltron
         {
             if (hexData != "0000")
                 return Convert.ToInt32(hexData, 16).ToString();
-                //throw new NotImplementedException("ConvertDouble for Data " + hexData + " not implemented. Please report example values via Github!");
+            //throw new NotImplementedException("ConvertDouble for Data " + hexData + " not implemented. Please report example values via Github!");
             else
                 return "0";
         }
@@ -315,7 +315,7 @@ namespace can2mqtt.Translator.StiebelEltron
         {
             if (hexData != "0000")
                 return Convert.ToInt32(hexData, 16).ToString();
-                //throw new NotImplementedException("ConvertTriple for Data " + hexData + " not implemented. Please report example values via Github!");
+            //throw new NotImplementedException("ConvertTriple for Data " + hexData + " not implemented. Please report example values via Github!");
             else
                 return "0";
         }
@@ -384,11 +384,11 @@ namespace can2mqtt.Translator.StiebelEltron
             var total = Convert.ToInt32(hexData, 16);
 
             var hour1 = block1 / 4;
-            var minute1 = (block1 % 4) * 15;
+            var minute1 = block1 % 4 * 15;
             var hour2 = block2 / 4;
             var minute2 = 15 * (total % 4);
 
-            return (hour1.ToString("D2") + ":" + minute1.ToString("D2") + " - " + hour2.ToString("D2") + ":" + minute2.ToString("D2"));
+            return hour1.ToString("D2") + ":" + minute1.ToString("D2") + " - " + hour2.ToString("D2") + ":" + minute2.ToString("D2");
         }
 
         public string ConvertValueBack(string value)
@@ -426,10 +426,10 @@ namespace can2mqtt.Translator.StiebelEltron
             return Convert.ToInt32(value).ToString("X4");
         }
     }
-    
+
     /// <summary>
-     /// Converts values (et_betriebsart)
-     /// </summary>
+    /// Converts values (et_betriebsart)
+    /// </summary>
     public class ConvertLanguage : IValueConverter
     {
         public string ConvertValue(string hexData)
@@ -512,7 +512,7 @@ namespace can2mqtt.Translator.StiebelEltron
     {
         public string ConvertValue(string hexData)
         {
-            return Convert.ToString(Convert.ToInt64(hexData, 16), 2).PadLeft(16,'0');
+            return Convert.ToString(Convert.ToInt64(hexData, 16), 2).PadLeft(16, '0');
         }
         public string ConvertValueBack(string value)
         {
