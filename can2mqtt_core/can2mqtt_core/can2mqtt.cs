@@ -221,17 +221,6 @@ namespace can2mqtt
             }
         }
 
-        private void SetTranslator()
-        {
-            //choose the translator to use and translate the message if translator exists
-            switch (CanTranslator)
-            {
-                case "StiebelEltron":
-                    Translator = new Translator.StiebelEltron.StiebelEltron();
-                    break;
-            }
-        }
-
         /// <summary>
         /// Connect or verify connection to socketcand
         /// </summary>
