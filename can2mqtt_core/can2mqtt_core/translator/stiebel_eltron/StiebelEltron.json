@@ -958,7 +958,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "092F",
@@ -982,7 +982,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0930",
@@ -1006,7 +1006,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0931",
@@ -1030,7 +1030,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "092A",
@@ -1054,7 +1054,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "092B",
@@ -1078,7 +1078,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "092C",
@@ -1102,7 +1102,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "092D",
@@ -1126,7 +1126,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0929",
@@ -1150,7 +1150,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0928",
@@ -1174,7 +1174,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0924",
@@ -1198,7 +1198,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0925",
@@ -1222,7 +1222,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "03AF",
@@ -1246,7 +1246,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "03AE",
@@ -1270,7 +1270,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "03B0",
@@ -1294,7 +1294,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "03B1",
@@ -1318,7 +1318,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0640",
@@ -1342,7 +1342,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0641",
@@ -1366,7 +1366,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0642",
@@ -1390,7 +1390,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0643",
@@ -1414,7 +1414,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0644",
@@ -1438,7 +1438,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0645",
@@ -1462,7 +1462,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0646",
@@ -1486,7 +1486,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0647",
@@ -1510,7 +1510,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0648",
@@ -1534,7 +1534,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "0649",
@@ -1558,7 +1558,7 @@
     "Default": "",
     "MinValue": null,
     "MaxValue": null,
-    "ReadOnly": false
+    "ReadOnly": true
   },
   {
     "Index": "05A4",
