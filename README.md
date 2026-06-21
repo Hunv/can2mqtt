@@ -7,7 +7,7 @@ The precompiled version you can find in the releases section may not be the late
 ## V5.0
 
 Breaking changes:
- - Running on .NET 8.0 instead of .NET 6.0
+ - Running on .NET 10.0 instead of .NET 6.0
 
 New features:
  - Added option `ConvertUnknown`, this defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
