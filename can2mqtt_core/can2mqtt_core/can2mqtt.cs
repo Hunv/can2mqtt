@@ -1,8 +1,6 @@
 ﻿using can2mqtt.Translator.StiebelEltron;
 using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Client.Options;
-using MQTTnet.Server;
+using System.Buffers;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -13,7 +11,7 @@ namespace can2mqtt
     {
         private readonly ILogger Logger;
         private IMqttClient MqttClient;
-        private IMqttClientOptions MqttClientOptions;
+        private MqttClientOptions MqttClientOptions;
         private string CanTranslator;
         private string CanServer;
         private int CanServerPort = 29536;
@@ -432,7 +430,7 @@ namespace can2mqtt
                 var message = new MqttApplicationMessageBuilder()
                     .WithTopic(MqttTopic + canMsg.MqttTopicExtention)
                     .WithPayload(string.IsNullOrEmpty(canMsg.MqttValue) ? canMsg.PayloadFull : canMsg.MqttValue)
-                    .WithExactlyOnceQoS()
+                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                     .WithRetainFlag()
                     .Build();
 
@@ -448,7 +446,7 @@ namespace can2mqtt
         private async Task SetupMqtt()
         {
             // Create a new MQTT client.
-            var mqttFactory = new MqttFactory();
+            var mqttFactory = new MqttClientFactory();
             MqttClient = mqttFactory.CreateMqttClient();
 
             // Create TCP based options using the builder.
@@ -471,28 +469,8 @@ namespace can2mqtt
             }
 
             //Handle reconnect on lost connection to MQTT Server
-            MqttClient.UseDisconnectedHandler(async e =>
-            {
-                Logger.LogWarning("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, e.Reason);
-                while (!MqttClient.IsConnected)
-                {
-                    try
-                    {
-                        // Connect the MQTT Client
-                        await MqttClient.ConnectAsync(MqttClientOptions);
-                        if (MqttClient.IsConnected)
-                            Logger.LogInformation("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
-                        else
-                            Logger.LogInformation("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogInformation("RECONNECTING TO MQTT BROKER {0} FAILED. Exception: {1}", MqttServer, ex.ToString());
-                        Thread.Sleep(10000); //Wait 10 seconds
-                    }
-                }
-            });
-
+            MqttClient.DisconnectedAsync += MqttDisconnect;
+            
             // Connect the MQTT Client to the MQTT Broker
             await MqttClient.ConnectAsync(MqttClientOptions);
             if (MqttClient.IsConnected)
@@ -502,38 +480,62 @@ namespace can2mqtt
             if (MqttAcceptSet)
             {
                 //Create listener on MQTT Broker to accept all messages with the MqttTopic from the config.
-                await MqttClient.SubscribeAsync(new MQTTnet.Client.Subscribing.MqttClientSubscribeOptionsBuilder().WithTopicFilter(MqttTopic + "/#").Build());
-                MqttClient.UseApplicationMessageReceivedHandler(async e =>
+                await MqttClient.SubscribeAsync(new MqttClientSubscribeOptionsBuilder().WithTopicFilter(MqttTopic + "/#").Build());
+                MqttClient.ApplicationMessageReceivedAsync += MqttMessageReceived;
+            }
+        }
+
+        private async Task MqttMessageReceived(MqttApplicationMessageReceivedEventArgs args)
+        {
+            // Check if it is a set topic and handle only if so.
+            if (args.ApplicationMessage.Topic.EndsWith("/set"))
+            {
+                Console.Write("Received MQTT SET Message; Topic = {0}", args.ApplicationMessage.Topic);
+                if (!args.ApplicationMessage.Payload.IsEmpty)
                 {
-                    // Check if it is a set topic and handle only if so.
-                    if (e.ApplicationMessage.Topic.EndsWith("/set"))
-                    {
-                        Console.Write("Received MQTT SET Message; Topic = {0}", e.ApplicationMessage.Topic);
-                        if (e.ApplicationMessage.Payload != null)
-                        {
-                            Logger.LogInformation($" and Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
-                            await SendCan(e.ApplicationMessage.Topic, e.ApplicationMessage.Payload, CanServer, CanServerPort);
-                        }
-                        else
-                        {
-                            Logger.LogInformation(" WITH NO PAYLOAD");
-                        }
-                    }
-                    // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
-                    else if (e.ApplicationMessage.Topic.EndsWith("/read"))
-                    {
-                        Console.Write("Received MQTT READ Message; Topic = {0}", e.ApplicationMessage.Topic);
-                        if (e.ApplicationMessage.Topic != null)
-                        {
-                            Logger.LogInformation("");
-                            await ReadCan(e.ApplicationMessage.Topic, CanServer, CanServerPort);
-                        }
-                        else
-                        {
-                            Logger.LogInformation(" WITH NO TOPIC");
-                        }
-                    }
-                });
+                    Logger.LogInformation($" and Payload = {Encoding.UTF8.GetString(args.ApplicationMessage.Payload)}");
+                    await SendCan(args.ApplicationMessage.Topic, args.ApplicationMessage.Payload.ToArray(), CanServer, CanServerPort);
+                }
+                else
+                {
+                    Logger.LogInformation(" WITH NO PAYLOAD");
+                }
+            }
+            // Check if it is a read topic. If yes, send a READ via CAN bus for the corresponding value to trigger a send of the value via CAN bus
+            else if (args.ApplicationMessage.Topic.EndsWith("/read"))
+            {
+                Console.Write("Received MQTT READ Message; Topic = {0}", args.ApplicationMessage.Topic);
+                if (args.ApplicationMessage.Topic != null)
+                {
+                    Logger.LogInformation("");
+                    await ReadCan(args.ApplicationMessage.Topic, CanServer, CanServerPort);
+                }
+                else
+                {
+                    Logger.LogInformation(" WITH NO TOPIC");
+                }
+            }
+        }
+
+        private async Task MqttDisconnect(MqttClientDisconnectedEventArgs args)
+        {
+            Logger.LogWarning("DISCONNECTED FROM MQTT BROKER {0} because of {1}", MqttServer, args.Reason);
+            while (!MqttClient.IsConnected)
+            {
+                try
+                {
+                    // Connect the MQTT Client
+                    await MqttClient.ConnectAsync(MqttClientOptions);
+                    if (MqttClient.IsConnected)
+                        Logger.LogInformation("CONNECTED TO MQTT BROKER {0} using ClientId {1}", MqttServer, MqttClientId);
+                    else
+                        Logger.LogInformation("CONNECTION TO MQTT BROKER {0} using ClientId {1} FAILED", MqttServer, MqttClientId);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogInformation("RECONNECTING TO MQTT BROKER {0} FAILED. Exception: {1}", MqttServer, ex.ToString());
+                    Thread.Sleep(10000); //Wait 10 seconds
+                }
             }
         }
 
