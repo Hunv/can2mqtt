@@ -7,7 +7,7 @@ The precompiled version you can find in the releases section may not be the late
 ## V5.0
 
 Breaking changes:
- - Running on .NET 10.0 instead of .NET 6.0
+ - Running on .NET 8.0 instead of .NET 6.0
 
 New features:
  - Added option `ConvertUnknown`, this defines if values of an unknown typed message (e.g., no entry in StiebelEltron.json) shall be converted with all possible formats and printed to console.
@@ -43,18 +43,18 @@ Note: This whole readme assumes the following environment:
 
 
 # Installation and Setup
-## Install .NET 6.0 Runtime
-Note, the packagelink may be differnt if you are not using a OS based on ubuntu 21.04 or 21.10. Check this page for other releases: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
-This are the links from https://dotnet.microsoft.com/en-us/download/dotnet/6.0 for the differente Processor architectures for Linux:
-ARM32: https://download.visualstudio.microsoft.com/download/pr/f8e1ab66-58f7-4ebb-a9bb-9decfa03501f/88e1fb49af6f75dc54c23383162409c5/dotnet-runtime-6.0.4-linux-arm.tar.gz
-ARM64: https://download.visualstudio.microsoft.com/download/pr/3641affa-8bb0-486f-93d9-68adff4f4af7/1e3df9fb86cba7299b9e575233975734/dotnet-runtime-6.0.4-linux-arm64.tar.gz
-x64: https://download.visualstudio.microsoft.com/download/pr/5b08d331-15ac-4a53-82a5-522fa45b1b99/65ae300dd160ae0b88b91dd78834ce3e/dotnet-runtime-6.0.4-linux-x64.tar.gz
-Use the link you need for your installation in the command below. Below I will uses ARM32.
+## Install .NET 10.0 Runtime
+The latest resources to install .Net is documented here: https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian?tabs=dotnet10
+
+### For Debian 13 (Trixie) this is
 ```
-wget https://download.visualstudio.microsoft.com/download/pr/f8e1ab66-58f7-4ebb-a9bb-9decfa03501f/88e1fb49af6f75dc54c23383162409c5/dotnet-runtime-6.0.4-linux-arm.tar.gz -O ~/dotnet6.0.4.tar.gz
-sudo tar -xvf dotnet6.0.4.tar.gz -C /opt/dotnet/
-sudo ln -s /opt/dotnet/dotnet /usr/local/bin
+wget https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+sudo apt update
+sudo apt install -y dotnet-runtime-10.0
 ```
+
 
 Check the setup by run "dotnet --info". It should return the installed version and some other details.
 
@@ -83,22 +83,20 @@ Paste the three lines above at the end before the "EXIT 0".
 ## socketcand installation and setup
 ### Install socketcand
 ```
-sudo apt-get install git autoconf
+sudo apt-get install git libconfig-dev autoconf libsocketcan-dev
 cd ~
 git clone https://github.com/linux-can/socketcand.git
 cd socketcand
-./autogen.sh
-./configure
-make
-make install
-sudo mv ~/socketcand /opt
+meson setup -Dlibconfig=true --buildtype=release build
+meson compile -C build
+sudo meson install -C build
 ```
 
 ### Start socketcand
 This is only required to test and debug or if you like to take care of socketcand on your own.
 You need to replace eth0 if your network interface is called different than eth0.
 ```
- /opt/socketcand/socketcand -i slcan0 -l eth0 -v
+ /usr/local/sbin/socketcand -i slcan0 -l eth0 -v
 ```
 
 ### Setup socketcand as daemon
@@ -109,8 +107,8 @@ Description=socketcand
 After=network.target
 
 [Service]
-ExecStart=/opt/socketcand/socketcand -i slcan0 -l eth0 -v
-WorkingDirectory=/opt/socketcand/
+ExecStart=/usr/local/sbin/socketcand -i slcan0 -l eth0 -v
+WorkingDirectory=/usr/local/sbin/
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
@@ -134,7 +132,7 @@ If you don't have any MQTT broker, Mosquitto is a common MQTT Broker. Please che
 ### Download can2mqtt
 ```
 cd ~
-wget https://github.com/Hunv/can2mqtt/releases/download/v4/can2mqtt_v4.zip.zip -O can2mqtt.zip
+wget https://github.com/Hunv/can2mqtt/releases/download/v5/can2mqtt_v5.zip -O can2mqtt.zip
 sudo unzip can2mqtt.zip -d /opt/can2mqtt
 ```
 
